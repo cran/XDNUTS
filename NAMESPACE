@@ -1,0 +1,8 @@
+useDynLib(XDNUTS, .registration=TRUE)
+importFrom(Rcpp, evalCpp)
+importFrom(Rdpack,reprompt)
+exportPattern("^[[:alpha:]]+")
+S3method(plot,XDNUTS)
+export(plot.XDNUTS)
+S3method(summary,XDNUTS)
+export(summary.XDNUTS)

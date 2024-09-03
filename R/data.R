@@ -1,0 +1,20 @@
+#' Blood viscosity data
+#'
+#' Contains blood viscosity measurements of 6 subjects. Each individual
+#' was measured 7 times.
+#'
+#' @format A data frame with 6 rows and 8 variables:
+#'  \describe{
+#'  \item{id}{subject identifier.}
+#'  \item{Time.1}{viscosity measurements for the first time.},
+#'  \item{Time.2}{viscosity measurements for the second time.},
+#'  \item{Time.3}{viscosity measurements for the third time.},
+#'  \item{Time.4}{viscosity measurements for the fourth time.},
+#'  \item{Time.5}{viscosity measurements for the fifth time.},
+#'  \item{Time.6}{viscosity measurements for the sixth time.},
+#'  \item{Time.7}{viscosity measurements for the seventh time.}}
+#'  
+#' @source {Master\'s Degree course at the University of Padua}
+#' @examples
+#' data(viscosity)
+"viscosity"
