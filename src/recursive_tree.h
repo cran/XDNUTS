@@ -421,7 +421,7 @@ arma::vec build_tree(arma::vec sub_tree,
                      const unsigned int depth,
                      const unsigned int& d,
                      arma::uvec& idx_disc,
-                     const double& log_tau);
+                     const double& tau);
 
 // diagonal matrix case without recycling
 arma::vec build_tree(arma::vec sub_tree,
@@ -431,7 +431,7 @@ arma::vec build_tree(arma::vec sub_tree,
                      const unsigned int depth,
                      const unsigned int& d,
                      arma::uvec& idx_disc,
-                     const double& log_tau,
+                     const double& tau,
                      const arma::vec& M_inv);
 
 /* -------------------------- RECYCLED VERSION ----------------------------- */
@@ -445,7 +445,7 @@ arma::vec build_tree(arma::vec sub_tree,
                      const unsigned int depth,
                      const unsigned int& d,
                      arma::uvec& idx_disc,
-                     const double& log_tau,
+                     const double& tau,
                      const unsigned int& K);
 
 // diagonal matrix case with recycling
@@ -456,7 +456,7 @@ arma::vec build_tree(arma::vec sub_tree,
                      const unsigned int depth,
                      const unsigned int& d,
                      arma::uvec& idx_disc,
-                     const double& log_tau,
+                     const double& tau,
                      const arma::vec& M_inv,
                      const unsigned int& K);
 

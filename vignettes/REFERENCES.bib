@@ -40,7 +40,7 @@
 
 @article{betancourt2013generalizing,
   title={Generalizing the no-U-turn sampler to Riemannian manifolds},
-  author={Betancourt, Michael J},
+  author={Betancourt, Michael},
   journal={arXiv preprint arXiv:1304.1920},
   year={2013}
 }
@@ -55,9 +55,49 @@
   year={2014}
 }
 
+@article{liu1994collapsed,
+  title={The collapsed Gibbs sampler in Bayesian computations with applications to a gene regulation problem},
+  author={Liu, Jun S},
+  journal={Journal of the American Statistical Association},
+  volume={89},
+  number={427},
+  pages={958--966},
+  year={1994},
+  publisher={Taylor \& Francis}
+}
+
+@article{robert2021rao,
+  title={Rao--Blackwellisation in the Markov chain Monte Carlo era},
+  author={Robert, Christian P and Roberts, Gareth},
+  journal={International Statistical Review},
+  volume={89},
+  number={2},
+  pages={237--249},
+  year={2021},
+  publisher={Wiley Online Library}
+}
+
+@article{rao1945information,
+  title={Information and the accuracy attainable in the estimation of statistical parameters},
+  author={Rao, C Radhakrishna},
+  journal = {Bulletin of the Calcutta Mathematical Society},
+  volume = {37},
+  pages={81--91},
+  year={1945},
+}
+
+@article{blackwell1947conditional,
+  title={Conditional expectation and unbiased sequential estimation},
+  author={Blackwell, David},
+  journal={The Annals of Mathematical Statistics},
+  pages={105--110},
+  year={1947},
+  publisher={JSTOR}
+}
+
 @misc{stan2021stan,
   title={Stan Modelling Language Users Guide and Reference Manual v. 2.27},
-  author={Stan Development Team},
+  author={{STAN development team}},
   year={2021}
 }
 
@@ -89,6 +129,17 @@
   publisher={Springer Science \& Business Media}
 }
 
+@article{kalman1960new,
+  title={A new approach to linear filtering and prediction problems},
+  author={Kalman, Rudolph Emil},
+  journal = {Transactions of the ASME-Journal of Basic Engineering},
+  volume = {82},
+  series = {D},
+  pages = {35--45},
+  year={1960}
+}
+
+
 @article{betancourt2017conceptual,
   title={A conceptual introduction to Hamiltonian Monte Carlo},
   author={Betancourt, Michael},
@@ -99,7 +150,8 @@
 @article{betancourt2017geometric,
   title={The geometric foundations of hamiltonian monte carlo},
   author={Betancourt, Michael and Byrne, Simon and Livingstone, Sam and Girolami, Mark},
-  year={2017}
+  year={2017},
+  journal={arXiv preprint arXiv:1701.02434}
 }
 
 @article{hastings1970monte,
@@ -120,6 +172,14 @@
   publisher={American Institute of Physics}
 }
 
+@book{gilks1995markov,
+  title={Markov chain Monte Carlo in practice},
+  author={Gilks, Walter R and Richardson, Sylvia and Spiegelhalter, David},
+  year={1995},
+  publisher={CRC press}
+}
+
+
 @book{watanabe2018mathematical,
   title={Mathematical theory of Bayesian statistics},
   author={Watanabe, Sumio},
@@ -137,6 +197,17 @@
   publisher={IEEE}
 }
 
+@article{roberts2001optimal,
+  title={Optimal scaling for various Metropolis-Hastings algorithms},
+  author={Roberts, Gareth O and Rosenthal, Jeffrey S},
+  journal={Statistical science},
+  volume={16},
+  number={4},
+  pages={351--367},
+  year={2001},
+  publisher={Institute of Mathematical Statistics}
+}
+
 @article{gustafson1998guided,
   title={A guided walk Metropolis algorithm},
   author={Gustafson, Paul},
@@ -147,11 +218,12 @@
   publisher={Springer}
 }
 
-@article{neal2012mcmc,
-  title={MCMC using Hamiltonian dynamics},
+@book{neal2012mcmc,
+  title={Handbook of Markov Chain Monte Carlo, capitolo 5: MCMC using Hamiltonian Dynamics},
   author={Neal, Radford M},
   journal={arXiv preprint arXiv:1206.1901},
-  year={2012}
+  year={2011},
+  publisher={CRC press}
 }
 
 @book{mazzoldi1991fisica,
@@ -187,6 +259,33 @@
   year={2023},
   publisher={SIAM}
 }
+
+@article{geyer1991computing,
+  title={Computing science and statistics: Proceedings of the 23rd Symposium on the Interface},
+  author={Geyer, Charles J and others},
+  journal={American Statistical Association, New York},
+  volume={156},
+  year={1991}
+}
+
+@article{marinari1992simulated,
+  title={Simulated tempering: a new Monte Carlo scheme},
+  author={Marinari, Enzo and Parisi, Giorgio},
+  journal={Europhysics letters},
+  volume={19},
+  number={6},
+  pages={451},
+  year={1992},
+  publisher={IOP Publishing}
+}
+
+@article{betancourt2014adiabatic,
+  title={Adiabatic Monte Carlo},
+  author={Betancourt, Michael},
+  journal={arXiv preprint arXiv:1405.3489},
+  year={2014}
+}
+
 
 @article{lamont2019correspondence,
   title={Correspondence between thermodynamics and inference},
@@ -257,7 +356,7 @@
   title={A general metric for Riemannian manifold Hamiltonian Monte Carlo},
   author={Betancourt, Michael},
   booktitle={International Conference on Geometric Science of Information},
-  pages={327--334},
+  pages={327-334},
   year={2013},
   organization={Springer}
 }
@@ -272,7 +371,7 @@
 
 @article{betancourt2014optimizing,
   title={Optimizing the integrator step size for Hamiltonian Monte Carlo},
-  author={Betancourt, MJ and Byrne, Simon and Girolami, Mark},
+  author={Betancourt, Michael and Byrne, Simon and Girolami, Mark},
   journal={arXiv preprint arXiv:1411.6669},
   year={2014}
 }
@@ -360,11 +459,30 @@
   publisher={Taylor \& Francis}
 }
 
+@Manual{R,
+    title = {R: A Language and Environment for Statistical Computing},
+    author = {R Core Team},
+    organization = {R Foundation for Statistical Computing},
+    address = {Vienna, Austria},
+    year = {2024},
+    url = {\url{https://www.R-project.org/}}
+}
+  
+@Book{Eddelbuettel2013seamless,
+    title = {Seamless {R} and {C++} Integration with {Rcpp}},
+    author = {Dirk Eddelbuettel},
+    publisher = {Springer},
+    address = {New York},
+    year = {2013},
+    note = {ISBN 978-1-4614-6867-7},
+    doi = {10.1007/978-1-4614-6868-4}
+}
+
 @article{Nishimura_2020,
    title={Recycling Intermediate Steps to Improve Hamiltonian Monte Carlo},
    volume={15},
    ISSN={1936-0975},
-   url={http://dx.doi.org/10.1214/19-BA1171},
+   url={\url{http://dx.doi.org/10.1214/19-BA1171}},
    DOI={10.1214/19-ba1171},
    number={4},
    journal={Bayesian Analysis},
@@ -372,6 +490,88 @@
    author={Nishimura, Akihiko and Dunson, David},
    year={2020},
    month=dec 
+}
+
+@Manual{Meco2024,
+    title = {XDNUTS: Discontinuous Hamiltonian Monte Carlo with Varying Trajectory Length},
+    author = {Paolo Manildo},
+    year = {2024},
+    note = {R package version 1.1},
+    url={\url{https://github.com/paolomanildo/XDNUTS}}
+}
+
+@article{dunn1961multiple,
+  title={Multiple comparisons among means},
+  author={Dunn, Olive Jean},
+  journal={Journal of the American statistical association},
+  volume={56},
+  number={293},
+  pages={52--64},
+  year={1961},
+  publisher={Taylor \& Francis}
+}
+
+@article{shapiro1965analysis,
+  title={An analysis of variance test for normality (complete samples)},
+  author={Shapiro, Samuel Sanford and Wilk, Martin B},
+  journal={Biometrika},
+  volume={52},
+  number={3-4},
+  pages={591--611},
+  year={1965},
+  publisher={Oxford University Press}
+}
+
+@article{wilcoxon1945individual,
+  title={Individual comparisons by ranking methods},
+  author={Wilcoxon, Frank},
+  journal = {Biometrics bullettin},
+  volume = {1},
+  number = {6},
+  pages={80--83},
+  year={1945},
+}
+
+@article{efron1979computers,
+  title={Computers and the theory of statistics: thinking the unthinkable},
+  author={Efron, Bradley},
+  journal={SIAM review},
+  volume={21},
+  number={4},
+  pages={460--480},
+  year={1979},
+  publisher={SIAM}
+}
+
+@article{simpson1951interpretation,
+  title={The interpretation of interaction in contingency tables},
+  author={Simpson, Edward H},
+  journal={Journal of the Royal Statistical Society: Series B (Methodological)},
+  volume={13},
+  number={2},
+  pages={238--241},
+  year={1951},
+  publisher={Wiley Online Library}
+}
+
+
+@article{hans2007shotgun,
+  title={Shotgun stochastic search for “large p” regression},
+  author={Hans, Chris and Dobra, Adrian and West, Mike},
+  journal={Journal of the American Statistical Association},
+  volume={102},
+  number={478},
+  pages={507--516},
+  year={2007},
+  publisher={Taylor \& Francis}
+}
+
+
+@book{mcelreath2018statistical,
+  title={Statistical rethinking: A Bayesian course with examples in R and Stan},
+  author={McElreath, Richard},
+  year={2018},
+  publisher={Chapman and Hall/CRC}
 }
 
 @article{gelman1992inference,
@@ -385,3 +585,20 @@
   publisher={Institute of Mathematical Statistics}
 }
 
+@article{maguire1952time,
+  title={The time intervals between industrial accidents},
+  author={Maguire, Brian A and Pearson, Egon S and Wynn, AHA},
+  journal={Biometrika},
+  volume={39},
+  number={1/2},
+  pages={168--180},
+  year={1952},
+  publisher={JSTOR}
+}
+
+@misc{STAN2022forum,
+  title={What (exactly) happens for only piecewise continuous posterior densities, gradients or wrong gradients?},
+  author={{STAN Forum}},
+  year={2022},
+  url = {https://discourse.mc-stan.org/t/what-exactly-happens-for-only-piecewise-continuous-posterior-densities-gradients-or-wrong-gradients/26798}
+}

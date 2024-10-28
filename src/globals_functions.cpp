@@ -37,11 +37,11 @@ void add_sign_log_sum_exp(double& log_abs_x,
 double check_u_turn(const arma::vec& x,
                     const unsigned int& d,
                     const unsigned int& k){
-  //if( dot(x.subvec(5*d,6*d-1),x.subvec(3*d,4*d-1)) < 0  && 
+  //if( dot(x.subvec(5*d,6*d-1),x.subvec(3*d,4*d-1)) < 0  || 
   //    dot(x.subvec(5*d,6*d-1),x.subvec(d,2*d-1)) > 0){
   if( 
     ( dot(x.subvec(5*d,6*d-k-1),x.subvec(3*d,4*d-k-1)) + 
-      dot(x.subvec(6*d-k,6*d-1),arma::sign(x.subvec(4*d - k,4*d-1))) ) < 0 && 
+      dot(x.subvec(6*d-k,6*d-1),arma::sign(x.subvec(4*d - k,4*d-1))) ) < 0 || 
       
     ( dot(x.subvec(5*d,6*d-k-1),x.subvec(d,2*d-k-1)) + 
       dot(x.subvec(6*d-k,6*d-1),arma::sign(x.subvec(2*d - k,2*d-1))) ) < 0
@@ -58,12 +58,12 @@ double check_u_turn(const arma::vec& x,
                     const unsigned int& k,
                     const arma::vec& M_inv_cont,
                     const arma::vec& M_inv_disc){
-  //if( ( dot(M_inv_cont % x.subvec(5*d,6*d-k-1),x.subvec(3*d,4*d-k-1)) + dot(M_inv_disc % x.subvec(6*d-k,6*d-1),x.subvec(4*d-k,4*d-1)) ) < 0  && 
+  //if( ( dot(M_inv_cont % x.subvec(5*d,6*d-k-1),x.subvec(3*d,4*d-k-1)) + dot(M_inv_disc % x.subvec(6*d-k,6*d-1),x.subvec(4*d-k,4*d-1)) ) < 0  || 
   //    ( dot(M_inv_cont % x.subvec(5*d,6*d-k-1),x.subvec(d,2*d-k-1))   + dot(M_inv_disc % x.subvec(6*d-k,6*d-1),x.subvec(2*d-k,2*d-1)) ) > 0){
   if( ( dot(M_inv_cont % x.subvec(5*d,6*d-k-1),x.subvec(3*d,4*d-k-1)) + 
-      dot(M_inv_disc % x.subvec(6*d-k,6*d-1),    arma::sign(x.subvec(4*d-k,4*d-1))) ) < 0  && 
+      dot(M_inv_disc % x.subvec(6*d-k,6*d-1),    arma::sign(x.subvec(4*d-k,4*d-1))) ) < 0  || 
       ( dot(M_inv_cont % x.subvec(5*d,6*d-k-1),x.subvec(d,2*d-k-1))   + 
-      dot(M_inv_disc % x.subvec(6*d-k,6*d-1),    arma::sign(x.subvec(2*d-k,2*d-1)) )) > 0){
+      dot(M_inv_disc % x.subvec(6*d-k,6*d-1),    arma::sign(x.subvec(2*d-k,2*d-1)) )) < 0){
   
     return 1.0;
   }
@@ -78,12 +78,12 @@ double check_u_turn(const arma::vec& x,
                     const arma::mat& M_inv_cont,
                     const arma::vec& M_inv_disc){
 
-  //if( ( dot(M_inv_cont * x.subvec(5*d,6*d-k-1),x.subvec(3*d,4*d-k-1)) + dot(M_inv_disc % x.subvec(6*d-k,6*d-1),x.subvec(4*d-k,4*d-1)) ) < 0  && 
+  //if( ( dot(M_inv_cont * x.subvec(5*d,6*d-k-1),x.subvec(3*d,4*d-k-1)) + dot(M_inv_disc % x.subvec(6*d-k,6*d-1),x.subvec(4*d-k,4*d-1)) ) < 0  || 
   //    ( dot(M_inv_cont * x.subvec(5*d,6*d-k-1),x.subvec(d,2*d-k-1))   + dot(M_inv_disc % x.subvec(6*d-k,6*d-1),x.subvec(2*d-k,2*d-1)) ) > 0){  
   if( ( dot(M_inv_cont * x.subvec(5*d,6*d-k-1),x.subvec(3*d,4*d-k-1)) + 
-      dot(M_inv_disc % x.subvec(6*d-k,6*d-1),    arma::sign(x.subvec(4*d-k,4*d-1)) )) < 0  && 
+      dot(M_inv_disc % x.subvec(6*d-k,6*d-1),    arma::sign(x.subvec(4*d-k,4*d-1)) )) < 0  || 
         ( dot(M_inv_cont * x.subvec(5*d,6*d-k-1),x.subvec(d,2*d-k-1))   + 
-        dot(M_inv_disc % x.subvec(6*d-k,6*d-1),    arma::sign(x.subvec(2*d-k,2*d-1)) )) > 0){  
+        dot(M_inv_disc % x.subvec(6*d-k,6*d-1),    arma::sign(x.subvec(2*d-k,2*d-1)) )) < 0){  
       return 1.0;
   }
   
@@ -97,13 +97,13 @@ double check_u_turn_rec(const arma::vec& x,
                         const unsigned int& d,
                         const unsigned int& k,
                         const unsigned int& K){
-  //if( dot(x.subvec((4+K)*d,(5+K)*d-1),x.subvec(3*d,4*d-1)) < 0  && 
+  //if( dot(x.subvec((4+K)*d,(5+K)*d-1),x.subvec(3*d,4*d-1)) < 0  || 
   //    dot(x.subvec((4+K)*d,(5+K)*d-1),x.subvec(d,2*d-1)) > 0){
   if( ( dot(x.subvec((4+K)*d,(5+K)*d-k-1),x.subvec(3*d,4*d-k-1)) + 
-      dot(x.subvec((5+K)*d-k,(5+K)*d-1),arma::sign(x.subvec(4*d-k,4*d-1))))< 0  && 
+      dot(x.subvec((5+K)*d-k,(5+K)*d-1),arma::sign(x.subvec(4*d-k,4*d-1))))< 0  || 
       
       (dot(x.subvec((4+K)*d,(5+K)*d-k-1),x.subvec(d,2*d-k-1)) + 
-       dot(x.subvec((5+K)*d-k,(5+K)*d-1),arma::sign(x.subvec(2*d-k,2*d-1)))) > 0){  
+       dot(x.subvec((5+K)*d-k,(5+K)*d-1),arma::sign(x.subvec(2*d-k,2*d-1)))) < 0){  
     return 1.0;
   }
   
@@ -118,9 +118,9 @@ double check_u_turn_rec(const arma::vec& x,
                         const arma::vec& M_inv_disc,
                         const unsigned int& K){
   if( ( dot(M_inv_cont % x.subvec((4+K)*d,(5+K)*d-k-1),x.subvec(3*d,4*d-k-1)) + 
-        dot(M_inv_disc % x.subvec((5+K)*d-k,(5+K)*d-1),     arma::sign(x.subvec(4*d-k,4*d-1)) ) ) < 0  && 
+        dot(M_inv_disc % x.subvec((5+K)*d-k,(5+K)*d-1),     arma::sign(x.subvec(4*d-k,4*d-1)) ) ) < 0  || 
       ( dot(M_inv_cont % x.subvec((4+K)*d,(5+K)*d-k-1),x.subvec(d,2*d-k-1))   + 
-        dot(M_inv_disc % x.subvec((5+K)*d-k,(5+K)*d-1),     arma::sign(x.subvec(2*d-k,2*d-1)) )) > 0){
+        dot(M_inv_disc % x.subvec((5+K)*d-k,(5+K)*d-1),     arma::sign(x.subvec(2*d-k,2*d-1)) )) < 0){
 
     return 1.0;
   }
@@ -137,9 +137,9 @@ double check_u_turn_rec(const arma::vec& x,
                         const unsigned int& K){
   
   if( ( dot(M_inv_cont * x.subvec((4+K)*d,(5+K)*d-k-1),x.subvec(3*d,4*d-k-1)) + 
-        dot(M_inv_disc % x.subvec((5+K)*d-k,(5+K)*d-1),     arma::sign(x.subvec(4*d-k,4*d-1))) ) < 0  && 
+        dot(M_inv_disc % x.subvec((5+K)*d-k,(5+K)*d-1),     arma::sign(x.subvec(4*d-k,4*d-1))) ) < 0  || 
       ( dot(M_inv_cont * x.subvec((4+K)*d,(5+K)*d-k-1),x.subvec(d,2*d-k-1))   + 
-        dot(M_inv_disc % x.subvec((5+K)*d-k,(5+K)*d-1),     arma::sign(x.subvec(2*d-k,2*d-1)) )) > 0){  
+        dot(M_inv_disc % x.subvec((5+K)*d-k,(5+K)*d-1),     arma::sign(x.subvec(2*d-k,2*d-1)) )) < 0){  
     return 1.0;
   }
   
@@ -151,8 +151,8 @@ double check_u_turn_rec(const arma::vec& x,
 //identity matrix case
 double check_u_turn(const arma::vec& x,
                     const unsigned int& d){
-  if( dot(x.subvec(5*d,6*d-1),x.subvec(3*d,4*d-1)) < 0  && 
-      dot(x.subvec(5*d,6*d-1),x.subvec(d,2*d-1)) > 0){
+  if( dot(x.subvec(5*d,6*d-1),x.subvec(3*d,4*d-1)) < 0  || 
+      dot(x.subvec(5*d,6*d-1),x.subvec(d,2*d-1)) < 0){
     
     return 1.0;
   }
@@ -160,25 +160,38 @@ double check_u_turn(const arma::vec& x,
   return 0.0;
 }
 
-//identity matrix case k = d
+//identity matrix case k = d uniform
 double check_u_turn2(const arma::vec& x,
-                    const unsigned int& d){
-  if( dot(x.subvec(5*d,6*d-1),arma::sign(x.subvec(3*d,4*d-1))) < 0  && 
-      dot(x.subvec(5*d,6*d-1),arma::sign(x.subvec(d,2*d-1))) > 0){
+                     const unsigned int& d){
+  if( dot(x.subvec(5*d,6*d-1),arma::sign(x.subvec(3*d,4*d-1))) < 0  || 
+      dot(x.subvec(5*d,6*d-1),arma::sign(x.subvec(d,2*d-1))) < 0){
     
     return 1.0;
   }
   
   return 0.0;
 }
+
+//identity matrix, k = d, biased
+double check_u_turn3(const arma::vec& x,
+                     const unsigned int& d){
+  if( dot(x.subvec(4*d,5*d-1),arma::sign(x.subvec(3*d,4*d-1))) < 0  || 
+      dot(x.subvec(4*d,5*d-1),arma::sign(x.subvec(d,2*d-1))) < 0){
+    
+    return 1.0;
+  }
+  
+  return 0.0;
+}
+
 
 // diagonal matrix case
 double check_u_turn(const arma::vec& x,
                     const unsigned int& d,
                     const arma::vec& M_inv){
   
-  if( ( dot(M_inv % x.subvec(5*d,6*d-1),x.subvec(3*d,4*d-1)) ) < 0  && 
-      ( dot(M_inv % x.subvec(5*d,6*d-1),x.subvec(d,2*d-1))  ) > 0){
+  if( ( dot(M_inv % x.subvec(5*d,6*d-1),x.subvec(3*d,4*d-1)) ) < 0  || 
+      ( dot(M_inv % x.subvec(5*d,6*d-1),x.subvec(d,2*d-1))  ) < 0){
     
     
     return 1.0;
@@ -187,13 +200,13 @@ double check_u_turn(const arma::vec& x,
   return 0.0;
 }
 
-// diagonal matrix case k = d
+// diagonal matrix case k = d uniform
 double check_u_turn2(const arma::vec& x,
                     const unsigned int& d,
                     const arma::vec& M_inv){
   
-  if( ( dot(M_inv % x.subvec(5*d,6*d-1),     arma::sign(x.subvec(3*d,4*d-1)) )) < 0  && 
-      ( dot(M_inv % x.subvec(5*d,6*d-1),     arma::sign(x.subvec(d,2*d-1))  )) > 0){
+  if( ( dot(M_inv % x.subvec(5*d,6*d-1),     arma::sign(x.subvec(3*d,4*d-1)) )) < 0  || 
+      ( dot(M_inv % x.subvec(5*d,6*d-1),     arma::sign(x.subvec(d,2*d-1))  )) < 0){
     
     
     return 1.0;
@@ -201,14 +214,30 @@ double check_u_turn2(const arma::vec& x,
   
   return 0.0;
 }
+
+// diagonal matrix case k = d biased
+double check_u_turn3(const arma::vec& x,
+                     const unsigned int& d,
+                     const arma::vec& M_inv){
+  
+  if( ( dot(M_inv % x.subvec(4*d,5*d-1),     arma::sign(x.subvec(3*d,4*d-1)) )) < 0  || 
+      ( dot(M_inv % x.subvec(4*d,5*d-1),     arma::sign(x.subvec(d,2*d-1))  )) < 0){
+    
+    
+    return 1.0;
+  }
+  
+  return 0.0;
+}
+
 
 // dense matrix case
 double check_u_turn(const arma::vec& x,
                     const unsigned int& d,
                     const arma::mat& M_inv){
   
-  if( ( dot(M_inv * x.subvec(5*d,6*d-1),x.subvec(3*d,4*d-1)) ) < 0  && 
-      ( dot(M_inv * x.subvec(5*d,6*d-1),x.subvec(d,2*d-1))  ) > 0){
+  if( ( dot(M_inv * x.subvec(5*d,6*d-1),x.subvec(3*d,4*d-1)) ) < 0  || 
+      ( dot(M_inv * x.subvec(5*d,6*d-1),x.subvec(d,2*d-1))  ) < 0){
 
     return 1.0;
   }
@@ -222,8 +251,8 @@ double check_u_turn(const arma::vec& x,
 double check_u_turn_rec(const arma::vec& x,
                         const unsigned int& d,
                         const unsigned int& K){
-  if( dot(x.subvec((4+K)*d,(5+K)*d-1),x.subvec(3*d,4*d-1)) < 0  && 
-      dot(x.subvec((4+K)*d,(5+K)*d-1),x.subvec(d,2*d-1)) > 0){
+  if( dot(x.subvec((4+K)*d,(5+K)*d-1),x.subvec(3*d,4*d-1)) < 0  || 
+      dot(x.subvec((4+K)*d,(5+K)*d-1),x.subvec(d,2*d-1)) < 0){
     
     return 1.0;
   }
@@ -235,8 +264,8 @@ double check_u_turn_rec(const arma::vec& x,
 double check_u_turn_rec2(const arma::vec& x,
                         const unsigned int& d,
                         const unsigned int& K){
-  if( dot(x.subvec((4+K)*d,(5+K)*d-1),arma::sign(x.subvec(3*d,4*d-1))) < 0  && 
-      dot(x.subvec((4+K)*d,(5+K)*d-1),arma::sign(x.subvec(d,2*d-1))) > 0){
+  if( dot(x.subvec((4+K)*d,(5+K)*d-1),arma::sign(x.subvec(3*d,4*d-1))) < 0  || 
+      dot(x.subvec((4+K)*d,(5+K)*d-1),arma::sign(x.subvec(d,2*d-1))) < 0){
     
     return 1.0;
   }
@@ -250,8 +279,8 @@ double check_u_turn_rec(const arma::vec& x,
                         const arma::vec& M_inv,
                         const unsigned int& K){
   
-  if( ( dot(M_inv % x.subvec((4+K)*d,(5+K)*d-1),x.subvec(3*d,4*d-1)) ) < 0  && 
-      ( dot(M_inv % x.subvec((4+K)*d,(5+K)*d-1),x.subvec(d,2*d-1))  ) > 0){
+  if( ( dot(M_inv % x.subvec((4+K)*d,(5+K)*d-1),x.subvec(3*d,4*d-1)) ) < 0  || 
+      ( dot(M_inv % x.subvec((4+K)*d,(5+K)*d-1),x.subvec(d,2*d-1))  ) < 0){
 
     return 1.0;
   }
@@ -265,8 +294,8 @@ double check_u_turn_rec2(const arma::vec& x,
                         const arma::vec& M_inv,
                         const unsigned int& K){
   
-  if( ( dot(M_inv % x.subvec((4+K)*d,(5+K)*d-1),     arma::sign(x.subvec(3*d,4*d-1)) )) < 0  && 
-      ( dot(M_inv % x.subvec((4+K)*d,(5+K)*d-1),     arma::sign(x.subvec(d,2*d-1))  ) ) > 0){
+  if( ( dot(M_inv % x.subvec((4+K)*d,(5+K)*d-1),     arma::sign(x.subvec(3*d,4*d-1)) )) < 0  || 
+      ( dot(M_inv % x.subvec((4+K)*d,(5+K)*d-1),     arma::sign(x.subvec(d,2*d-1))  ) ) < 0){
     
     return 1.0;
   }
@@ -280,8 +309,8 @@ double check_u_turn_rec(const arma::vec& x,
                         const arma::mat& M_inv,
                         const unsigned int& K){
   
-  if( ( dot(M_inv * x.subvec((4+K)*d,(5+K)*d-1),x.subvec(3*d,4*d-1)) ) < 0  && 
-      ( dot(M_inv * x.subvec((4+K)*d,(5+K)*d-1),x.subvec(d,2*d-1))  ) > 0){
+  if( ( dot(M_inv * x.subvec((4+K)*d,(5+K)*d-1),x.subvec(3*d,4*d-1)) ) < 0  || 
+      ( dot(M_inv * x.subvec((4+K)*d,(5+K)*d-1),x.subvec(d,2*d-1))  ) < 0){
 
     return 1.0;
   }

@@ -67,8 +67,12 @@ double check_u_turn_rec(const arma::vec& x,
 double check_u_turn(const arma::vec& x,
                     const unsigned int& d);
 
-//identity matrix case k = d
+//identity matrix case k = d, uniform
 double check_u_turn2(const arma::vec& x,
+                     const unsigned int& d);
+
+//identity matrix case k = d, biased
+double check_u_turn3(const arma::vec& x,
                      const unsigned int& d);
 
 // diagonal matrix case
@@ -76,8 +80,13 @@ double check_u_turn(const arma::vec& x,
                     const unsigned int& d,
                     const arma::vec& M_inv);
 
-// diagonal matrix case k = d
+// diagonal matrix case k = d, uniform
 double check_u_turn2(const arma::vec& x,
+                     const unsigned int& d,
+                     const arma::vec& M_inv);
+
+//identity matrix case k = d, biased
+double check_u_turn3(const arma::vec& x,
                      const unsigned int& d,
                      const arma::vec& M_inv);
 

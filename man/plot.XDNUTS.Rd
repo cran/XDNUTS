@@ -9,11 +9,11 @@
   type = 1,
   which = NULL,
   warm_up = FALSE,
-  cex.titles = 1,
-  cex.legend = 1,
   plot.new = FALSE,
   which_chains = NULL,
   colors = NULL,
+  gg = TRUE,
+  scale = 1,
   ...
 )
 }
@@ -33,24 +33,29 @@
 \item{\code{which = 'continuous'}}{for plotting the first \eqn{d-k} parameters.}
 \item{\code{which = 'discontinuous'}}{for plotting the last \eqn{k} parameters.}
 }
-where both \eqn{d} and \eqn{k} are elements contained in the output of the \link{xdnuts} function.}
+where both \eqn{d} and \eqn{k} are elements contained in the output of the \link{xdnuts} function.
+ If \code{type = 7}, it refers to the rates index instead. When \code{which = 'continuous'}, 
+ only the global acceptance rate is displayed. In contrast, when \code{which = 'discontinuous'},
+  the refraction rates are shown.}
 
 \item{warm_up}{a boolean value indicating whether the plot should be made using the warm-up samples.}
-
-\item{cex.titles}{a numerical value for regulating the size of the plot's titles, default value is \code{1}.}
-
-\item{cex.legend}{a numerical value for regulating the size of the plot's legend, default value is \code{1}.}
 
 \item{plot.new}{a boolean value indicating whether a new graphical window should be opened. This is advised if the parameters space is big.}
 
 \item{which_chains}{a numerical vector indicating the index of the chains of interest.}
 
-\item{colors}{a numerical vector of the same length as \code{which_chains} containing the colors for each chain.}
+\item{colors}{a numerical vector containing the colors for each chain specified in \code{which_chains}
+or for each rate specified in \code{which} when \code{type = 7}.}
 
-\item{...}{additional arguments to customize plots.}
+\item{gg}{A boolean value indicating whether the plot should utilize the grammar of graphics features. 
+Default value is set to \code{TRUE}.}
+
+\item{scale}{A numeric value for scaling the appearance of plots.}
+
+\item{...}{additional arguments to customize plots. In reality, these do nothing.}
 }
 \value{
-No return value.
+A graphical object if \code{gg = TRUE}, otherwise nothing is returned.
 }
 \description{
 Function to view the draws from the posterior distribution.

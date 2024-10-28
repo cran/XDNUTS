@@ -1,0 +1,675 @@
+---
+title: "Tutorial for main functions"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Tutorial for main functions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: REFERENCES.bib  
+header-includes:
+  - \usepackage{amsmath}
+  - \usepackage{mathtools}
+  - \usepackage{amsfonts}
+  - \usepackage{amssymb}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = NULL
+)
+```
+
+# MCMC through the function `xdnuts`
+
+This function is the core of the package; it employs DHMC with varying trajectory lengths. To use it, one must:
+
+ * Write the formula for a probability distribution, such as a Bayesian posterior density, which does not necessarily need to be normalized: $\pi(\theta|y)$.
+ 
+ * Transform it into potential energy: $U(\theta) = -\log\pi(\theta|y)$.
+ 
+ * Derive the formula for its gradient with respect only to the continuous components. This can be done either analytically or numerically using an R function, such as `numDeriv::grad`. The first approach requires more manual effort but pays off in terms of execution time.
+
+*Remark 1: If the gradient derivation is done analytically, it is always a good idea to check whether it is correct by comparing it with its numerical counterpart!*
+
+Once these preliminary steps are completed, they must be translated into R.
+
+*Remark 2: The use of other programming languages, such as C++ via the Rcpp package, does not integrate well with the C++ functions compiled into the package. Therefore, if one considers speeding up computation by writing the function for the posterior distribution in a more efficient language, this is usually not a good idea!*
+
+This requires the creation of two R objects:
+
+ * A function to be passed to the `nlp` argument of the `xdnuts` function. `nlp` refers to negative log probability (posterior). The name of this function and its arguments are not important, but it must have three arguments, which are as follows:
+   
+   1. `par`, a vector of length dd representing a value for $\theta$. This vector must be ordered such that the first $d-k$ components correspond to the continuous ones, for which the gradient must be evaluated, and the last $k$ components refer to the discontinuous ones, for which no derivation is required.
+   
+   2. `args`, a list containing the arguments needed for the negative log posterior computation, namely the data and hyperparameters.
+   
+   3. `eval_nlp`,  a logical value; if `TRUE`, the function must return the negative log posterior, hence a scalar value. If `FALSE`, the function must return the gradient of only the continuous components.
+  
+ * A list of elements to pass to the `args` argument of the `xdnuts` function, which refers to the second argument of the function mentioned above.
+ 
+*Remark 3: The package currently cannot handle bounded probability spaces. If there are parameters with bounded support, this must be specified within the nlp function by assigning infinite negative log posterior probability to all values outside the support, or by applying a reparameterization. The latter is recommended as a more elegant solution which allows for easy transformation back to the original parameterization by applying the inverse transformation to the MCMC samples.*
+
+After this, we can finally perform MCMC!
+
+Let `N_chains` be the number of chains we wish to obtain. We must first define a starting value for each chain. This should be placed in a list of `N_chains` vectors, each of length $d$. For example, we can simulate it with a function like this:
+
+```{r, eval = FALSE}
+theta0 <- lapply(seq_len(N_chains),myfunction)
+```
+
+If we wish to perform the sampling in parallel, we can specify `parallel = TRUE` (always ensure that enough cores are available!). In this case, if there are any external R objects or packages related to the `nlp` function or the `args` list, it is necessary to load them on each core. This can be done by providing the names of the objects in a character vector to be passed to the `loadLibraries` and `loadRObject` arguments of the `xdnuts` function.
+
+The length of each chain is specified via the `N` argument, while thinning is specified by `thin` (the total number of samples is then `N` times `thin`, but only `N` are returned). `K`, in uppercase, specifies the number of recycled samples (@Nishimura_2020, by default, this occurs only during the warm-up phase for improving the estimates of the Mass Matrix $M$), while `k`, in lowercase, defines the number of discontinuous components. 
+
+The `method` argument specifies the type of algorithm; there are several possible choices:
+
+ * `method = 'HMC'`: This applies the classic termination criterion with a fixed step length $L$. The value of $L$ must then be specified as another argument of the `xdnuts` function, for example with `L = 10`. It is suggested to perform some preliminary runs starting with moderately small values, inspecting the autocorrelation plots (for example, using `plots(model,type = 6)`),and then increasing it until the autocorrelation appears negligible. To mitigate the drawbacks of using a fixed value for `L`, it is possible to sample $L$ uniformly in a neighborhood around `L`. This can be regulated by the `L_jitter` argument passed to the `set_parameters()` function, which defines the `control` argument of the `xdnuts` function. The interval is constructed as follows: $[\max(1,L-L_{jitter}),L + L_{jitter}]$.
+ 
+ * `method = 'XHMC'`: This applies the virial exhaustion criterion (@betancourt2016identifying) for identifying sufficient trajectory exploration. A threshold $\tau$ must be specified as an argument of the `xdnuts` function. For example, with `tau = 0.1`; it is suggested to perform some preliminary runs starting with moderately large values, inspecting the autocorrelation plots (for example, using `plots(model,type = 6)`), and then decreasing it until the autocorrelation appears negligible.
+ 
+ * `method = 'NUTS'`: This applies the No U-Turn Sampler criterion (@hoffman2014no) for identifying a collapsing trend in the trajectory. The advantage of this approach is that it is completely automatic, requiring no further calibration, but it is not guaranteed to perform efficient exploration.
+ 
+One must keep in mind that, as shown in @betancourt2016identifying, each of these criteria has its flaws. The virial-based method seems the most appealing, as it allows for both manual calibration and varying trajectory lengths dictated by the local geometry of the probability density. However, due to its simplicity and often effective results, the default choice for the `xdnuts` function is `method = 'NUTS'`.
+
+# Set algorithm's features using the `set_parameters` function
+
+The output of this function is given to the control argument of the `xdnuts` function, serving the purpose of regulating more subtle features of the algorithm.
+
+ * `N_init1`: Defines the number of iterations for the first calibration of $\epsilon$.
+ 
+ * `N_adapt`: Defines the duration of the warm-up phase. After this phase, if `M_type = 'diagonal' or 'dense'`, the samples collected are used to estimate the Mass Matrix $\hat{M} = \hat{\Sigma}^{-1}$, where $\Sigma$ is the posterior covariance matrix. This step is crucial for facilitating exploration of the parameter space, as modifying the covariance matrix of the momentum distribution indirectly applies a rotation to the original probability space.
+ 
+ * `N_init2`:  Defines the number of iterations for the second calibration of $\epsilon$. This is a mandatory step following the estimation of the Mass Matrix. However, even if `M_type = 'identity'`, there are advantages to performing this step, as it can correct anomalies encountered during the first calibration due to an initial chain location far from areas with higher probability mass.
+ 
+ * `burn_adapt_ratio`: A numeric scalar $\in (0,1]$ indicating the ratio of warm-up samples to discard when estimating the covariance matrix of the parameters. Typically, HMC quickly reaches the region with higher probability mass (also known as the *Typical Set* of the probability space), but if that’s not the case, not discarding enough initial samples can lead to an overestimation of $\Sigma$ (and consequently an underestimation of $M$), which can cause mixing issues and inefficiencies.
+ 
+ * `keep_warm_up`: If set to `TRUE`, stores the warm-up phase for each chain. This can help diagnose insufficient burning of the warm-up samples (e.g., via `plot(model, warm_up = TRUE)`).
+
+ * `recycle_only_init`: If set to `TRUE`, allows recycling even during the sampling phase.
+ 
+ * `delta`: A vector containing the desired Metropolis acceptance rates, including both global and potential difference-related rates. The default values are `0.8` and `0.6`, respectively, but other values may be considered based on chain mixing and the presence of divergent transitions. The latter occur when the precision of the symplectic integrator in certain areas of the probability space is insufficient. This can be addressed by increasing the nominal value (for example, `control = set_parameters(delta = c(0.95,0.6))`) or by reparametrizing the model, as these issues typically arise when the probability space is characterized by a density with extreme curvature, which can be alleviated through such ad hoc measures. If the second element of the vector is set to `NA`, the step size calibration is conducted solely through the global acceptance probabilities.
+ 
+ * `eps_jitter`: A numeric scalar that regulates the amount of jittering used to perturb the value of the step size for each iteration of the chain after the warm-up phase. Increasing this value may mitigate the presence of divergent transitions, as it allows smaller values of $\epsilon$ to be used.
+ 
+ * `max_treedepth`: An integer that regulates the maximum depth of the binary tree used to approximate Hamilton's equations for exploring each energy level set. If many trajectories reach this upper limit, it may indicate the presence of flat areas in the probability density. Increasing this value could make the computational burden grow exponentially.
+ 
+ * `L_jitter`: An integer scalar that regulates the amount of jittering used to perturb the value of the trajectory length if specified to be constant. This occurs when the classic Hamiltonian Monte Carlo algorithm is used with the `method = "HMC"` option in the `xdnuts` function. See above for more details.
+ 
+ * `M_type`: A character value specifying the type of Mass Matrix to estimate:
+
+   * `"identity"`, no Mass Matrix estimation is done.
+
+   * `"diagonal"`, a diagonal Mass Matrix is estimated during the warm-up phase.
+
+   * `"dense"`, a full dense Mass Matrix is estimated during the warm-up phase.
+ 
+ * `refresh`: A numeric scalar bounded in $(0,1)$ that regulates the update frequency of the displayed sampling process state. The default value is `0.1`, meaning updates occur every 10% of the total samples.
+ 
+ * `l_eps_init`: A numeric scalar representing the logarithm of the initial step size value. This can be used, along with `N_init1 = 0` and `N_init2 = 0`, to prevent an automatic adaptation of $\epsilon$ when its performance is poor.
+
+ * `different_stepsize`: When set to `TRUE`, this option applies a parallel adaptation scheme to ensure that the nominal and empirical refraction rates of each discontinuous component remain closely aligned. To maintain the physical interpretation of the trajectory as solutions to Hamilton's equations, the different step sizes are derived from the redefinition of the diagonal elements of the discontinuous mass matrix. If set to `FALSE`, only a global $\epsilon$ is adapted, which penalizes deviations from both the global nominal value and each refraction rate.
+ 
+ * `M_cont`: Allows specification of the Mass Matrix for the continuous components. This may be useful if the model adaptation is done in more sequential steps.
+ 
+ * `M_disc`: The same as above, but concerning the discontinuous components.
+
+# Model diagnostic through the `print`, `summary` and `plot` functions
+
+## `print`
+
+After adapting the model, you can print the returned `XDNUTS` object to the console to view its features. The resulting output is self-explanatory, so no further comments are necessary. The main purpose of this function is to provide a quick overview of each chain, summarizing important features that aid in diagnosing potential issues.
+
+## `summary`
+
+This function focuses more on the model outcomes rather than the characteristics of the algorithm. In fact, these two aspects are not necessarily related; an algorithm may produce good inference even in the presence of internal issues. Therefore, it’s better to have different functions to describe them. The function returns a list containing several posterior statistics, such as the mean, standard deviation, quantiles specified in the `q.val` argument, Effective Sample Size (ESS, @geyer2011introduction), Potential Scale Reduction Factor (PSRF, @gelman1992inference), and Bayesian Fraction of Missing Information (BFMI, @betancourt2016diagnosing) across all chains.
+
+ * ESS is a raw measure of the information regarding the posterior distribution contained in the MCMC samples. For the $i$-th parameter, it is computed as:
+ \[
+ \frac{N}{1+2\sum_{m = 1}^{M} \rho_i(k)}
+ \]
+ where $N$ is the length of the chain, $M$ is a sufficiently large integer, and $\rho_i(m)$ is the empirical auto-correlation function of lag $m$ for the $i$-th parameter. The computation is performed using the `coda::effectiveSize` function.
+ 
+ * PSRF is a statistic that compares the between-chain and within-chain variance of each parameter's empirical distribution across chains. The idea is that if the variability between chains ($B$) is close to zero then all the chains variability is explained by the within chains one ($W$), then the ratio
+ \[
+ R = \frac{B + W}{W}
+ \]
+ should be approximately one. Larger values provide evidence against the null hypothesis of chain convergence. The empirical estimator is obtained using the `coda::gelman.diag` function, which returns both the statistic and its upper confidence interval. Typically, values greater than $1.1$ are considered indicative of poor convergence, which can often be addressed through reparameterization or by increasing the length of the chains.
+
+ * BFMI is a summary statistic that assesses the adequacy of the momenta distribution specification. A more detailed explanation of this topic can be found in @betancourt2016diagnosing, specifically in the section on Hamiltonian Monte Carlo's other degrees of freedom. The concept is similar to the PSRF statistic discussed earlier: the variance of the energy level set explored by Hamiltonian Monte Carlo can be partitioned using the law of total variance:
+ \[
+ \mathbb{V}(E) = \mathbb{V}_{\theta}[\mathbb{E}(E|\theta)] + \mathbb{E}[\mathbb{V}(E|\theta)]
+ \]
+ Thus the ratio
+ \[
+ \frac{\mathbb{E}[\mathbb{V}(E|\theta)]}{\mathbb{V}(E)}
+ \]
+ summarizes the portion of energy variability determined by the momenta distribution, which corresponds to the energy probability law conditional on the $\theta$ values. Low values of this ratio suggest that the variability in energy is primarily induced by the distribution of $\theta$, indicating that the momenta distribution may be sub-optimal.
+ The package supports only Gaussian distributions (for continuous components) and/or Laplace distributions (for discontinuous components), with the covariance matrix as the sole degree of freedom. Denoting the energy level set by $E$, the empirical estimator of this quantity is given by:
+ \[
+\widehat{BFMI} = \frac{\sum_{i=2}^N(E_i - E_{i-1})^2}{\sum_{i=1}^N (E_i - \bar{E})^2}
+\]
+This statistic often yields values greater than $1$ due to estimation error, with values below $0.2$ generally considered problematic.
+
+One common feature concerning both the algorithm and the sample inference is the number of divergent transitions encountered by the trajectories during the sampling process. For this reason, this information is reported in both the `print` and `summary` outputs. Such issues indicate both an inefficacy of the algorithm to approximate Hamilton's equations and potential inference bias due to density underestimation in the area where the symplectic integrator diverges, leading to the bouncing back of the fictitious particle. Possible solutions include:
+
+ * Reparameterizing the model.
+
+ * Increasing the algorithm's precision by setting a higher value for the first element of `delta` in the `set_parameters` function.
+
+
+## `plot`
+
+This function allows you to plot various characteristics of the algorithm and samples, which can be selected using the `type` argument:
+
+ * `type = 1`, marginal chains, one for each desired dimension;
+ 
+ * `type = 2`, univariate and bivariate density plots;
+ 
+ * `type = 3`, time series plot of the energy level sets. Good for a quick diagnostic of big models;
+ 
+ * `type = 4`, stickplot of the step-length of each iteration;
+ 
+ * `type = 5`, histograms of the centered marginal energy in gray and of the first differences of energy in red;
+
+ * `type = 6`, autoregressive function plot of the parameters;
+ 
+ * `type = 7`, matplot of the empirical acceptance rate and refraction rates.
+
+The `which` argument accepts either a numerical vector indicating the indices of the parameters of interest or a string:
+
+ * `which = 'continuous'` for plotting the first $d-k$ parameters.
+
+ * `which = 'discontinuous'` for plotting the last $k$ parameters.
+
+If `type = 7`, it refers to the rates index instead. When `which = 'continuous'`, only the global acceptance rate is displayed. In contrast, when `which = 'discontinuous'`, the refraction rates are shown.
+
+The `which_chains` argument selects the chains to be used for constructing the plot, while `warm_up = TRUE` specifies the use of warm-up samples. This is only applicable for `type = 1, 2, 6`, as the other necessary warm-up quantities are not stored by the sampler. The chain colors can be customized through the `colors` argument.
+
+Additional graphical customization options include:
+
+ * `plot.new = TRUE` opens a new graphical windows;
+
+ * `gg = FALSE` uses classic R plotting instead of plots based on the grammar of 
+graphics paradigm, which is preferable for more interactive customization.
+
+ * `scale = ...`, helps make classic R plots more visually appealing by rescaling the axis labels and titles.
+
+# Posterior sampling post-processing through the `xdtransform`, `xdextract` functions
+
+It is often useful to use the Monte Carlo samples to compute various posterior quantities, which may be necessary for converting back to the original bounded parameterization, as discussed above. Other possibilities include subsampling from each chain, which can help reduce memory allocation if the samples are highly autocorrelated or to discard initial samples that have not yet reached convergence.
+
+The package provides two functions for this purpose:
+
+## `xdtransform`
+
+This function applies a transformation to all or some of the parameter samples while preserving the structure of an `XDNUTS` object. As a result, diagnostics through the `summary` and `plot` functions remain straightforward (the output of the `print` function does not change, as it pertains to the algorithm's features rather than the samples themselves).
+
+The `which` argument selects which parameters the transformation specified in the `FUN` argument should be applied to. `FUN` can accept multiple arguments, but the first must correspond to the parameters of interest, while the others can be specified directly in the input of the `xdtransform` function. If `which = NULL`, the function is applied to all parameters. The new parameter names can be specified through the `new.names` argument.
+
+For thinning or burning the initial samples, the `thin` and `burn` arguments can be used, respectively.
+
+## `xdextract`
+
+This function extracts the raw posterior samples into a more manageable R object, specifically a matrix or an array. While this format facilitates post-computation of the MCMC samples, it does lose the structure of the `XDNUTS` object.
+
+In this case, the `which` argument can take either a numerical vector indicating the indices of the parameters of interest or a string:
+
+ * `which = 'continuous'`, for plotting the first $d-k$ parameters.
+ 
+ * `which = 'discontinuous'`, for plotting the last $k$ parameters.
+
+Additionally, the `which_chains` argument allows you to select specific chains to extract. This is useful if some chains become stuck in local modes with negligible probability mass, as discarding them helps prevent bias in the Monte Carlo estimates.
+
+If `collapse = TRUE`, the MCMC output is stored in a matrix rather than an array, which loses the information about parallel chain identifiers but makes it easier to manage.
+
+As before, the `thin` and `burn` arguments can be used for thinning or burning the initial samples, respectively.
+
+# Practical examples
+
+## Example with both continuous and discontinuous components
+
+```{r, echo = FALSE, eval = FALSE}
+set.seed(123)
+```
+
+
+```{r setup, eval = TRUE, echo = FALSE}
+library(XDNUTS)
+```
+
+Consider the following probabilistic model
+\begin{align*}
+X & \sim Negbin(r,p) \notag \\
+p & \sim Beta(a_0,b_0) \notag \\
+r & \sim Unif(\{1,\dotsc,X\}) \notag 
+\end{align*}
+$X$ represents the number of trials necessary to obtain $r$ successes in a series of independent and identically distributed events with probability $p$.
+We can generate an arbitrary value for $X$ and set the hyperparameters $a_0$ and $b_0$ as desired:
+```{r, eval = TRUE}
+#observed data
+X <- 50
+
+#hyperparameteers
+a0 <- 10
+b0 <- 10
+
+#list of arguments
+arglist <- list(data = X, hyp =  c(a0,b0))
+```
+
+Since $p$ is a continuous parameter and $r$ is positive discrete, the classic Hamiltonian Monte Carlo algorithms is not defined, due to lack of differentiability. To address this, we can use the method described by @nishimura2020discontinuous . First, we need to specify a continuous version of $r$, which we will denote as $\tilde{r}$. This continuous variable $\tilde{r}$ is defined on the open interval $(1,X+1]$. Next, consider the trivial sequence $\{a_r\}_1^{X+1}: a_r = r$.  To transfer the mass probabilities of $\mathbb{P}(r) = \frac{1}{X} \,,r = 1,\dotsc,X$  to the continuous interval spanning from $a_{r}$ to $a_{r+1}$ we divide by the length of this interval. Using this approach and the indicator function, the probability density function of $\tilde{r}$ can be given by:
+\[
+\pi_{\tilde{R}}(\tilde{r}) = \displaystyle\sum_{r = 1}^X \frac{\pi_R(r)}{a_{r+1} - a_r} \mathcal{I}(a_r < \tilde{r} \leq a_{r+1})
+\]
+Since the support of this parameter is bounded, it is preferable to apply a transformation that maps $\tilde{r}$ to $\mathbb{R}$. Any bijective function can be used for this purpose; for example, the logistic function serves this need:
+\[
+\hat{r} = \log\left(\frac{\tilde{r} - 1}{ (X+1) - \tilde{r}}\right)
+\]
+The new discontinuous probability density can be derived from the cumulative distribution function. Interestingly, this approach yields the same result as applying the Jacobian determinant of the inverse transformation.
+\[
+\pi_{\hat{R}}(\hat{r}) = \displaystyle\sum_{r = 1}^X \frac{\pi_R(r)}{a_{r+1} - a_r} \mathcal{I}(a_r < \tilde{r} \leq a_{r+1}) \cdot ( (X+1) - 1) \cdot\left(\frac{1}{1+e^{-\hat{r}}}\right)\cdot\left(\frac{e^{-\hat{r}}}{1+e^{-\hat{r}}}\right)
+\]
+where $\tilde{r} = 1 + \frac{(X+1) - 1}{1 + e^{-\hat{r}}}$ and since $\pi_R(r) = \frac{1}{X}$ the final result gives:
+\[
+\pi_{\hat{R}}(\hat{r}) = \displaystyle\sum_{r = 1}^X \frac{\mathcal{I}(a_r < \tilde{r} \leq a_{r+1})}{a_{r+1} - a_r} \cdot\left(\frac{1}{1+e^{-\hat{r}}}\right)\cdot\left(\frac{e^{-\hat{r}}}{1+e^{-\hat{r}}}\right)
+\]
+Since both the sequence $\{a_r\}$ and the inverse logistic function are monotonic, and the original probability mass has been canceled out, the summation has no effect because there are no values of $\hat{r}$ that map to more than one interval, and the probability mass within those intervals remains constant. Therefore, the final result is:
+\[
+\pi_{\hat{R}}(\hat{r}) = \left(\frac{1}{1+e^{-\hat{r}}}\right)\cdot\left(\frac{e^{-\hat{r}}}{1+e^{-\hat{r}}}\right)
+\]
+
+For the same reason of disliking bounded probability spaces, we can apply a similar transformation to map the support of $p$ from $(0,1)$ to $\mathbb{R}$, Define:
+\[
+\omega = \log\left(\frac{p}{1-p}\right)
+\]
+which yields the following non-normalized prior distribution for $\omega$:
+\[
+\pi(\omega) = \left(\frac{1}{1+e^{-\omega}}\right)^{a_0}\cdot\left(\frac{e^{-\omega}}{1+e^{-\omega}}\right)^{b_0}
+\]
+The resulting posterior distribution in this parameterization is given by:
+\[
+\pi(\omega,\hat{r}|X) \propto \binom{X-1}{r-1} \cdot \left(\frac{1}{1+e^{-\omega}}\right)^{r + a_0}\cdot\left(\frac{e^{-\omega}}{1+e^{-\omega}}\right)^{X - r +  b_0 } \cdot\left(\frac{1}{1+e^{-\hat{r}}}\right)\cdot\left(\frac{e^{-\hat{r}}}{1+e^{-\hat{r}}}\right)
+\]
+Where $r = \left\lceil 1 + \frac{(X+1)-1}{1+e^{-\hat{r}}} \right\rceil - 1$.
+
+Ultimately, it can be easily shown that the negative logarithm of the posterior distribution and its derivative with respect to $\omega$ are as follows:
+\begin{align*}
+-\log\pi(\omega,\hat{r}|X)  \propto -\displaystyle\sum_{i = X - r + 1}^{X - 1} \log(i) &+ \displaystyle\sum_{i = 1}^{r-1}\log(i) + (X + a_0+b_0)\log\left(1+e^{-\omega}\right) \notag \\
+&+ (X - r + b_0)\omega + \hat{r} + 2\log\left(1+e^{-\hat{r}}\right) \notag 
+\end{align*}
+\[
+\frac{\partial-\log\pi(\omega,\hat{r}|X)}{\partial\omega}  =  (X - r + b_0) - (X+a_0+b_0)\frac{e^{-\omega}}{1+e^{-\omega}} 
+\]
+We can define an R function to evaluate these quantities. To be compatible with the package, the first argument should be the parameter values, the second should be the list of arguments necessary to evaluate the posterior, and the third should be a logical value: if `TRUE`, the function must return the negative logarithm of the posterior distribution; otherwise, it should return the gradient with respect to the continuous components, which, in this case, refers to the first element of the parameter vector.
+```{r, eval = TRUE}
+#function for the negative log posterior and its gradient
+#with respect to the continuous components
+nlp <- function(par,args,eval_nlp = TRUE){
+  
+  if(eval_nlp){
+    #only the negative log posterior
+    
+    #overflow
+    if(any(par > 30)) return(Inf) 
+    
+    #conversion of the r value
+    r <- ceiling(1 + args$data*plogis(par[2])) - 1
+    
+    #output
+    out <- sum(log(seq_len(r-1))) + 
+      (args$data + args$hyp[1] + args$hyp[2])*log(1+exp(-par[1])) + 
+      par[1]*(args$data - r + args$hyp[2]) + par[2] + 2*log(1+exp(-par[2]))
+    if(r > 2) out <- out - sum(log(seq(args$data - r + 1,args$data - 1)))
+    
+    return(out)
+    
+  }else{
+    #only the gradient
+    
+    #overflow
+    if(any(par > 30)) return(Inf) 
+    
+    #conversion of the r value
+    r <- ceiling(1 + args$data*plogis(par[2])) - 1
+    
+    #output
+    return( (args$data - r + args$hyp[2]) - 
+              (args$data + args$hyp[1] + args$hyp[2])*(1-plogis(par[1])) )
+  }
+  
+}
+```
+
+To run the algorithm, use the `xdnuts` function. For instance, if you want to run 4 chains, you need to provide a list of 4 initial vectors as the first argument.
+```{r, warning=FALSE, message=FALSE, eval = TRUE}
+#MCMC
+set.seed(1)
+chains <- xdnuts(theta0 = lapply(1:4,function(x) c(omega = rnorm(1),r_hat = rnorm(1))),
+                 nlp = nlp,
+                 args = arglist,
+                 k = 1,
+                 thin = 1,
+                 parallel = FALSE,
+                 method = "NUTS",
+                 hide = TRUE)
+```
+
+After sampling, you can examine the model output with the `print` function.
+```{r}
+chains
+```
+
+This will provide information about the algorithm used and some diagnostic metrics.
+Next, you can examine the results using the `plot` function:
+
+```{r, out.width='70%', out.height='70%', eval = TRUE, dpi = 300}
+plot(chains)
+```
+
+By default, it displays the trace plots for each marginal chain, which is useful for checking if the chains are mixing well. To view the marginal and bivariate densities, specify `type = 2`.
+
+```{r, out.width='70%', out.height='70%', eval = TRUE, dpi = 300}
+plot(chains, type = 2, gg = FALSE)
+```
+
+Examining the marginal densities can help diagnose poor convergence of the chains, though this does not seem to be an issue here.
+
+\
+Another useful plot can be generated with the `type = 3` argument. This option overlays the energy level Markov chains. While it is less sensitive to convergence issues, it provides a summary of the global Markov process in a single chain, making it especially valuable for large models.
+
+```{r, out.width='70%', out.height='70%', eval = TRUE, dpi = 300}
+plot(chains, type = 3)
+```
+
+\
+With `type = 4`, a stick plot of the trajectory lengths is displayed, with data from different chains overlaid. This plot serves as a good proxy for the computational cost of the procedure, as each step requires evaluating both the negative logarithmic posterior and its gradient multiple times.
+
+```{r, out.width='70%', out.height='70%', eval = TRUE, dpi = 300}
+plot(chains, type = 4)
+```
+
+\
+With `type = 5`, the histogram of the marginal energy levels (in gray) is overlaid with the histogram of the corresponding proposal values (in red).
+
+```{r, out.width='70%', out.height='70%', eval = TRUE, dpi = 300}
+plot(chains, type = 5)
+```
+
+
+As with the classic Metropolis scheme, when the proposal distribution matches the target distribution well, there is effective exploration of the parameter space where the probability mass is highest. A poor match would indicate a suboptimal choice of the transition kernel, which in this case is determined solely by the choice of the momenta distribution. This would be reflected in a more leptokurtic red histogram compared to the gray histogram. For more details on this topic, see @betancourt2016diagnosing.
+
+\
+With `type = 6`, the function plots the autocorrelation function for each chain and parameter. This is an effective way to diagnose slow exploration of the posterior distribution.
+
+```{r, out.width='70%', out.height='70%', eval = TRUE, dpi = 300}
+plot(chains, type = 6)
+```
+
+\
+With `type = 7`, the function plots the empirical Metropolis acceptance rate and the refraction rate of the discontinuous component for each chain. This plot helps diagnose suboptimal adaptation of the step-size.
+
+```{r, out.width='70%', out.height='70%', eval = TRUE, dpi = 300}
+plot(chains, type = 7)
+```
+
+
+\
+Last but not least, we can summarize the chain’s output using the summary function.
+```{r, warning=FALSE, message=FALSE, out.width='70%',out.height='70%', eval = TRUE}
+summary(chains)
+```
+
+Quantities of interest for each marginal distribution are returned, with the last two columns referring to the Potential Scale Reduction Factor statistic from @gelman1992inference. Values greater than 1.1 indicate non-convergence of the chains. Below the table, the multivariate version of this test is printed to the console, along with the Bayesian Fraction of Missing Information from @betancourt2016diagnosing. If the latter is less than 0.2, it suggests slow exploration of the energy distribution. The latter is calculated by aggregating the energy from all chains. To see the value specific to each chain, use the `print` function, as showed above. 
+
+## Example with only discontinuous components
+
+It is possible to reuse the same models adopted previously while treating the first parameters as inducing a discontinuity as well. In this case, you should set `k=2` in the `xdnuts` function. For teaching purposes, this time the algorithm with the exhaustion termination criterion from @betancourt2016identifying will be used, specified by setting `method = "XHMC"`. In this scenario, you must specify a threshold value for this method. A reasonable but sub-optimal value for this threshold seems to be `tau = 0.01`.
+
+```{r, eval = TRUE, dpi = 300}
+#MCMC
+set.seed(1)
+chains <- xdnuts(theta0 = lapply(1:4,function(x) rnorm(2)),
+                 nlp = nlp,
+                 args = arglist,
+                 k = 2,
+                 thin = 1,
+                 parallel = FALSE,
+                 method = "XHMC",
+                 hide = TRUE,
+                 tau = 0.01)
+```
+
+This time, we transform the chains back to their original parameterization using the function `xdtransform`
+
+```{r, eval = TRUE}
+#define the function to be applied to each sample
+f <- function(x,XX) {
+  c(
+    plogis(x[1]), #inverse logistic for the probability
+    ceiling(1 + XX*plogis(x[2])) - 1 #number of trials
+  )
+}
+original_chains <- xdtransform(X = chains, which = NULL,
+                               FUN = f,XX = arglist$data,
+                               new.names = c("p","r"))
+```
+
+
+To avoid repetitions, not all plots are displayed.
+
+```{r, out.width='70%', out.height='70%', eval = TRUE, dpi = 300}
+plot(original_chains, type = 2, gg = FALSE)
+```
+
+The densities for each chain behave more appropriately, primarily due to reduced autocorrelation.
+
+```{r, out.width='70%', out.height='70%', eval = TRUE, dpi = 300}
+plot(original_chains, type = 4)
+```
+
+The improved performance observed earlier comes at the cost of an increased number of density evaluations.
+
+```{r, out.width='70%', out.height='70%', eval = TRUE, dpi = 300}
+plot(original_chains, type = 6)
+```
+
+As indicated by the first graph, the autocorrelations have significantly decreased, leading to faster convergence of the estimates.
+
+```{r, out.width='70%', out.height='70%', eval = TRUE, dpi = 300}
+summary(original_chains)
+```
+
+It is noteworthy that the Effective Sample Size (@geyer2011introduction) has increased.
+
+## Example with only continuous components
+
+For this example, we can use a Gaussian hierarchical model applied to the blood viscosity dataset, which is available in the package:
+```{r, eval = TRUE}
+data(viscosity)
+viscosity
+
+#create the list function
+arglist <- list(data =  as.matrix(viscosity[,-1]),
+                hyp = c(0, #mean a priori for mu
+                        1000, #variance a priori for mu
+                        0.5,1,0.5,1 #inverse gamma iperparameters
+                        )
+                )
+```
+
+This dataset contains 7 blood viscosity measurements for each of 6 different subjects. The model considered is as follows:
+
+\begin{align*}
+y_{ij} &\sim N(a_j,\sigma^2) \quad, i = 1,\dotsc,I\,,j = 1,\dotsc, J \notag \\
+a_j &\sim N(\mu,\sigma_a^2) \notag \\
+\mu &\sim N(m_0,s_0^2) \notag \\
+\sigma^2 &\sim InvGamma(a_0,b_0) \notag \\
+\sigma_a^2 &\sim InvGamma(a_1,b_1) \notag
+\end{align*}
+
+with $I = 7$, $J = 6$ and $n = I\times J$.
+
+The variance parameters are transformed using a logarithmic scale to facilitate the algorithm's exploration of the parameter space: $\omega = \log\sigma^2$ and $\omega_a = \log\sigma^2_a$. In this case, only the final results are presented, as the intermediate calculations are not necessary.
+
+\begin{align*}
+-\log\pi(\theta|y) \propto &\quad\omega(n + a_0) + 0.5e^{-\omega}\left[2b_0 + \sum_{i,j} (y_{i,j} - a_j)^2 \right] \notag \\
+&+ \omega_a(J + a_1) + 0.5e^{-\omega_a}\left[2b_1 + \sum_{j=1}^J(a_j - \mu)^2\right] + \frac{\mu^2 - 2\mu m_0}{2s_0^2} \notag
+\end{align*}
+
+\begin{align*}
+\frac{\partial-\log\pi(\theta|y)}{\partial \mu} &= \frac{\mu - m_0}{s_0^2} - e^{-\omega_a}\displaystyle\sum_{j=1}^J (a_j - \mu)^2 \notag \\
+\frac{\partial-\log\pi(\theta|y)}{\partial \omega} &= (n+a_0) - 0.5e^{-\omega}\left[2b_0 + \sum_{i,j} (y_{i,j} - a_j)^2\right] \notag \\
+\frac{\partial-\log\pi(\theta|y)}{\partial \omega_a} &= (J+a_1) - 0.5e^{-\omega_a}\left[ 2b_1 + \displaystyle\sum_{j=1}^J (a_j - \mu)^2 \right]
+\end{align*}
+
+These computations are summarized in the following R function:
+```{r, eval = TRUE}
+nlp <- function(par,args,eval_nlp = TRUE){
+    
+    if(eval_nlp){
+      #only the negative log posterior
+
+      #overflow
+      if(any(abs(par[2:3]) > 30)) return(Inf)
+      
+      return(par[2] * ( prod(dim(args$data)) + args$hyp[3] ) + 
+               (sum( (args$data - par[-(1:3)])^2 ) + 
+                  2*args$hyp[4])*exp(-par[2])/2 +
+               par[3] * (length(par[-(1:3)]) + 
+                           args$hyp[5]) +  
+               (sum( (par[-(1:3)] - par[1])^2 ) + 
+                  2+args$hyp[6])*exp(-par[3])/2 +
+               (par[1] - args$hyp[1])^2/2/args$hyp[2])
+      
+    }else{
+      #only the gradient
+      
+      #overflow
+      if(any(abs(par[2:3]) > 30)) return(rep(Inf,9))
+      
+      c(
+        -sum( par[-(1:3)] - par[1] )*exp(-par[3]) + (
+          par[1] - args$hyp[1])/args$hyp[2], #mu derivative
+        
+        prod(dim(args$data)) + args$hyp[3] - 
+          (sum( (args$data - par[-(1:3)])^2 ) +
+             2*args$hyp[4])*exp(-par[2])/2, #omega derivative
+        
+        length(par[-(1:3)]) + args$hyp[5] - 
+          (sum( (par[-(1:3)] - par[1])^2 ) + 
+             2+args$hyp[6])*exp(-par[3])/2, #omega_a derivative
+        
+        -apply(args$data - par[-(1:3)],1,sum)*exp(-par[2]) + 
+          (par[-(1:3)] - par[1])*exp(-par[3]) #random effects gradient
+      )
+      
+    }
+  
+}
+```
+
+The derivation of the gradient is recommended for computational efficiency; however, it is always possible to calculate it numerically using methods like the `numDeriv::grad` function.
+
+Since this is the only algorithm not yet explored, we will use the standard Hamiltonian Monte Carlo with a fixed trajectory length `L`.  In practice, the trajectory length `L` is sampled uniformly from the interval [`max(1,L - L_jitter)`,`L + L_jitter`]. By default, `L_jitter` is set to 1, while `L`  must be specified by the user. A sub-optimal but reasonable value for `L` is `31`.
+
+The current model is notably difficult to explore due to the centered parameterization (@gelfand1995efficient), so it seems reasonable to extend the warm-up phase to `1e3` for each chain. To determine if the default value of `burn_adapt_ratio` is reasonable, we save the warm-up samples and then inspect them.
+
+```{r, eval = TRUE}
+#MCMC
+set.seed(1)
+chains <- xdnuts(theta0 = lapply(1:4,function(x) {
+                      out <- rnorm(3 + 6)
+                      names(out) <- c("mu","log_s2","log_s2_a",
+                                      paste0("mu",1:6))
+                      out}),
+                 nlp = nlp,
+                 args = arglist,
+                 k = 0, #no discontinuous components
+                 thin = 1,
+                 parallel = FALSE,
+                 method = "HMC",
+                 hide = TRUE,
+                 L = 31,
+                 control = set_parameters(L_jitter = 5,
+                                          N_adapt = 1e3,
+                                          keep_warm_up = TRUE))
+```
+
+```{r, out.width='70%', out.height='70%', eval = TRUE, dpi = 300}
+plot(chains,warm_up = TRUE)
+```
+
+As we can see, for the warm up phase, the default burn-in of $10%$ seems reasonable.
+
+We can transform the variance components back from their logarithmic parameterization using the `xdtransform` function. This time, only these components should be selected.
+```{r, eval = TRUE}
+original_chains <- xdtransform(X = chains,which = 2:3,
+                               FUN = exp,new.names = c("s2","s2_a"))
+```
+
+Since the parameter dimension is relatively high, we can examine the chain of energy level sets for a mixing diagnostic.
+
+```{r, out.width='70%', out.height='70%', eval = TRUE, dpi = 300}
+plot(original_chains, type = 3)
+```
+
+Although in a Bayesian context the only difference concerns the informativeness of the priors, we can plot the density plots of the *fixed* and *random* parameters separately.
+
+```{r, out.width='70%', out.height='70%', eval = TRUE, dpi = 300}
+plot(original_chains, type = 2, which = 1:3, gg = FALSE, scale = 0.5)#fixed
+```
+
+```{r, out.width='70%', out.height='70%', eval = TRUE, dpi = 300}
+plot(original_chains, type = 2, which = 4:9, gg = FALSE, scale = 0.5)#random
+```
+
+Next, it is useful to check the autocorrelation plots for each chain:
+
+```{r, out.width='70%', out.height='70%', eval = TRUE, dpi = 300}
+plot(original_chains, type = 6)
+```
+
+As expected from theory, the centered parameterization of the model makes exploring the random effects variance components challenging, which is reflected in the strong autocorrelation of their chains.
+\
+Finally, the summary function:
+```{r, out.width='70%', out.height='70%', eval = TRUE}
+summary(original_chains, q.val = c(0.05,0.5,0.95))
+```
+
+By using the `xdextract` function, you can rearrange the chains into a more convenient format, such as an array or a matrix. This is useful for computing posterior quantities, including model predictions.
+
+```{r, out.width='70%', out.height='70%', eval = TRUE, dpi = 300}
+#extract samples into matrix
+theta <- xdextract(original_chains,collapse = TRUE)
+
+#compute prediction
+y_hat <- sapply(1:6, function(i){
+  rnorm(NROW(theta),theta[,3+i],sqrt(theta[,2]))
+})
+
+#plot prediction
+op <- par(no.readonly = TRUE)
+par(mar=c(5.1, 4.1, 2.1, 4.1), xpd=TRUE)
+plot(NULL, xlim = c(1,6), ylim = c(15,85), xlab = "Subject",
+     ylab =  "Viscosity", bty = "L")
+for(i in 1:6){
+  #data
+  points(rep(i,7),viscosity[i,-1], pch = 16)
+  
+  #data 95% credible intervals for the prediction
+  lines(rep(i,2),quantile(y_hat[,i],c(0.025,0.975)), col = 3, lwd = 3)
+  
+  #random effects 95% credible intervals
+  lines(rep(i,2),quantile(theta[,3+i],c(0.025,0.975)), col = 4, lwd = 4)
+}
+legend("topright",inset=c(-0.2,-0.2), lty = 1, lwd = 2, col = c(3,4),
+       title = "95% Credible Intervals",
+       legend = c("prediction","random effects"),
+       bty = "n", bg = "transparent", cex = 0.8)
+par(op)
+```
+
+The investigation of the first subject, which appears to be an outlier, is beyond the scope of this analysis. However, the hierarchical model's property of borrowing strength across subjects seems to be effective.
+
+## Bibliography

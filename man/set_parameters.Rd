@@ -94,12 +94,12 @@ components Mass Matrix. Default value is \code{FALSE}.}
 
 \item{mu}{a numeric scalar containing the value to which the step size is shrunken during the warm-up phase.}
 
-\item{M_cont}{a vector of length-\eqn{d} if \code{M_type = "diagonal"} or a \eqn{d \times d} matrix
+\item{M_cont}{a vector of length-\eqn{d-k} if \code{M_type = "diagonal"} or a \eqn{(d-k) \times (d-k)} matrix
 if \code{M_type = "dense"} containing an initial estimate for the Mass Matrix
 (the inverse of the parameters covariance matrix).
 If you want to keep it fixed, they should specify \code{N_adapt = 0}.}
 
-\item{M_disc}{a vector of length-\eqn{d} if \code{M_type = "diagonal"} or 
+\item{M_disc}{a vector of length-\eqn{k} if \code{M_type = "diagonal"} or 
 \code{M_type = "dense"} containing an initial estimate for the Mass Matrix
 (the inverse of the parameters covariances).
 If one wants to keep it fixed, they should specify \code{N_adapt = 0}.}

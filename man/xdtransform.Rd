@@ -4,13 +4,21 @@
 \alias{xdtransform}
 \title{Function to apply a transformation to the samples from the output of an XDNUTS model.}
 \usage{
-xdtransform(X, which = NULL, FUN = NULL, ..., new.names = NULL)
+xdtransform(
+  X,
+  which = NULL,
+  FUN = NULL,
+  ...,
+  new.names = NULL,
+  thin = NULL,
+  burn = NULL
+)
 }
 \arguments{
 \item{X}{an object of class \code{XDNUTS}.}
 
 \item{which}{a vector of indices indicating which parameter the transformation should be applied to.
-If \code{NULL}, the function is applied to all current iterations of the chain.}
+If \code{NULL}, the function is applied to all of them.}
 
 \item{FUN}{a function object which takes one or more components of an MCMC iteration and any other possible arguments.}
 
@@ -18,6 +26,10 @@ If \code{NULL}, the function is applied to all current iterations of the chain.}
 
 \item{new.names}{a character vector containing the parameter names in the new parameterization.
 If only one value is provided, but the transformation involves more, the name is iterated with an increasing index.}
+
+\item{thin}{an integer value indicating how many samples should be discarded before returning an iteration of the chain.}
+
+\item{burn}{an integer value indicating how many initial samples for each chain to discard.}
 }
 \value{
 an object of class \code{XDNUTS} with the specified transformation applied to each chain.

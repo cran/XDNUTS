@@ -17,6 +17,8 @@ xdnuts(
   thin = 1,
   control = set_parameters(),
   parallel = FALSE,
+  loadLibraries = NULL,
+  loadRObject = NULL,
   verbose = FALSE,
   hide = FALSE
 )
@@ -63,6 +65,12 @@ in particular the one described in \insertCite{betancourt2017conceptual}{XDNUTS}
 \item{control}{an object of class \code{control_xdnuts}, output of the function \link{set_parameters}.}
 
 \item{parallel}{a boolean value specifying whether the chains must be run in parallel. Default value is \code{FALSE}.}
+
+\item{loadLibraries}{A character vector indicating the names of the packages to load on each cluster if
+\code{parallel} is set to \code{TRUE}.}
+
+\item{loadRObject}{A character vector indicating the names of the R objects to load on each cluster if
+\code{parallel} is set to \code{TRUE}.}
 
 \item{verbose}{a boolean value for printing all the information regarding the sampling process.}
 

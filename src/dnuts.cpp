@@ -68,11 +68,11 @@ using namespace std;
 //'  algorithm is exploited and the difference between these is obtained through the updating of the discontinuous
 //'  components Mass Matrix. Default value is \code{FALSE}.
 //' @param mu a numeric scalar containing the value to which the step size is shrunken during the warm-up phase.
-//' @param M_cont a vector of length-\eqn{d} if \code{M_type = "diagonal"} or a \eqn{d \times d} matrix
+//' @param M_cont a vector of length-\eqn{d-k} if \code{M_type = "diagonal"} or a \eqn{(d-k) \times (d-k)} matrix
 //' if \code{M_type = "dense"} containing an initial estimate for the Mass Matrix
 //' (the inverse of the parameters covariance matrix).
 //' If you want to keep it fixed, they should specify \code{N_adapt = 0}.
-//' @param M_disc a vector of length-\eqn{d} if \code{M_type = "diagonal"} or 
+//' @param M_disc a vector of length-\eqn{k} if \code{M_type = "diagonal"} or 
 //' \code{M_type = "dense"} containing an initial estimate for the Mass Matrix
 //' (the inverse of the parameters covariances).
 //' If one wants to keep it fixed, they should specify \code{N_adapt = 0}.
@@ -107,6 +107,9 @@ Rcpp::List set_parameters(const unsigned int N_init1 = 50,
     delta_val = arma::vec({0.8,0.6});
   }else{
     Rcpp::NumericVector tmp(delta);
+    if(tmp.length() != 2){
+      Rcpp::stop("'delta' must be a vector of length two!");
+    }
     delta_val = arma::vec(tmp.begin(),tmp.size(),false);
   }
   
@@ -130,7 +133,7 @@ Rcpp::List set_parameters(const unsigned int N_init1 = 50,
   if(std::isnan(delta_val(1)) && different_stepsize ){
     Rcpp::stop(" The second element of 'delta' can't be NA if 'different_stepsize' is set to TRUE!");
   }
-  
+
   if(M_type != "identity" && M_type != "diagonal" && M_type != "dense"){
     Rcpp::stop("'M_type' must be a character scalar with possible value in \"identity\", \"diagonal\" or \"dense\"");
   }
@@ -175,8 +178,8 @@ Rcpp::List set_parameters(const unsigned int N_init1 = 50,
   //return the list
   return control;
 }
-
  
+
 // FUNCTION THAT COMPUTE A SINGLE MARKOV CHAIN
 //' Function to generate a Markov chain for both continuous and discontinuous posterior distributions.
 //' @description The function allows to generate a single Markov Chain for sampling from both continuous and discontinuous
@@ -231,17 +234,17 @@ Rcpp::List set_parameters(const unsigned int N_init1 = 50,
 //' @export main_function
 // [[Rcpp::export]]
 Rcpp::List main_function(const arma::vec& theta0,
-                 const Rcpp::Function& nlp,
-                 const Rcpp::List& args,
-                 const unsigned int k,
-                 const unsigned int N,
-                 unsigned int K,
-                 double tau,
-                 unsigned int L,
-                 int thin,
-                 const unsigned int& chain_id,
-                 const bool verbose,
-                 const Rcpp::List& control){
+                         const Rcpp::Function& nlp,
+                         const Rcpp::List& args,
+                         const unsigned int k,
+                         const unsigned int N,
+                         unsigned int K,
+                         double tau,
+                         unsigned int L,
+                         int thin,
+                         const unsigned int& chain_id,
+                         const bool verbose,
+                         const Rcpp::List& control){
   
   //get parameter dimension
   unsigned int d = theta0.size();
@@ -330,8 +333,8 @@ Rcpp::List main_function(const arma::vec& theta0,
     //if XHMC
     log_tau = std::log(tau);
   }else{
-    //if NUTS/HMC set it to zero
-    log_tau = 0;
+    //if NUTS/HMC set it to one thousend
+    log_tau = 1000;
   }
   
   //get console update frequency
@@ -400,7 +403,7 @@ Rcpp::List main_function(const arma::vec& theta0,
   }else{
     K_adapt = K;
   }
-    
+  
   //initialize warm-up samples matrix
   arma::mat warm_up(N_adapt*K_adapt,d);
   
@@ -430,40 +433,41 @@ Rcpp::List main_function(const arma::vec& theta0,
     
     //mcmc
     mcmc_wrapper(warm_up,
-               step_size_warm,
-               step_length,
-               energy,
-               delta_energy,
-               alpha,
-               max_treedepth,
-               refresh,
-               theta,
-               nlp,
-               args,
-               N_adapt,
-               bar,
-               d,
-               k,
-               idx_disc,
-               M_cont_diag,
-               M_disc,
-               M_inv_cont_diag,
-               M_inv_disc,
-               M_cont_dense,
-               M_inv_cont_dense,
-               K_adapt,
-               M_type,
-               true,
-               chain_id,
-               thin,
-               log_tau,
-               L,
-               L_jitter);
+                 step_size_warm,
+                 step_length,
+                 energy,
+                 delta_energy,
+                 alpha,
+                 max_treedepth,
+                 refresh,
+                 theta,
+                 nlp,
+                 args,
+                 N_adapt,
+                 bar,
+                 d,
+                 k,
+                 idx_disc,
+                 M_cont_diag,
+                 M_disc,
+                 M_inv_cont_diag,
+                 M_inv_disc,
+                 M_cont_dense,
+                 M_inv_cont_dense,
+                 K_adapt,
+                 M_type,
+                 true,
+                 chain_id,
+                 thin,
+                 log_tau,
+                 L,
+                 L_jitter);
     
   }
   
   //second step size calibration
-  if(Rcpp::as<std::string>(control["M_type"]) != "identity" && N_init2 > 0 && N_adapt > 0){
+  //if(Rcpp::as<std::string>(control["M_type"]) != "identity" && N_init2 > 0 && N_adapt > 0){
+  if(N_init2 > 0){
     Rcpp::Rcout << "Chain " << chain_id << ", Step size second calibration..." << std::endl;
     
     //adaptive procedure

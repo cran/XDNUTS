@@ -82,9 +82,10 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              k,
                              idx_disc);
       
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
-      
+      if(!sub_tree2(6*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      }
     }else{
       
       //double the tree on the left
@@ -98,8 +99,10 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              k,
                              idx_disc);
       
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      if(!sub_tree2(6*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      }
     }
     
     //if we haven't encountered any disagreements, update the proposed value
@@ -114,13 +117,13 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       
       //and update the cumulative sum of the kinetic energy gradients
       sub_tree.subvec(5*d,6*d-1) += sub_tree2.subvec(5*d,6*d-1);
+      
+      //check the U-TURN or divergence condition with the second tree
+      sub_tree(6*d+1) += check_u_turn(sub_tree,d,k);
     }
     
     //accumulate the rest: metropolis acceptance rates and number of leaves
     sub_tree.subvec(6*d+1,6*d+3+k) += sub_tree2.subvec(6*d+1,6*d+3+k);
-    
-    //check the U-TURN or divergence condition with the second tree
-    sub_tree(6*d+1) += check_u_turn(sub_tree,d,k);
     
     //increase the depth of the tree
     depth++;
@@ -207,8 +210,10 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              M_inv_cont,
                              M_inv_disc);
       
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      if(!sub_tree2(6*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      }
       
     }else{
       
@@ -225,8 +230,11 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              M_inv_cont,
                              M_inv_disc);
       
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      if(!sub_tree2(6*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      }
+      
     }
     
     //if we haven't encountered any disagreements, update the proposed value
@@ -241,13 +249,13 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       
       //and update the cumulative sum of the kinetic energy gradients
       sub_tree.subvec(5*d,6*d-1) += sub_tree2.subvec(5*d,6*d-1);
+      
+      //check the U-TURN or divergence condition with the second tree
+      sub_tree(6*d+1) += check_u_turn(sub_tree,d,k,M_inv_cont,M_inv_disc);
     }
     
     //accumulate the rest: metropolis acceptance rates and number of leaves
     sub_tree.subvec(6*d+1,6*d+3+k) += sub_tree2.subvec(6*d+1,6*d+3+k);
-    
-    //check the U-TURN or divergence condition with the second tree
-    sub_tree(6*d+1) += check_u_turn(sub_tree,d,k,M_inv_cont,M_inv_disc);
     
     //increase the depth of the tree
     depth++;
@@ -334,8 +342,10 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              M_inv_cont,
                              M_inv_disc);
       
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      if(!sub_tree2(6*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      }
       
     }else{
       
@@ -352,8 +362,11 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              M_inv_cont,
                              M_inv_disc);
       
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      if(!sub_tree2(6*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      }
+      
     }
     
     //if we haven't encountered any disagreements, update the proposed value
@@ -368,13 +381,13 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       
       //and update the cumulative sum of the kinetic energy gradients
       sub_tree.subvec(5*d,6*d-1) += sub_tree2.subvec(5*d,6*d-1);
+      
+      //check the U-TURN or divergence condition with the second tree
+      sub_tree(6*d+1) += check_u_turn(sub_tree,d,k,M_inv_cont,M_inv_disc);
     }
     
     //accumulate the rest: metropolis acceptance rates and number of leaves
     sub_tree.subvec(6*d+1,6*d+3+k) += sub_tree2.subvec(6*d+1,6*d+3+k);
-    
-    //check the U-TURN or divergence condition with the second tree
-    sub_tree(6*d+1) += check_u_turn(sub_tree,d,k,M_inv_cont,M_inv_disc);
     
     //increase the depth of the tree
     depth++;
@@ -465,8 +478,10 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              idx_disc,
                              K);
       
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      if(!sub_tree2((5+K)*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      }
       
     }else{
       
@@ -482,8 +497,11 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              idx_disc,
                              K);
       
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      if(!sub_tree2((5+K)*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      }
+      
     }
     
     //if we haven't encountered any disagreements, update the proposed value
@@ -492,17 +510,20 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       //biased sampling for the proposed value
       alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
       
+      //sample from the trajectory
       if(arma::randu() < alpha){
-        sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
+        sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
       }
+      
+      //uniform for the others
       
       //cumulate the log multinomial weights
       sub_tree((5+K)*d) = arma::log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
       
-      //recalculate the probability for uniform sampling
+      //recalculate alpha
       alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
       
-      //uniform sampling
+      //sample from the trajectory
       for(unsigned int i = 1; i < K; i++){
         if(arma::randu() < alpha){
           sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
@@ -511,13 +532,13 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       
       //and update the cumulative sum of the kinetic energy gradients
       sub_tree.subvec((4+K)*d,(5+K)*d-1) += sub_tree2.subvec((4+K)*d,(5+K)*d-1);
+      
+      //check the U-TURN or divergence condition with the second tree
+      sub_tree((5+K)*d+1) += check_u_turn_rec(sub_tree,d,k,K);
     }
     
     //cumulates metropolis acceptance rates and number of leaves
     sub_tree.subvec((5+K)*d+1,(5+K)*d+3+k) += sub_tree2.subvec((5+K)*d+1,(5+K)*d+3+k);
-    
-    //check the U-TURN or divergence condition with the second tree
-    sub_tree((5+K)*d+1) += check_u_turn_rec(sub_tree,d,k,K);
     
     //increase the depth of the tree
     depth++;
@@ -611,8 +632,10 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              M_inv_disc,
                              K);
 
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      if(!sub_tree2((5+K)*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      }
       
     }else{
       
@@ -629,9 +652,12 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              M_inv_cont,
                              M_inv_disc,
                              K);
- 
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      
+      if(!sub_tree2((5+K)*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      }
+      
     }
     
     //if we haven't encountered any disagreements, update the proposed value
@@ -640,32 +666,36 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       //biased sampling for the proposed value
       alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
       
+      //sample from the trajectory
       if(arma::randu() < alpha){
-        sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
+        sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
       }
+      
+      //uniform for the others
       
       //cumulate the log multinomial weights
       sub_tree((5+K)*d) = arma::log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
       
-      //recalculate the probability for uniform sampling
+      //recalculate alpha
       alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
       
-      //uniform sampling
+      //sample from the trajectory
       for(unsigned int i = 1; i < K; i++){
         if(arma::randu() < alpha){
           sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
         }
       }
-      
+
       //and update the cumulative sum of the kinetic energy gradients
       sub_tree.subvec((4+K)*d,(5+K)*d-1) += sub_tree2.subvec((4+K)*d,(5+K)*d-1);
+      
+      //check the U-TURN or divergence condition with the second tree
+      sub_tree((5+K)*d+1) += check_u_turn_rec(sub_tree,d,k,M_inv_cont,M_inv_disc,K);
+      
     }
     
     //cumulates metropolis acceptance rates and number of leaves
     sub_tree.subvec((5+K)*d+1,(5+K)*d+3+k) += sub_tree2.subvec((5+K)*d+1,(5+K)*d+3+k);
-    
-    //check the U-TURN or divergence condition with the second tree
-    sub_tree((5+K)*d+1) += check_u_turn_rec(sub_tree,d,k,M_inv_cont,M_inv_disc,K);
     
     //increase the depth of the tree
     depth++;
@@ -760,8 +790,10 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              M_inv_disc,
                              K);
       
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      if(!sub_tree2((5+K)*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      }
       
     }else{
       
@@ -779,8 +811,11 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              M_inv_disc,
                              K);
       
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      if(!sub_tree2((5+K)*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      }
+      
     }
 
     //if we haven't encountered any disagreements, update the proposed value
@@ -789,17 +824,20 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       //biased sampling for the proposed value
       alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
       
+      //sample from the trajectory
       if(arma::randu() < alpha){
-        sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
+        sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
       }
+      
+      //uniform for the others
       
       //cumulate the log multinomial weights
       sub_tree((5+K)*d) = arma::log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
       
-      //recalculate the probability for uniform sampling
+      //recalculate alpha
       alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
       
-      //uniform sampling
+      //sample from the trajectory
       for(unsigned int i = 1; i < K; i++){
         if(arma::randu() < alpha){
           sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
@@ -808,13 +846,13 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       
       //and update the cumulative sum of the kinetic energy gradients
       sub_tree.subvec((4+K)*d,(5+K)*d-1) += sub_tree2.subvec((4+K)*d,(5+K)*d-1);
+      
+      //check the U-TURN or divergence condition with the second tree
+      sub_tree((5+K)*d+1) += check_u_turn_rec(sub_tree,d,k,M_inv_cont,M_inv_disc,K);
     }
     
     //cumulates metropolis acceptance rates and number of leaves
     sub_tree.subvec((5+K)*d+1,(5+K)*d+3+k) += sub_tree2.subvec((5+K)*d+1,(5+K)*d+3+k);
-    
-    //check the U-TURN or divergence condition with the second tree
-    sub_tree((5+K)*d+1) += check_u_turn_rec(sub_tree,d,k,M_inv_cont,M_inv_disc,K);
     
     //increase the depth of the tree
     depth++;
@@ -895,8 +933,10 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              H0,
                              d);
       
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      if(!sub_tree2(6*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      }
       
     }else{
       
@@ -909,14 +949,17 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              H0,
                              d);
 
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
-
+      if(!sub_tree2(6*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      }
+      
     }
     
     //if we haven't encountered any disagreements, update the proposed value
     //with probability proportional to the weights of the trees
     if(!sub_tree2(6*d+1)){
+      
       if(arma::randu() < std::exp(sub_tree2(6*d) - sub_tree(6*d))){
         sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
         
@@ -924,17 +967,17 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       
       //and update the logarithm of the weights for multinomial sampling from the trajectory
       sub_tree(6*d) = arma::log_add_exp(sub_tree(6*d),sub_tree2(6*d));
-
+      
       //and update the cumulative sum of the kinetic energy gradients
       sub_tree.subvec(5*d,6*d-1) += sub_tree2.subvec(5*d,6*d-1);
+      
+      //check the U-TURN or divergence condition with the second tree
+      sub_tree(6*d+1) += check_u_turn(sub_tree,d);
       
     }
     
     //accumulate the rest: metropolis acceptance rates and number of leaves
     sub_tree.subvec(6*d+1,6*d+3) += sub_tree2.subvec(6*d+1,6*d+3);
-    
-    //check the U-TURN or divergence condition with the second tree
-    sub_tree(6*d+1) += check_u_turn(sub_tree,d);
     
     //increase the depth of the tree
     depth++;
@@ -1013,8 +1056,10 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              d,
                              M_inv);
       
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      if(!sub_tree2(6*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      }
       
     }else{
       
@@ -1028,8 +1073,11 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              d,
                              M_inv);
       
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      if(!sub_tree2(6*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      }
+      
     }
     
     //if we haven't encountered any disagreements, update the proposed value
@@ -1044,14 +1092,14 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       
       //and update the cumulative sum of the kinetic energy gradients
       sub_tree.subvec(5*d,6*d-1) += sub_tree2.subvec(5*d,6*d-1);
+      
+      //check the U-TURN or divergence condition with the second tree
+      sub_tree(6*d+1) += check_u_turn(sub_tree,d,M_inv);
     }
     
     //accumulate the rest: metropolis acceptance rates and number of leaves
     sub_tree.subvec(6*d+1,6*d+3) += sub_tree2.subvec(6*d+1,6*d+3);
-    
-    //check the U-TURN or divergence condition with the second tree
-    sub_tree(6*d+1) += check_u_turn(sub_tree,d,M_inv);
-    
+
     //increase the depth of the tree
     depth++;
   }
@@ -1126,8 +1174,10 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              d,
                              M_inv);
       
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      if(!sub_tree2(6*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      }
       
     }else{
       
@@ -1141,8 +1191,11 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              d,
                              M_inv);
       
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      if(!sub_tree2(6*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      }
+      
     }
     
     //if we haven't encountered any disagreements, update the proposed value
@@ -1157,13 +1210,14 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       
       //and update the cumulative sum of the kinetic energy gradients
       sub_tree.subvec(5*d,6*d-1) += sub_tree2.subvec(5*d,6*d-1);
+      
+      //check the U-TURN or divergence condition with the second tree
+      sub_tree(6*d+1) += check_u_turn(sub_tree,d,M_inv);
+      
     }
     
     //cumula il resto:tassi di accettazione metropolis e numero di foglie
     sub_tree.subvec(6*d+1,6*d+3) += sub_tree2.subvec(6*d+1,6*d+3);
-    
-    //check the U-TURN or divergence condition with the second tree
-    sub_tree(6*d+1) += check_u_turn(sub_tree,d,M_inv);
     
     //increase the depth of the tree
     depth++;
@@ -1246,8 +1300,10 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              d,
                              K);
       
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      if(!sub_tree2((5+K)*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      }
       
     }else{
       
@@ -1261,8 +1317,11 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              d,
                              K);
       
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      if(!sub_tree2((5+K)*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      }
+      
     }
     
     //if we haven't encountered any disagreements, update the proposed value
@@ -1271,17 +1330,20 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       //biased sampling for the proposed value
       alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
       
+      //sample from the trajectory
       if(arma::randu() < alpha){
-        sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
+        sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
       }
+      
+      //uniform for the others
       
       //cumulate the log multinomial weights
       sub_tree((5+K)*d) = arma::log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
       
-      //recalculate the probability for uniform sampling
+      //recalculate alpha
       alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
       
-      //uniform sampling
+      //sample from the trajectory
       for(unsigned int i = 1; i < K; i++){
         if(arma::randu() < alpha){
           sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
@@ -1290,13 +1352,13 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       
       //and update the cumulative sum of the kinetic energy gradients
       sub_tree.subvec((4+K)*d,(5+K)*d-1) += sub_tree2.subvec((4+K)*d,(5+K)*d-1);
+      
+      //check the U-TURN or divergence condition with the second tree
+      sub_tree((5+K)*d+1) += check_u_turn_rec(sub_tree,d,K);
     }
     
     //cumulates metropolis acceptance rates and number of leaves
     sub_tree.subvec((5+K)*d+1,(5+K)*d+3) += sub_tree2.subvec((5+K)*d+1,(5+K)*d+3);
-    
-    //check the U-TURN or divergence condition with the second tree
-    sub_tree((5+K)*d+1) += check_u_turn_rec(sub_tree,d,K);
     
     //increase the depth of the tree
     depth++;
@@ -1378,8 +1440,10 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              M_inv,
                              K);
       
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      if(!sub_tree2((5+K)*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      }
       
     }else{
       
@@ -1394,8 +1458,11 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              M_inv,
                              K);
       
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      if(!sub_tree2((5+K)*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      }
+      
     }
     
     //if we haven't encountered any disagreements, update the proposed value
@@ -1404,17 +1471,20 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       //biased sampling for the proposed value
       alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
       
+      //sample from the trajectory
       if(arma::randu() < alpha){
-        sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
+        sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
       }
+      
+      //uniform for the others
       
       //cumulate the log multinomial weights
       sub_tree((5+K)*d) = arma::log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
       
-      //recalculate the probability for uniform sampling
+      //recalculate alpha
       alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
       
-      //uniform sampling
+      //sample from the trajectory
       for(unsigned int i = 1; i < K; i++){
         if(arma::randu() < alpha){
           sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
@@ -1423,13 +1493,13 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       
       //and update the cumulative sum of the kinetic energy gradients
       sub_tree.subvec((4+K)*d,(5+K)*d-1) += sub_tree2.subvec((4+K)*d,(5+K)*d-1);
+      
+      //check the U-TURN or divergence condition with the second tree
+      sub_tree((5+K)*d+1) += check_u_turn_rec(sub_tree,d,M_inv,K);
     }
     
     //cumulates metropolis acceptance rates and number of leaves
     sub_tree.subvec((5+K)*d+1,(5+K)*d+3) += sub_tree2.subvec((5+K)*d+1,(5+K)*d+3);
-    
-    //check the U-TURN or divergence condition with the second tree
-    sub_tree((5+K)*d+1) += check_u_turn_rec(sub_tree,d,M_inv,K);
     
     //increase the depth of the tree
     depth++;
@@ -1511,8 +1581,10 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              M_inv,
                              K);
       
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      if(!sub_tree2((5+K)*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      }
       
     }else{
       
@@ -1527,8 +1599,11 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              M_inv,
                              K);
       
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      if(!sub_tree2((5+K)*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      }
+      
     }
     
     //if we haven't encountered any disagreements, update the proposed value
@@ -1537,32 +1612,35 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       //biased sampling for the proposed value
       alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
       
+      //sample from the trajectory
       if(arma::randu() < alpha){
-        sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
+        sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
       }
+      
+      //uniform for the others
       
       //cumulate the log multinomial weights
       sub_tree((5+K)*d) = arma::log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
       
-      //recalculate the probability for uniform sampling
+      //recalculate alpha
       alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
       
-      //uniform sampling
+      //sample from the trajectory
       for(unsigned int i = 1; i < K; i++){
         if(arma::randu() < alpha){
           sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
         }
       }
-      
+
       //and update the cumulative sum of the kinetic energy gradients
       sub_tree.subvec((4+K)*d,(5+K)*d-1) += sub_tree2.subvec((4+K)*d,(5+K)*d-1);
+      
+      //check the U-TURN or divergence condition with the second tree
+      sub_tree((5+K)*d+1) += check_u_turn_rec(sub_tree,d,M_inv,K);
     }
     
     //cumulates metropolis acceptance rates and number of leaves
     sub_tree.subvec((5+K)*d+1,(5+K)*d+3) += sub_tree2.subvec((5+K)*d+1,(5+K)*d+3);
-    
-    //check the U-TURN or divergence condition with the second tree
-    sub_tree((5+K)*d+1) += check_u_turn_rec(sub_tree,d,M_inv,K);
     
     //increase the depth of the tree
     depth++;
@@ -1584,16 +1662,16 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
 
 // identity matrix case
 Rcpp::List nuts_singolo(const arma::vec& theta0,
-                        const arma::vec& m0,
-                        const Rcpp::Function& nlp,
-                        const Rcpp::List& args,
-                        const double& eps,
-                        const unsigned int& max_treedepth,
-                        const unsigned int& d,
-                        arma::uvec& idx_disc){
+                         const arma::vec& m0,
+                         const Rcpp::Function& nlp,
+                         const Rcpp::List& args,
+                         const double& eps,
+                         const unsigned int& max_treedepth,
+                         const unsigned int& d,
+                         arma::uvec& idx_disc){
   
   //initialize the final tree
-  arma::vec sub_tree = arma::zeros<arma::vec>(6*d+5);
+  arma::vec sub_tree = arma::zeros<arma::vec>(7*d+4);
   
   //initial position of the particle at the left end of the tree
   sub_tree.subvec(0,d-1) = theta0;
@@ -1607,17 +1685,17 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
   //initial position of the particle momentum at the right end of the tree
   sub_tree.subvec(3*d,4*d-1) = m0;
   
-  //trajectory direction
-  sub_tree(6*d+4) = 1;
+  //proposal value sampled from the tree
+  sub_tree.subvec(4*d,5*d-1) = theta0;
   
   //initialize the value of the potential energy both on the right and on the left
-  sub_tree(5*d) = sub_tree(5*d+2) = Rcpp::as<double>(nlp(theta0,args,true));
-
+  sub_tree(6*d) = sub_tree(6*d+2) = Rcpp::as<double>(nlp(theta0,args,true));
+  
   //we also compute the energy level
-  double H0 = sub_tree(5*d) + arma::sum(arma::abs(m0));
+  double H0 = sub_tree(6*d) + arma::sum(arma::abs(m0));
   
   //initialize the accumulation of gradients for kinetic energy
-  sub_tree.subvec(4*d,5*d-1) = arma::sign(sub_tree.subvec(d,2*d-1)); //laplace
+  sub_tree.subvec(5*d,6*d-1) = arma::sign(sub_tree.subvec(d,2*d-1)); //laplace
   
   //depth of the current tree
   unsigned int depth = 0;
@@ -1625,95 +1703,96 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
   //let's build the tree recursively
   
   //initialize the subtree which doubles the current one
-  arma::vec sub_tree2 = arma::zeros<arma::vec>(6*d+5);
+  arma::vec sub_tree2 = arma::zeros<arma::vec>(7*d+4);
   
   //until we met a stopping criterion, divergent transitions or
   //the maximum depth has been reached, continue to double the tree
-  while(!sub_tree(5*d + 1) && depth < max_treedepth){
+  while(!sub_tree(6*d + 1) && depth < max_treedepth){
     
     //should the doubling be done on the right or left?
     if(arma::randu() < 0.5){
       
       //double the tree on the right
       sub_tree2 = build_tree(sub_tree,
-                             nlp,
-                             args,
-                             eps,
-                             depth,
-                             d,
-                             idx_disc);
-
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+                              nlp,
+                              args,
+                              eps,
+                              depth,
+                              d,
+                              idx_disc);
       
-      //update the U value of the right end
-      sub_tree(5*d + 2) = sub_tree2(5*d + 2);
-
+      if(!sub_tree2(5*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+        
+        //update the U value of the right end
+        sub_tree(6*d + 2) = sub_tree2(6*d + 2);
+      }
+      
     }else{
       
       //double the tree on the left
       sub_tree2 = build_tree(sub_tree,
-                             nlp,
-                             args,
-                             -eps,
-                             depth,
-                             d,
-                             idx_disc);
+                              nlp,
+                              args,
+                              -eps,
+                              depth,
+                              d,
+                              idx_disc);
       
-     
+      if(!sub_tree2(6*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+        
+        //update the U value of the left endpoint
+        sub_tree(6*d) = sub_tree2(6*d);
+      }
       
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
-      
-      //update the U value of the left endpoint
-      sub_tree(5*d) = sub_tree2(5*d);
-
     }
     
-    //if haven't encountered any divergences, update the trajectory extreme value
-    if(!sub_tree2(5*d+1)){
-      sub_tree(6*d+4) = sub_tree2(6*d+4);
+    //if haven't encountered any divergences, update the trajectory proposed value
+    if(!sub_tree2(6*d+1)){
+      //if(arma::randu() < 0.5){
+        sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
+      //}
       
       //and update the cumulative sum of the kinetic energy gradients
-      sub_tree.subvec(4*d,5*d-1) += sub_tree2.subvec(4*d,5*d-1);
-
+      sub_tree.subvec(5*d,6*d-1) += sub_tree2.subvec(5*d,6*d-1);
+      
+      //check the U-TURN or divergence condition with the second tree
+      sub_tree(6*d+1) += check_u_turn2(sub_tree,d);
+      
     }
     
     //cumulate the reminder: metropolis rate and number of leaves
-    sub_tree(5*d+1) += sub_tree2(5*d+1);
-    sub_tree.subvec(5*d+3,6*d+3) += sub_tree2.subvec(5*d+3,6*d+3);
+    sub_tree(6*d+1) += sub_tree2(6*d+1);
+    sub_tree.subvec(6*d+3,7*d+3) += sub_tree2.subvec(6*d+3,7*d+3);
     
-    //check the U-TURN or divergence condition with the second tree
-    sub_tree(5*d+1) += check_u_turn2(sub_tree,d);
-
     //increase the depth of the tree
     depth++;
   }
   //return the proposed value, the average acceptance rate,
   //the length of the trajectory and the current energy level
   
-  //which trajectory extreme value must be returned?
-  unsigned int idx = (1 + segno(sub_tree(6*d+4))) * d;
-
-  return Rcpp::List::create(Rcpp::Named("theta") = sub_tree.subvec(idx,idx+d-1),
-                            Rcpp::Named("alpha") = sub_tree.subvec(5*d+3,6*d+2) / sub_tree(6*d+3),
-                            Rcpp::Named("n") = sub_tree(6*d+3),
+  return Rcpp::List::create(Rcpp::Named("theta") = sub_tree.subvec(4*d,5*d-1),
+                            Rcpp::Named("alpha") = sub_tree.subvec(6*d+3,7*d+2) / sub_tree(7*d+3),
+                            Rcpp::Named("n") = sub_tree(7*d+3),
                             Rcpp::Named("E") = H0);
 }
 
 // diagonal matrix case
 Rcpp::List nuts_singolo(const arma::vec& theta0,
-                        const arma::vec& m0,
-                        const Rcpp::Function& nlp,
-                        const Rcpp::List& args,
-                        const double& eps,
-                        const unsigned int& max_treedepth,
-                        const unsigned int& d,
-                        arma::uvec& idx_disc,
-                        const arma::vec& M_inv){
+                         const arma::vec& m0,
+                         const Rcpp::Function& nlp,
+                         const Rcpp::List& args,
+                         const double& eps,
+                         const unsigned int& max_treedepth,
+                         const unsigned int& d,
+                         arma::uvec& idx_disc,
+                         const arma::vec& M_inv){
   
   //initialize the final tree
-  arma::vec sub_tree = arma::zeros<arma::vec>(6*d+5);
+  arma::vec sub_tree = arma::zeros<arma::vec>(7*d+4);
   
   //initial position of the particle at the left end of the tree
   sub_tree.subvec(0,d-1) = theta0;
@@ -1727,17 +1806,17 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
   //initial position of the particle momentum at the right end of the tree
   sub_tree.subvec(3*d,4*d-1) = m0;
   
-  //trajectory direction
-  sub_tree(6*d+4) = 1;
+  //proposal value sampled from the tree
+  sub_tree.subvec(4*d,5*d-1) = theta0;
   
   //initialize the value of the potential energy both on the right and on the left
-  sub_tree(5*d) = sub_tree(5*d+2) = Rcpp::as<double>(nlp(theta0,args,true));
+  sub_tree(6*d) = sub_tree(6*d+2) = Rcpp::as<double>(nlp(theta0,args,true));
   
   //we also compute the energy level
-  double H0 = sub_tree(5*d) + arma::sum(M_inv % arma::abs(m0));
+  double H0 = sub_tree(6*d) + arma::sum(M_inv % arma::abs(m0));
   
   //initialize the accumulation of gradients for kinetic energy
-  sub_tree.subvec(4*d,5*d-1) = arma::sign(sub_tree.subvec(d,2*d-1)); //laplace
+  sub_tree.subvec(5*d,6*d-1) = arma::sign(sub_tree.subvec(d,2*d-1)); //laplace
   
   //depth of the current tree
   unsigned int depth = 0;
@@ -1745,64 +1824,72 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
   //let's build the tree recursively
   
   //initialize the subtree which doubles the current one
-  arma::vec sub_tree2 = arma::zeros<arma::vec>(6*d+5);
+  arma::vec sub_tree2 = arma::zeros<arma::vec>(7*d+4);
   
   //until we met a stopping criterion, divergent transitions or
   //the maximum depth has been reached, continue to double the tree
-  while(!sub_tree(5*d + 1) && depth < max_treedepth){
+  while(!sub_tree(6*d + 1) && depth < max_treedepth){
     
     //should the doubling be done on the right or left?
     if(arma::randu() < 0.5){
       
       //double the tree on the right
       sub_tree2 = build_tree(sub_tree,
-                             nlp,
-                             args,
-                             eps,
-                             depth,
-                             d,
-                             idx_disc,
-                             M_inv);
+                              nlp,
+                              args,
+                              eps,
+                              depth,
+                              d,
+                              idx_disc,
+                              M_inv);
       
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
-      
-      //update the U value of the right end
-      sub_tree(5*d + 2) = sub_tree2(5*d + 2);
+      if(!sub_tree2(6*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+        
+        //update the U value of the right end
+        sub_tree(6*d + 2) = sub_tree2(6*d + 2);
+      }
       
     }else{
       
       //double the tree on the left
       sub_tree2 = build_tree(sub_tree,
-                             nlp,
-                             args,
-                             -eps,
-                             depth,
-                             d,
-                             idx_disc,
-                             M_inv);
+                              nlp,
+                              args,
+                              -eps,
+                              depth,
+                              d,
+                              idx_disc,
+                              M_inv);
       
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      if(!sub_tree2(6*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+        
+        //update the U value of the left endpoint
+        sub_tree(6*d) = sub_tree2(6*d);
+      }
       
-      //update the U value of the left endpoint
-      sub_tree(5*d) = sub_tree2(5*d);
     }
     
-    //if haven't encountered any divergences, update the trajectory extreme value
-    if(!sub_tree2(5*d+1)){
-      sub_tree(6*d+4) = sub_tree2(6*d+4);
+    //if haven't encountered any divergences, update the trajectory proposed value
+    if(!sub_tree2(6*d+1)){
+      
+      //if(arma::randu() < 0.5){
+        sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
+      //}
       
       //and update the cumulative sum of the kinetic energy gradients
-      sub_tree.subvec(4*d,5*d-1) += sub_tree2.subvec(4*d,5*d-1);
+      sub_tree.subvec(5*d,6*d-1) += sub_tree2.subvec(5*d,6*d-1);
+      
+      //check the U-TURN or divergence condition with the second tree
+      sub_tree(6*d+1) += check_u_turn2(sub_tree,d,M_inv);
     }
     
     //cumulate the reminder: metropolis rate and number of leaves
-    sub_tree(5*d+1) += sub_tree2(5*d+1);
-    sub_tree.subvec(5*d+3,6*d+3) += sub_tree2.subvec(5*d+3,6*d+3);
-    
-    //check the U-TURN or divergence condition with the second tree
-    sub_tree(5*d+1) += check_u_turn2(sub_tree,d,M_inv);
+    sub_tree(6*d+1) += sub_tree2(6*d+1);
+    sub_tree.subvec(6*d+3,7*d+3) += sub_tree2.subvec(6*d+3,7*d+3);
     
     //increase the depth of the tree
     depth++;
@@ -1810,12 +1897,9 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
   //return the proposed value, the average acceptance rate,
   //the length of the trajectory and the current energy level
   
-  //which trajectory extreme value must be returned?
-  unsigned int idx = (1 + segno(sub_tree(6*d+4))) * d;
-  
-  return Rcpp::List::create(Rcpp::Named("theta") = sub_tree.subvec(idx,idx+d-1),
-                            Rcpp::Named("alpha") = sub_tree.subvec(5*d+3,6*d+2) / sub_tree(6*d+3),
-                            Rcpp::Named("n") = sub_tree(6*d+3),
+  return Rcpp::List::create(Rcpp::Named("theta") = sub_tree.subvec(4*d,5*d-1),
+                            Rcpp::Named("alpha") = sub_tree.subvec(6*d+3,7*d+2) / sub_tree(7*d+3),
+                            Rcpp::Named("n") = sub_tree(7*d+3),
                             Rcpp::Named("E") = H0);
 }
 
@@ -1824,17 +1908,17 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
 
 // identity matrix case
 Rcpp::List nuts_singolo(const arma::vec& theta0,
-                        const arma::vec& m0,
-                        const Rcpp::Function& nlp,
-                        const Rcpp::List& args,
-                        const double& eps,
-                        const unsigned int& max_treedepth,
-                        const unsigned int& d,
-                        arma::uvec& idx_disc,
-                        const unsigned int& K){
+                         const arma::vec& m0,
+                         const Rcpp::Function& nlp,
+                         const Rcpp::List& args,
+                         const double& eps,
+                         const unsigned int& max_treedepth,
+                         const unsigned int& d,
+                         arma::uvec& idx_disc,
+                         const unsigned int& K){
   
   //initialize the final tree
-  arma::vec sub_tree = arma::zeros<arma::vec>((6+K)*d+5);
+  arma::vec sub_tree = arma::zeros<arma::vec>((6+K)*d+4);
   
   //initial position of the particle at the left end of the tree
   sub_tree.subvec(0,d-1) = theta0;
@@ -1853,12 +1937,9 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
     sub_tree.subvec((4+i)*d,(5+i)*d - 1) = theta0;
   }
   
-  //trajectory direction
-  sub_tree((6+K)*d+4) = 1;
-  
   //initialize the value of the potential energy both on the right and on the left
   sub_tree((5+K)*d) = sub_tree((5+K)*d+2) = Rcpp::as<double>(nlp(theta0,args,true));
-
+  
   //we also compute the energy level
   double H0 = sub_tree((5+K)*d) + arma::sum(arma::abs(m0));
   
@@ -1882,61 +1963,68 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       
       //double the tree on the right
       sub_tree2 = build_tree(sub_tree,
-                             nlp,
-                             args,
-                             eps,
-                             depth,
-                             d,
-                             idx_disc,
-                             K);
+                              nlp,
+                              args,
+                              eps,
+                              depth,
+                              d,
+                              idx_disc,
+                              K);
       
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
-      
-      //update the U value of the right end
-      sub_tree((5+K)*d + 2) = sub_tree2((5+K)*d + 2);
+      if(!sub_tree2((5+K)*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+        
+        //update the U value of the right end
+        sub_tree((5+K)*d + 2) = sub_tree2((5+K)*d + 2);
+      }
       
     }else{
       
       //double the tree on the left
       sub_tree2 = build_tree(sub_tree,
-                             nlp,
-                             args,
-                             -eps,
-                             depth,
-                             d,
-                             idx_disc,
-                             K);
+                              nlp,
+                              args,
+                              -eps,
+                              depth,
+                              d,
+                              idx_disc,
+                              K);
       
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      if(!sub_tree2((5+K)*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+        
+        //update the U value of the left endpoint
+        sub_tree((5+K)*d) = sub_tree2((5+K)*d);
+      }
       
-      //update the U value of the left endpoint
-      sub_tree((5+K)*d) = sub_tree2((5+K)*d);
     }
     
     //if haven't encountered any divergences, update the trajectory extreme value
     //and those proposed with uniform unbiased probability
     if(!sub_tree2((5+K)*d+1)){
-      for(unsigned int i = 0; i < K; i++){
+      
+      //biased probability for the proposed value
+      sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
+      
+      //uniform for the others
+      for(unsigned int i = 1; i < K; i++){
         if(arma::randu() < 0.5){
           sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
         }
       }
       
-      // direction update
-      sub_tree((6+K)*d+4) = sub_tree2((6+K)*d+4);
-      
       //and update the cumulative sum of the kinetic energy gradients
       sub_tree.subvec((4+K)*d,(5+K)*d-1) += sub_tree2.subvec((4+K)*d,(5+K)*d-1);
+      
+      //check the U-TURN or divergence condition with the second tree
+      sub_tree((5+K)*d+1) += check_u_turn_rec2(sub_tree,d,K);
     }
     
     //cumulate the reminder: metropolis rate and number of leaves
     sub_tree((5+K)*d+1) += sub_tree2((5+K)*d+1);
     sub_tree.subvec((5+K)*d+3,(6+K)*d+3) += sub_tree2.subvec((5+K)*d+3,(6+K)*d+3);
-    
-    //check the U-TURN or divergence condition with the second tree
-    sub_tree((5+K)*d+1) += check_u_turn_rec2(sub_tree,d,K);
     
     //increase the depth of the tree
     depth++;
@@ -1944,30 +2032,27 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
   //return the proposed value, the average acceptance rate,
   //the length of the trajectory and the current energy level
   
-  //which trajectory extreme value must be returned?
-  unsigned int idx = (1 + segno(sub_tree((6+K)*d+4))) * d;
   
-  return Rcpp::List::create(Rcpp::Named("theta") = sub_tree.subvec(idx,idx+d-1),
-                            Rcpp::Named("theta_rec") = sub_tree.subvec(4*d,(4+K)*d-1),
+  return Rcpp::List::create(Rcpp::Named("theta") = sub_tree.subvec(4*d,(4+K)*d-1),
                             Rcpp::Named("alpha") = sub_tree.subvec((5+K)*d+3,(6+K)*d+2) / sub_tree((6+K)*d+3),
                             Rcpp::Named("n") = sub_tree((6+K)*d+3),
                             Rcpp::Named("E") = H0);
 }
 
-// identity matrix case
+// diagonal matrix case
 Rcpp::List nuts_singolo(const arma::vec& theta0,
-                        const arma::vec& m0,
-                        const Rcpp::Function& nlp,
-                        const Rcpp::List& args,
-                        const double& eps,
-                        const unsigned int& max_treedepth,
-                        const unsigned int& d,
-                        arma::uvec& idx_disc,
-                        const arma::vec& M_inv,
-                        const unsigned int& K){
+                         const arma::vec& m0,
+                         const Rcpp::Function& nlp,
+                         const Rcpp::List& args,
+                         const double& eps,
+                         const unsigned int& max_treedepth,
+                         const unsigned int& d,
+                         arma::uvec& idx_disc,
+                         const arma::vec& M_inv,
+                         const unsigned int& K){
   
   //initialize the final tree
-  arma::vec sub_tree = arma::zeros<arma::vec>((6+K)*d+5);
+  arma::vec sub_tree = arma::zeros<arma::vec>((6+K)*d+4);
   
   //initial position of the particle at the left end of the tree
   sub_tree.subvec(0,d-1) = theta0;
@@ -1980,18 +2065,15 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
   
   //initial position of the particle momentum at the right end of the tree
   sub_tree.subvec(3*d,4*d-1) = m0;
-
+  
   //proposal values sampled from the tree, K in total
   for(unsigned int i = 0; i < K; i++){
     sub_tree.subvec((4+i)*d,(5+i)*d - 1) = theta0;
   }
   
-  //trajectory direction
-  sub_tree((6+K)*d+4) = 1;
-  
   //initialize the value of the potential energy both on the right and on the left
   sub_tree((5+K)*d) = sub_tree((5+K)*d+2) = Rcpp::as<double>(nlp(theta0,args,true));
-
+  
   //we also compute the energy level
   double H0 = sub_tree((5+K)*d) + arma::sum(M_inv % arma::abs(m0));
   
@@ -2015,63 +2097,70 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       
       //double the tree on the right
       sub_tree2 = build_tree(sub_tree,
-                             nlp,
-                             args,
-                             eps,
-                             depth,
-                             d,
-                             idx_disc,
-                             M_inv,
-                             K);
+                              nlp,
+                              args,
+                              eps,
+                              depth,
+                              d,
+                              idx_disc,
+                              M_inv,
+                              K);
       
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
-      
-      //update the U value of the right end
-      sub_tree((5+K)*d + 2) = sub_tree2((5+K)*d + 2);
+      if(!sub_tree2((5+K)*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+        
+        //update the U value of the right end
+        sub_tree((5+K)*d + 2) = sub_tree2((5+K)*d + 2);
+      }
       
     }else{
       
       //double the tree on the left
       sub_tree2 = build_tree(sub_tree,
-                             nlp,
-                             args,
-                             -eps,
-                             depth,
-                             d,
-                             idx_disc,
-                             M_inv,
-                             K);
+                              nlp,
+                              args,
+                              -eps,
+                              depth,
+                              d,
+                              idx_disc,
+                              M_inv,
+                              K);
       
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      if(!sub_tree2((5+K)*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+        
+        //update the U value of the left endpoint
+        sub_tree((5+K)*d) = sub_tree2((5+K)*d);
+      }
       
-      //update the U value of the left endpoint
-      sub_tree((5+K)*d) = sub_tree2((5+K)*d);
     }
     
     //if haven't encountered any divergences, update the trajectory extreme value
     //and those proposed with uniform unbiased probability
     if(!sub_tree2((5+K)*d+1)){
-      for(unsigned int i = 0; i < K; i++){
+      
+      //biased probability for the proposed value
+      sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
+      
+      //uniform for the others
+      for(unsigned int i = 1; i < K; i++){
         if(arma::randu() < 0.5){
           sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
         }
       }
       
-      // direction update
-      sub_tree((6+K)*d+4) = sub_tree2((6+K)*d+4);
-      
       //and update the cumulative sum of the kinetic energy gradients
       sub_tree.subvec((4+K)*d,(5+K)*d-1) += sub_tree2.subvec((4+K)*d,(5+K)*d-1);
+      
+      //check the U-TURN or divergence condition with the second tree
+      sub_tree((5+K)*d+1) += check_u_turn_rec2(sub_tree,d,M_inv,K);
     }
     
     //cumulate the reminder: metropolis rate and number of leaves
     sub_tree((5+K)*d+1) += sub_tree2((5+K)*d+1);
     sub_tree.subvec((5+K)*d+3,(6+K)*d+3) += sub_tree2.subvec((5+K)*d+3,(6+K)*d+3);
-    
-    //check the U-TURN or divergence condition with the second tree
-    sub_tree((5+K)*d+1) += check_u_turn_rec2(sub_tree,d,M_inv,K);
     
     //increase the depth of the tree
     depth++;
@@ -2079,16 +2168,11 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
   //return the proposed value, the average acceptance rate,
   //the length of the trajectory and the current energy level
   
-  //which trajectory extreme value must be returned?
-  unsigned int idx = (1 + segno(sub_tree((6+K)*d+4))) * d;
-  
-  return Rcpp::List::create(Rcpp::Named("theta") = sub_tree.subvec(idx,idx+d-1),
-                            Rcpp::Named("theta_rec") = sub_tree.subvec(4*d,(4+K)*d-1),
+  return Rcpp::List::create(Rcpp::Named("theta") = sub_tree.subvec(4*d,(4+K)*d-1),
                             Rcpp::Named("alpha") = sub_tree.subvec((5+K)*d+3,(6+K)*d+2) / sub_tree((6+K)*d+3),
                             Rcpp::Named("n") = sub_tree((6+K)*d+3),
                             Rcpp::Named("E") = H0);
 }
-
 /* --------------------------------- XDHMC ---------------------------------- */
 
 // identity matrix case
@@ -2156,8 +2240,10 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              idx_disc,
                              log_tau);
       
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      if(!sub_tree2(5*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      }
       
     }else{
       
@@ -2173,13 +2259,19 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              idx_disc,
                              log_tau);
       
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      if(!sub_tree2(5*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      }
+      
     }
+    
+    //accumulate the rest: metropolis acceptance rates and number of leaves
+    sub_tree.subvec(5*d+1,5*d+3+k) += sub_tree2.subvec(5*d+1,5*d+3+k);
     
     //if we haven't encountered any disagreements, update the proposed value
     //with probability proportional to the weights of the trees
-    if(!sub_tree2(5*d+1)){
+    if(!sub_tree(5*d+1)){
       if(arma::randu() < std::exp(sub_tree2(5*d) - sub_tree(5*d))){
         sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
       }
@@ -2200,9 +2292,6 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
         (sub_tree(5*d+k+4) - sub_tree(5*d) - log(1+sub_tree(5*d+k+3)) ) < log_tau;
       
     }
-    
-    //accumulate the rest: metropolis acceptance rates and number of leaves
-    sub_tree.subvec(5*d+1,5*d+3+k) += sub_tree2.subvec(5*d+1,5*d+3+k);
     
     //increase the depth of the tree
     depth++;
@@ -2286,9 +2375,10 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              log_tau,
                              M_inv_cont,
                              M_inv_disc);
-      
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      if(!sub_tree2(5*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      }
       
     }else{
       
@@ -2306,13 +2396,19 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              M_inv_cont,
                              M_inv_disc);
       
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      if(!sub_tree2(5*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      }
+      
     }
+    
+    //accumulate the rest: metropolis acceptance rates and number of leaves
+    sub_tree.subvec(5*d+1,5*d+3+k) += sub_tree2.subvec(5*d+1,5*d+3+k);
     
     //if we haven't encountered any disagreements, update the proposed value
     //with probability proportional to the weights of the trees
-    if(!sub_tree2(5*d+1)){
+    if(!sub_tree(5*d+1)){
       if(arma::randu() < std::exp(sub_tree2(5*d) - sub_tree(5*d))){
         sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
       }
@@ -2333,10 +2429,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
         (sub_tree(5*d+k+4) - sub_tree(5*d) - log(1+sub_tree(5*d+k+3)) ) < log_tau;
       
     }
-    
-    //accumulate the rest: metropolis acceptance rates and number of leaves
-    sub_tree.subvec(5*d+1,5*d+3+k) += sub_tree2.subvec(5*d+1,5*d+3+k);
-    
+     
     //increase the depth of the tree
     depth++;
   }
@@ -2420,8 +2513,10 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              M_inv_cont,
                              M_inv_disc);
       
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      if(!sub_tree2(5*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      }
       
     }else{
       
@@ -2439,13 +2534,19 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              M_inv_cont,
                              M_inv_disc);
       
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      if(!sub_tree2(5*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      }
+      
     }
+    
+    //accumulate the rest: metropolis acceptance rates and number of leaves
+    sub_tree.subvec(5*d+1,5*d+3+k) += sub_tree2.subvec(5*d+1,5*d+3+k);
     
     //if we haven't encountered any disagreements, update the proposed value
     //with probability proportional to the weights of the trees
-    if(!sub_tree2(5*d+1)){
+    if(!sub_tree(5*d+1)){
       if(arma::randu() < std::exp(sub_tree2(5*d) - sub_tree(5*d))){
         sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
       }
@@ -2466,9 +2567,6 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
         (sub_tree(5*d+k+4) - sub_tree(5*d) - log(1+sub_tree(5*d+k+3)) ) < log_tau;
       
     }
-    
-    //accumulate the rest: metropolis acceptance rates and number of leaves
-    sub_tree.subvec(5*d+1,5*d+3+k) += sub_tree2.subvec(5*d+1,5*d+3+k);
     
     //increase the depth of the tree
     depth++;
@@ -2560,8 +2658,10 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              log_tau,
                              K);
       
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      if(!sub_tree2((4+K)*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      }
       
     }else{
       
@@ -2578,27 +2678,36 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              log_tau,
                              K);
       
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      if(!sub_tree2((4+K)*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      }
+      
     }
+    
+    //accumulate the rest: metropolis acceptance rates and number of leaves
+    sub_tree.subvec((4+K)*d+1,(4+K)*d+3+k) += sub_tree2.subvec((4+K)*d+1,(4+K)*d+3+k);
     
     //if we haven't encountered any disagreements, update the proposed value
     //with probability proportional to the weights of the trees
-    if(!sub_tree2((4+K)*d+1)){
+    if(!sub_tree((4+K)*d+1)){
       //biased sampling for the proposed value
       alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
       
+      //sample from the trajectory
       if(arma::randu() < alpha){
-        sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
+        sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
       }
+      
+      //uniform sampling for the recycled values
       
       //cumulate the log multinomial weights
       sub_tree((4+K)*d) = arma::log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
       
-      //recalculate the probability for uniform sampling
+      //update alpha
       alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
       
-      //uniform sampling
+      //sample from the trajectory
       for(unsigned int i = 1; i < K; i++){
         if(arma::randu() < alpha){
           sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
@@ -2607,7 +2716,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       
       //check the condition of the virial:
       
-      //then, cumulates the virial
+      //cumulates the virial
       add_sign_log_sum_exp(sub_tree( (4+K)*d+k+4),
                            sub_tree( (4+K)*d+k+5),
                            sub_tree2((4+K)*d+k+4),
@@ -2618,9 +2727,6 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
         (sub_tree((4+K)*d+k+4) - sub_tree((4+K)*d) - log(1+sub_tree((4+K)*d+k+3)) ) < log_tau;
       
     }
-    
-    //accumulate the rest: metropolis acceptance rates and number of leaves
-    sub_tree.subvec((4+K)*d+1,(4+K)*d+3+k) += sub_tree2.subvec((4+K)*d+1,(4+K)*d+3+k);
     
     //increase the depth of the tree
     depth++;
@@ -2715,8 +2821,10 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              M_inv_disc,
                              K);
       
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      if(!sub_tree2((4+K)*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      }
       
     }else{
       
@@ -2735,36 +2843,45 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              M_inv_disc,
                              K);
       
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      if(!sub_tree2((4+K)*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      }
+      
     }
+    
+    //accumulate the rest: metropolis acceptance rates and number of leaves
+    sub_tree.subvec((4+K)*d+1,(4+K)*d+3+k) += sub_tree2.subvec((4+K)*d+1,(4+K)*d+3+k);
     
     //if we haven't encountered any disagreements, update the proposed value
     //with probability proportional to the weights of the trees
-    if(!sub_tree2((4+K)*d+1)){
+    if(!sub_tree((4+K)*d+1)){
       //biased sampling for the proposed value
       alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
       
+      //sample from the trajectory
       if(arma::randu() < alpha){
-        sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
+        sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
       }
+      
+      //uniform sampling for the recycled values
       
       //cumulate the log multinomial weights
       sub_tree((4+K)*d) = arma::log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
       
-      //recalculate the probability for uniform sampling
+      //update alpha
       alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
       
-      //uniform sampling
+      //sample from the trajectory
       for(unsigned int i = 1; i < K; i++){
         if(arma::randu() < alpha){
           sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
         }
       }
-      
+
       //check the condition of the virial:
       
-      //then, cumulates the virial
+      //cumulates the virial
       add_sign_log_sum_exp(sub_tree( (4+K)*d+k+4),
                            sub_tree( (4+K)*d+k+5),
                            sub_tree2((4+K)*d+k+4),
@@ -2775,9 +2892,6 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
         (sub_tree((4+K)*d+k+4) - sub_tree((4+K)*d) - log(1+sub_tree((4+K)*d+k+3)) ) < log_tau;
       
     }
-    
-    //accumulate the rest: metropolis acceptance rates and number of leaves
-    sub_tree.subvec((4+K)*d+1,(4+K)*d+3+k) += sub_tree2.subvec((4+K)*d+1,(4+K)*d+3+k);
     
     //increase the depth of the tree
     depth++;
@@ -2872,8 +2986,10 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              M_inv_disc,
                              K);
       
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      if(!sub_tree2((4+K)*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      }
       
     }else{
       
@@ -2892,36 +3008,45 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              M_inv_disc,
                              K);
       
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      if(!sub_tree2((4+K)*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      }
+      
     }
+    
+    //accumulate the rest: metropolis acceptance rates and number of leaves
+    sub_tree.subvec((4+K)*d+1,(4+K)*d+3+k) += sub_tree2.subvec((4+K)*d+1,(4+K)*d+3+k);
     
     //if we haven't encountered any disagreements, update the proposed value
     //with probability proportional to the weights of the trees
-    if(!sub_tree2((4+K)*d+1)){
+    if(!sub_tree((4+K)*d+1)){
       //biased sampling for the proposed value
       alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
       
+      //sample from the trajectory
       if(arma::randu() < alpha){
-        sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
+        sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
       }
+      
+      //uniform sampling for the recycled values
       
       //cumulate the log multinomial weights
       sub_tree((4+K)*d) = arma::log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
       
-      //recalculate the probability for uniform sampling
+      //update alpha
       alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
       
-      //uniform sampling
+      //sample from the trajectory
       for(unsigned int i = 1; i < K; i++){
         if(arma::randu() < alpha){
           sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
         }
       }
-      
+
       //check the condition of the virial:
       
-      //then, cumulates the virial
+      //cumulates the virial
       add_sign_log_sum_exp(sub_tree( (4+K)*d+k+4),
                            sub_tree( (4+K)*d+k+5),
                            sub_tree2((4+K)*d+k+4),
@@ -2932,9 +3057,6 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
         (sub_tree((4+K)*d+k+4) - sub_tree((4+K)*d) - log(1+sub_tree((4+K)*d+k+3)) ) < log_tau;
       
     }
-    
-    //accumulate the rest: metropolis acceptance rates and number of leaves
-    sub_tree.subvec((4+K)*d+1,(4+K)*d+3+k) += sub_tree2.subvec((4+K)*d+1,(4+K)*d+3+k);
     
     //increase the depth of the tree
     depth++;
@@ -3012,10 +3134,12 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              H0,
                              d,
                              log_tau);
-
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
-
+      
+      if(!sub_tree2(5*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      }
+      
     }else{
 
       //double the tree on the left
@@ -3028,14 +3152,19 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              d,
                              log_tau);
 
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
-
+      if(!sub_tree2(5*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      }
+      
     }
+    
+    //accumulate the rest: metropolis acceptance rates and number of leaves
+    sub_tree.subvec(5*d+1,5*d+3) += sub_tree2.subvec(5*d+1,5*d+3);
     
     //if we haven't encountered any disagreements, update the proposed value
     //with probability proportional to the weights of the trees
-    if(!sub_tree2(5*d+1)){
+    if(!sub_tree(5*d+1)){
       if(arma::randu() < std::exp(sub_tree2(5*d) - sub_tree(5*d))){
         sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
       }
@@ -3056,9 +3185,6 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
         (sub_tree(5*d+4) - sub_tree(5*d) - log(1+sub_tree(5*d+3)) ) < log_tau;
       
     }
-    
-    //accumulate the rest: metropolis acceptance rates and number of leaves
-    sub_tree.subvec(5*d+1,5*d+3) += sub_tree2.subvec(5*d+1,5*d+3);
     
     //increase the depth of the tree
     depth++;
@@ -3134,10 +3260,11 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              log_tau,
                              M_inv);
       
+      if(!sub_tree2(5*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      }
       
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
-
     }else{
 
       //double the tree on the left
@@ -3151,14 +3278,19 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              log_tau,
                              M_inv);
 
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
-
+      if(!sub_tree2(5*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      }
+      
     }
+    
+    //accumulate the rest: metropolis acceptance rates and number of leaves
+    sub_tree.subvec(5*d+1,5*d+3) += sub_tree2.subvec(5*d+1,5*d+3);
     
     //if we haven't encountered any disagreements, update the proposed value
     //with probability proportional to the weights of the trees
-    if(!sub_tree2(5*d+1)){
+    if(!sub_tree(5*d+1)){
       if(arma::randu() < std::exp(sub_tree2(5*d) - sub_tree(5*d))){
         sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
       }
@@ -3179,9 +3311,6 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
         (sub_tree(5*d+4) - sub_tree(5*d) - log(1+sub_tree(5*d+3)) ) < log_tau;
       
     }
-    
-    //accumulate the rest: metropolis acceptance rates and number of leaves
-    sub_tree.subvec(5*d+1,5*d+3) += sub_tree2.subvec(5*d+1,5*d+3);
     
     //increase the depth of the tree
     depth++;
@@ -3257,9 +3386,11 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              log_tau,
                              M_inv);
 
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
-
+      if(!sub_tree2(5*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      }
+      
     }else{
 
       //double the tree on the left
@@ -3273,14 +3404,19 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              log_tau,
                              M_inv);
 
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
-
+      if(!sub_tree2(5*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      }
+      
     }
+    
+    //accumulate the rest: metropolis acceptance rates and number of leaves
+    sub_tree.subvec(5*d+1,5*d+3) += sub_tree2.subvec(5*d+1,5*d+3);
     
     //if we haven't encountered any disagreements, update the proposed value
     //with probability proportional to the weights of the trees
-    if(!sub_tree2(5*d+1)){
+    if(!sub_tree(5*d+1)){
       if(arma::randu() < std::exp(sub_tree2(5*d) - sub_tree(5*d))){
         sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
       }
@@ -3301,11 +3437,6 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
         (sub_tree(5*d+4) - sub_tree(5*d) - log(1+sub_tree(5*d+3)) ) < log_tau;
       
     }
-    
-    //accumulate the rest: metropolis acceptance rates and number of leaves
-    
-    //accumulate the rest: metropolis acceptance rates and number of leaves
-    sub_tree.subvec(5*d+1,5*d+3) += sub_tree2.subvec(5*d+1,5*d+3);
     
     //increase the depth of the tree
     depth++;
@@ -3389,8 +3520,10 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              log_tau,
                              K);
       
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      if(!sub_tree2((4+K)*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      }
       
     }else{
       
@@ -3405,27 +3538,36 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              log_tau,
                              K);
       
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      if(!sub_tree2((4+K)*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      }
+      
     }
+    
+    //cumulates metropolis acceptance rates and number of leaves
+    sub_tree.subvec((4+K)*d+1,(4+K)*d+3) += sub_tree2.subvec((4+K)*d+1,(4+K)*d+3);
     
     //if we haven't encountered any disagreements, update the proposed value
     //with probability proportional to the weights of the trees
-    if(!sub_tree2((4+K)*d+1)){
+    if(!sub_tree((4+K)*d+1)){
       //biased sampling for the proposed value
       alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
       
+      //sample from the trajectory
       if(arma::randu() < alpha){
-        sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
+        sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
       }
+      
+      //uniform sampling for the recycled values
       
       //cumulate the log multinomial weights
       sub_tree((4+K)*d) = arma::log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
       
-      //recalculate the probability for uniform sampling
+      //update alpha
       alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
       
-      //uniform sampling
+      //sample from the trajectory
       for(unsigned int i = 1; i < K; i++){
         if(arma::randu() < alpha){
           sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
@@ -3444,9 +3586,6 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       sub_tree((4+K)*d+1) += 
         (sub_tree((4+K)*d+4) - sub_tree((4+K)*d) - log(1+sub_tree((4+K)*d+3)) ) < log_tau;
     }
-    
-    //cumulates metropolis acceptance rates and number of leaves
-    sub_tree.subvec((4+K)*d+1,(4+K)*d+3) += sub_tree2.subvec((4+K)*d+1,(4+K)*d+3);
     
     //increase the depth of the tree
     depth++;
@@ -3528,8 +3667,10 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              M_inv,
                              K);
       
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      if(!sub_tree2((4+K)*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      }
       
     }else{
       
@@ -3545,33 +3686,42 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              M_inv,
                              K);
       
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      if(!sub_tree2((4+K)*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      }
+      
     }
+    
+    //cumulates metropolis acceptance rates and number of leaves
+    sub_tree.subvec((4+K)*d+1,(4+K)*d+3) += sub_tree2.subvec((4+K)*d+1,(4+K)*d+3);
     
     //if we haven't encountered any disagreements, update the proposed value
     //with probability proportional to the weights of the trees
-    if(!sub_tree2((4+K)*d+1)){
+    if(!sub_tree((4+K)*d+1)){
       //biased sampling for the proposed value
       alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
       
+      //sample from the trajectory
       if(arma::randu() < alpha){
-        sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
+        sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
       }
+      
+      //uniform sampling for the recycled values
       
       //cumulate the log multinomial weights
       sub_tree((4+K)*d) = arma::log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
       
-      //recalculate the probability for uniform sampling
+      //update alpha
       alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
       
-      //uniform sampling
+      //sample from the trajectory
       for(unsigned int i = 1; i < K; i++){
         if(arma::randu() < alpha){
           sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
         }
       }
-      
+
       //check the condition of the virial:
       
       //then, cumulates the virial
@@ -3584,9 +3734,6 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       sub_tree((4+K)*d+1) += 
         (sub_tree((4+K)*d+4) - sub_tree((4+K)*d) - log(1+sub_tree((4+K)*d+3)) ) < log_tau;
     }
-    
-    //cumulates metropolis acceptance rates and number of leaves
-    sub_tree.subvec((4+K)*d+1,(4+K)*d+3) += sub_tree2.subvec((4+K)*d+1,(4+K)*d+3);
     
     //increase the depth of the tree
     depth++;
@@ -3668,8 +3815,10 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              M_inv,
                              K);
       
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      if(!sub_tree2((4+K)*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+      }
       
     }else{
       
@@ -3685,27 +3834,36 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                              M_inv,
                              K);
       
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      if(!sub_tree2((4+K)*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+      }
+      
     }
+    
+    //cumulates metropolis acceptance rates and number of leaves
+    sub_tree.subvec((4+K)*d+1,(4+K)*d+3) += sub_tree2.subvec((4+K)*d+1,(4+K)*d+3);
     
     //if we haven't encountered any disagreements, update the proposed value
     //with probability proportional to the weights of the trees
-    if(!sub_tree2((4+K)*d+1)){
+    if(!sub_tree((4+K)*d+1)){
       //biased sampling for the proposed value
       alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
       
+      //sample from the trajectory
       if(arma::randu() < alpha){
-        sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
+        sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
       }
+      
+      //uniform sampling for the recycled values
       
       //cumulate the log multinomial weights
       sub_tree((4+K)*d) = arma::log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
       
-      //recalculate the probability for uniform sampling
+      //update alpha
       alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
       
-      //uniform sampling
+      //sample from the trajectory
       for(unsigned int i = 1; i < K; i++){
         if(arma::randu() < alpha){
           sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
@@ -3724,9 +3882,6 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       sub_tree((4+K)*d+1) += 
         (sub_tree((4+K)*d+4) - sub_tree((4+K)*d) - log(1+sub_tree((4+K)*d+3)) ) < log_tau;
     }
-    
-    //cumulates metropolis acceptance rates and number of leaves
-    sub_tree.subvec((4+K)*d+1,(4+K)*d+3) += sub_tree2.subvec((4+K)*d+1,(4+K)*d+3);
     
     //increase the depth of the tree
     depth++;
@@ -3748,17 +3903,17 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
 
 // identity matrix case
 Rcpp::List nuts_singolo(const arma::vec& theta0,
-                        const arma::vec& m0,
-                        const Rcpp::Function& nlp,
-                        const Rcpp::List& args,
-                        const double& eps,
-                        const unsigned int& max_treedepth,
-                        const unsigned int& d,
-                        arma::uvec& idx_disc,
-                        const double& log_tau){
+                         const arma::vec& m0,
+                         const Rcpp::Function& nlp,
+                         const Rcpp::List& args,
+                         const double& eps,
+                         const unsigned int& max_treedepth,
+                         const unsigned int& d,
+                         arma::uvec& idx_disc,
+                         const double& tau){
   
   //initialize the final tree
-  arma::vec sub_tree = arma::zeros<arma::vec>(5*d+6);
+  arma::vec sub_tree = arma::zeros<arma::vec>(6*d+5);
   
   //initial position of the particle at the left end of the tree
   sub_tree.subvec(0,d-1) = theta0;
@@ -3772,85 +3927,87 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
   //initial position of the particle momentum at the right end of the tree
   sub_tree.subvec(3*d,4*d-1) = m0;
   
-  //trajectory direction
-  sub_tree(5*d+4) = 1;
+  //proposal value sampled from the tree
+  sub_tree.subvec(4*d,5*d-1) = theta0;
   
   //initialize the value of the potential energy both on the right and on the left
-  sub_tree(4*d) = sub_tree(4*d+2) = Rcpp::as<double>(nlp(theta0,args,true));
+  sub_tree(5*d) = sub_tree(5*d+2) = Rcpp::as<double>(nlp(theta0,args,true));
   
   //we also compute the energy level
-  double H0 = sub_tree(4*d) + arma::sum(arma::abs(m0));
+  double H0 = sub_tree(5*d) + arma::sum(arma::abs(m0));
   
   //depth of the current tree
   unsigned int depth = 0;
-
+  
   //let's build the tree recursively
   
   //initialize the subtree which doubles the current one
-  arma::vec sub_tree2 = arma::zeros<arma::vec>(5*d+6);
+  arma::vec sub_tree2 = arma::zeros<arma::vec>(6*d+5);
   
   //until we met a stopping criterion, divergent transitions or
   //the maximum depth has been reached, continue to double the tree
-  while(!sub_tree(4*d + 1) && depth < max_treedepth){
+  while(!sub_tree(5*d + 1) && depth < max_treedepth){
     
     //should the doubling be done on the right or left?
     if(arma::randu() < 0.5){
       
       //double the tree on the right
       sub_tree2 = build_tree(sub_tree,
-                             nlp,
-                             args,
-                             eps,
-                             depth,
-                             d,
-                             idx_disc,
-                             log_tau);
-
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+                              nlp,
+                              args,
+                              eps,
+                              depth,
+                              d,
+                              idx_disc,
+                              tau);
       
-      //update the U value of the right end
-      sub_tree(4*d + 2) = sub_tree2(4*d + 2);
-
+      if(!sub_tree2(5*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+        
+        //update the U value of the right end
+        sub_tree(5*d + 2) = sub_tree2(5*d + 2);
+      }
+      
     }else{
       
       //double the tree on the left
       sub_tree2 = build_tree(sub_tree,
-                             nlp,
-                             args,
-                             -eps,
-                             depth,
-                             d,
-                             idx_disc,
-                             log_tau);
-
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+                              nlp,
+                              args,
+                              -eps,
+                              depth,
+                              d,
+                              idx_disc,
+                              tau);
       
-      //update the U value of the left endpoint
-      sub_tree(4*d) = sub_tree2(4*d);
-
+      if(!sub_tree2(5*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+        
+        //update the U value of the left endpoint
+        sub_tree(5*d) = sub_tree2(5*d);
+      }
+      
     }
     
-    //if haven't encountered any divergences, update the trajectory extreme value
-    if(!sub_tree2(4*d+1)){
-      sub_tree(5*d+4) = sub_tree2(5*d+4);
-      
-      //accumulate the rest: metropolis acceptance rates and number of leaves
-      sub_tree(4*d+1) += sub_tree2(4*d+1);
-      sub_tree.subvec(4*d+3,5*d+3) += sub_tree2.subvec(4*d+3,5*d+3);
+    //accumulate the rest: metropolis acceptance rates and number of leaves
+    sub_tree(5*d+1) += sub_tree2(5*d+1);
+    sub_tree.subvec(5*d+3,6*d+3) += sub_tree2.subvec(5*d+3,6*d+3);
+    
+    //if haven't encountered any divergences, update the trajectory proposed value
+    if(!sub_tree(5*d+1)){
+      //if(arma::randu() < 0.5){
+        sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
+      //}
       
       //then, cumulates the virial
-      sub_tree(5*d + 5) += sub_tree2(5*d + 5);
+      sub_tree(6*d + 4) += sub_tree2(6*d + 4);
       
       //and check the termination condition
-      sub_tree(4*d+1) += 
-        (sub_tree(5*d+5) / (1+sub_tree(5*d+3)) / sub_tree(5*d+3) ) < log_tau;
+      sub_tree(5*d+1) += 
+        std::abs( sub_tree(6*d+4) / (1+sub_tree(6*d+3)) / sub_tree(6*d+3) ) < tau;
       
-      //in this case it always takes the extremes of the trajectory
-      //so we must update the direction of the trajectory
-      sub_tree(5*d+4) = sub_tree2(5*d+4);
-
     }
     
     //increase the depth of the tree
@@ -3859,29 +4016,26 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
   //return the proposed value, the average acceptance rate,
   //the length of the trajectory and the current energy level
   
-  //which trajectory extreme value must be returned?
-  unsigned int idx = (1 + segno(sub_tree(5*d+4))) * d;
-  
-  return Rcpp::List::create(Rcpp::Named("theta") = sub_tree.subvec(idx,idx+d-1),
-                            Rcpp::Named("alpha") = sub_tree.subvec(4*d+3,5*d+2) / sub_tree(5*d+3),
-                            Rcpp::Named("n") = sub_tree(5*d+3),
+  return Rcpp::List::create(Rcpp::Named("theta") = sub_tree.subvec(4*d,5*d-1),
+                            Rcpp::Named("alpha") = sub_tree.subvec(5*d+3,6*d+2) / sub_tree(6*d+3),
+                            Rcpp::Named("n") = sub_tree(6*d+3),
                             Rcpp::Named("E") = H0);
 }
 
 // diagonal matrix case
 Rcpp::List nuts_singolo(const arma::vec& theta0,
-                        const arma::vec& m0,
-                        const Rcpp::Function& nlp,
-                        const Rcpp::List& args,
-                        const double& eps,
-                        const unsigned int& max_treedepth,
-                        const unsigned int& d,
-                        arma::uvec& idx_disc,
-                        const double& log_tau,
-                        const arma::vec& M_inv){
+                         const arma::vec& m0,
+                         const Rcpp::Function& nlp,
+                         const Rcpp::List& args,
+                         const double& eps,
+                         const unsigned int& max_treedepth,
+                         const unsigned int& d,
+                         arma::uvec& idx_disc,
+                         const double& tau,
+                         const arma::vec& M_inv){
   
   //initialize the final tree
-  arma::vec sub_tree = arma::zeros<arma::vec>(5*d+6);
+  arma::vec sub_tree = arma::zeros<arma::vec>(6*d+5);
   
   //initial position of the particle at the left end of the tree
   sub_tree.subvec(0,d-1) = theta0;
@@ -3895,87 +4049,89 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
   //initial position of the particle momentum at the right end of the tree
   sub_tree.subvec(3*d,4*d-1) = m0;
   
-  //trajectory direction
-  sub_tree(5*d+4) = 1;
+  //proposal value sampled from the tree
+  sub_tree.subvec(4*d,5*d-1) = theta0;
   
   //initialize the value of the potential energy both on the right and on the left
-  sub_tree(4*d) = sub_tree(4*d+2) = Rcpp::as<double>(nlp(theta0,args,true));
-
+  sub_tree(5*d) = sub_tree(5*d+2) = Rcpp::as<double>(nlp(theta0,args,true));
+  
   //we also compute the energy level
-  double H0 = sub_tree(4*d) + arma::sum(M_inv % arma::abs(m0));
+  double H0 = sub_tree(5*d) + arma::sum(M_inv % arma::abs(m0));
   
   //depth of the current tree
   unsigned int depth = 0;
-
+  
   //let's build the tree recursively
   
   //initialize the subtree which doubles the current one
-  arma::vec sub_tree2 = arma::zeros<arma::vec>(5*d+6);
+  arma::vec sub_tree2 = arma::zeros<arma::vec>(6*d+5);
   
   //until we met a stopping criterion, divergent transitions or
   //the maximum depth has been reached, continue to double the tree
-  while(!sub_tree(4*d + 1) && depth < max_treedepth){
+  while(!sub_tree(5*d + 1) && depth < max_treedepth){
     
     //should the doubling be done on the right or left?
     if(arma::randu() < 0.5){
       
       //double the tree on the right
       sub_tree2 = build_tree(sub_tree,
-                             nlp,
-                             args,
-                             eps,
-                             depth,
-                             d,
-                             idx_disc,
-                             log_tau,
-                             M_inv);
-
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+                              nlp,
+                              args,
+                              eps,
+                              depth,
+                              d,
+                              idx_disc,
+                              tau,
+                              M_inv);
       
-      //update the U value of the right end
-      sub_tree(4*d + 2) = sub_tree2(4*d + 2);
-
+      if(!sub_tree2(5*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+        
+        //update the U value of the right end
+        sub_tree(5*d + 2) = sub_tree2(5*d + 2);
+      }
+      
     }else{
       
       //double the tree on the left
       sub_tree2 = build_tree(sub_tree,
-                             nlp,
-                             args,
-                             -eps,
-                             depth,
-                             d,
-                             idx_disc,
-                             log_tau,
-                             M_inv);
-
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+                              nlp,
+                              args,
+                              -eps,
+                              depth,
+                              d,
+                              idx_disc,
+                              tau,
+                              M_inv);
       
-      //update the U value of the left endpoint
-      sub_tree(4*d) = sub_tree2(4*d);
-
+      if(!sub_tree2(5*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+        
+        //update the U value of the left endpoint
+        sub_tree(5*d) = sub_tree2(5*d);
+      }
+      
     }
     
-    //if haven't encountered any divergences, update the trajectory extreme value
-    if(!sub_tree2(4*d+1)){
-      sub_tree(5*d+4) = sub_tree2(5*d+4);
-      
-      //accumulate the rest: metropolis acceptance rates and number of leaves
-      sub_tree(4*d+1) += sub_tree2(4*d+1);
-      sub_tree.subvec(4*d+3,5*d+3) += sub_tree2.subvec(4*d+3,5*d+3);
+    //accumulate the rest: metropolis acceptance rates and number of leaves
+    sub_tree(5*d+1) += sub_tree2(5*d+1);
+    sub_tree.subvec(5*d+3,6*d+3) += sub_tree2.subvec(5*d+3,6*d+3);
+    
+    //if haven't encountered any divergences, update the trajectory proposed value
+    if(!sub_tree(5*d+1)){
+      //if(arma::randu() < 0.5){
+        sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
+      //}
       
       //then, cumulates the virial
-      sub_tree(5*d + 5) += sub_tree2(5*d + 5);
+      sub_tree(6*d + 4) += sub_tree2(6*d + 4);
       
       //and check the termination condition
-      sub_tree(4*d+1) += 
-        (sub_tree(5*d+5) / (1+sub_tree(5*d+3)) / sub_tree(5*d+3) ) < log_tau;
+      sub_tree(5*d+1) += 
+        std::abs( sub_tree(6*d+4) / (1+sub_tree(6*d+3)) / sub_tree(6*d+3) ) < tau;
       
-      //in this case it always takes the extremes of the trajectory
-      //so we must update the direction of the trajectory
-      sub_tree(5*d+4) = sub_tree2(5*d+4);
-
     }
     
     //increase the depth of the tree
@@ -3984,12 +4140,9 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
   //return the proposed value, the average acceptance rate,
   //the length of the trajectory and the current energy level
   
-  //which trajectory extreme value must be returned?
-  unsigned int idx = (1 + segno(sub_tree(5*d+4))) * d;
-
-  return Rcpp::List::create(Rcpp::Named("theta") = sub_tree.subvec(idx,idx+d-1),
-                            Rcpp::Named("alpha") = sub_tree.subvec(4*d+3,5*d+2) / sub_tree(5*d+3),
-                            Rcpp::Named("n") = sub_tree(5*d+3),
+  return Rcpp::List::create(Rcpp::Named("theta") = sub_tree.subvec(4*d,5*d-1),
+                            Rcpp::Named("alpha") = sub_tree.subvec(5*d+3,6*d+2) / sub_tree(6*d+3),
+                            Rcpp::Named("n") = sub_tree(6*d+3),
                             Rcpp::Named("E") = H0);
 }
 
@@ -3998,18 +4151,18 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
 
 // identity matrix case
 Rcpp::List nuts_singolo(const arma::vec& theta0,
-                        const arma::vec& m0,
-                        const Rcpp::Function& nlp,
-                        const Rcpp::List& args,
-                        const double& eps,
-                        const unsigned int& max_treedepth,
-                        const unsigned int& d,
-                        arma::uvec& idx_disc,
-                        const double& log_tau,
-                        const unsigned int& K){
+                         const arma::vec& m0,
+                         const Rcpp::Function& nlp,
+                         const Rcpp::List& args,
+                         const double& eps,
+                         const unsigned int& max_treedepth,
+                         const unsigned int& d,
+                         arma::uvec& idx_disc,
+                         const double& tau,
+                         const unsigned int& K){
   
   //initialize the final tree
-  arma::vec sub_tree = arma::zeros<arma::vec>((5+K)*d+6);
+  arma::vec sub_tree = arma::zeros<arma::vec>((5+K)*d+5);
   
   //initial position of the particle at the left end of the tree
   sub_tree.subvec(0,d-1) = theta0;
@@ -4028,22 +4181,19 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
     sub_tree.subvec((4+i)*d,(5+i)*d - 1) = theta0;
   }
   
-  //trajectory direction
-  sub_tree((5+K)*d+4) = 1;
-  
   //initialize the value of the potential energy both on the right and on the left
   sub_tree((4+K)*d) = sub_tree((4+K)*d+2) = Rcpp::as<double>(nlp(theta0,args,true));
-
+  
   //we also compute the energy level
   double H0 = sub_tree((4+K)*d) + arma::sum(arma::abs(m0));
   
   //depth of the current tree
   unsigned int depth = 0;
-
+  
   //let's build the tree recursively
   
   //initialize the subtree which doubles the current one
-  arma::vec sub_tree2 = arma::zeros<arma::vec>((5+K)*d+6);
+  arma::vec sub_tree2 = arma::zeros<arma::vec>((5+K)*d+5);
   
   //until we met a stopping criterion, divergent transitions or
   //the maximum depth has been reached, continue to double the tree
@@ -4054,62 +4204,70 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       
       //double the tree on the right
       sub_tree2 = build_tree(sub_tree,
-                             nlp,
-                             args,
-                             eps,
-                             depth,
-                             d,
-                             idx_disc,
-                             log_tau,
-                             K);
-
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+                              nlp,
+                              args,
+                              eps,
+                              depth,
+                              d,
+                              idx_disc,
+                              tau,
+                              K);
       
-      //update the U value of the right end
-      sub_tree((4+K)*d + 2) = sub_tree2((4+K)*d + 2);
-
+      if(!sub_tree2((4+K)*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+        
+        //update the U value of the right end
+        sub_tree((4+K)*d + 2) = sub_tree2((4+K)*d + 2);
+      }
+      
     }else{
       
       //double the tree on the left
       sub_tree2 = build_tree(sub_tree,
-                             nlp,
-                             args,
-                             -eps,
-                             depth,
-                             d,
-                             idx_disc,
-                             log_tau,
-                             K);
-
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+                              nlp,
+                              args,
+                              -eps,
+                              depth,
+                              d,
+                              idx_disc,
+                              tau,
+                              K);
       
-      //update the U value of the left endpoint
-      sub_tree((4+K)*d) = sub_tree2((4+K)*d);
-
+      if(!sub_tree2((4+K)*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+        
+        //update the U value of the left endpoint
+        sub_tree((4+K)*d) = sub_tree2((4+K)*d);
+      }
+      
     }
     
+    //accumulate the rest: metropolis acceptance rates and number of leaves
+    sub_tree((4+K)*d+1) += sub_tree2((4+K)*d+1);
+    sub_tree.subvec((4+K)*d+3,(5+K)*d+3) += sub_tree2.subvec((4+K)*d+3,(5+K)*d+3);
+    
     //if haven't encountered any divergences, update the trajectory extreme value
-    if(!sub_tree2((4+K)*d+1)){
-      sub_tree((5+K)*d+4) = sub_tree2((5+K)*d+4);
+    if(!sub_tree((4+K)*d+1)){
       
-      //accumulate the rest: metropolis acceptance rates and number of leaves
+      //sample with probability one the proposed value
+      sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
       
-      sub_tree((4+K)*d+1) += sub_tree2((4+K)*d+1);
-      sub_tree.subvec((4+K)*d+3,(5+K)*d+3) += sub_tree2.subvec((4+K)*d+3,(5+K)*d+3);
+      //sample with probability 0.5 the recycled values
+      for(unsigned int i = 1; i < K; i++){
+        if(arma::randu() < 0.5){
+          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
+        }
+      }
       
       //then, cumulates the virial
-      sub_tree((5+K)*d + 5) += sub_tree2((5+K)*d + 5);
+      sub_tree((5+K)*d + 4) += sub_tree2((5+K)*d + 4);
       
       //and check the termination condition
       sub_tree((4+K)*d+1) += 
-        (sub_tree((5+K)*d+5) / (1+sub_tree((5+K)*d+3)) / sub_tree((5+K)*d+3) ) < log_tau;
+        std::abs( sub_tree((5+K)*d+4) / (1+sub_tree((5+K)*d+3)) / sub_tree((5+K)*d+3) ) < tau;
       
-      //in this case it always takes the extremes of the trajectory
-      //so we must update the direction of the trajectory
-      sub_tree((5+K)*d+4) = sub_tree2((5+K)*d+4);
-
     }
     
     //increase the depth of the tree
@@ -4118,11 +4276,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
   //return the proposed value, the average acceptance rate,
   //the length of the trajectory and the current energy level
   
-  //which trajectory extreme value must be returned?
-  unsigned int idx = (1 + segno(sub_tree((5+K)*d+4))) * d;
-
-  return Rcpp::List::create(Rcpp::Named("theta") = sub_tree.subvec(idx,idx+d-1),
-                            Rcpp::Named("theta_rec") = sub_tree.subvec(4*d,(4+K)*d-1),
+  return Rcpp::List::create(Rcpp::Named("theta") = sub_tree.subvec(4*d,(4+K)*d-1),
                             Rcpp::Named("alpha") = sub_tree.subvec((4+K)*d+3,(5+K)*d+2) / sub_tree((5+K)*d+3),
                             Rcpp::Named("n") = sub_tree((5+K)*d+3),
                             Rcpp::Named("E") = H0);
@@ -4130,19 +4284,19 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
 
 // diagonal matrix case
 Rcpp::List nuts_singolo(const arma::vec& theta0,
-                        const arma::vec& m0,
-                        const Rcpp::Function& nlp,
-                        const Rcpp::List& args,
-                        const double& eps,
-                        const unsigned int& max_treedepth,
-                        const unsigned int& d,
-                        arma::uvec& idx_disc,
-                        const double& log_tau,
-                        const arma::vec& M_inv,
-                        const unsigned int& K){
+                         const arma::vec& m0,
+                         const Rcpp::Function& nlp,
+                         const Rcpp::List& args,
+                         const double& eps,
+                         const unsigned int& max_treedepth,
+                         const unsigned int& d,
+                         arma::uvec& idx_disc,
+                         const double& tau,
+                         const arma::vec& M_inv,
+                         const unsigned int& K){
   
   //initialize the final tree
-  arma::vec sub_tree = arma::zeros<arma::vec>((5+K)*d+6);
+  arma::vec sub_tree = arma::zeros<arma::vec>((5+K)*d+5);
   
   //initial position of the particle at the left end of the tree
   sub_tree.subvec(0,d-1) = theta0;
@@ -4161,22 +4315,19 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
     sub_tree.subvec((4+i)*d,(5+i)*d - 1) = theta0;
   }
   
-  //trajectory direction
-  sub_tree((5+K)*d+4) = 1;
-  
   //initialize the value of the potential energy both on the right and on the left
   sub_tree((4+K)*d) = sub_tree((4+K)*d+2) = Rcpp::as<double>(nlp(theta0,args,true));
-
+  
   //we also compute the energy level
   double H0 = sub_tree((4+K)*d) + arma::sum(M_inv % arma::abs(m0));
   
   //depth of the current tree
   unsigned int depth = 0;
-
+  
   //let's build the tree recursively
   
   //initialize the subtree which doubles the current one
-  arma::vec sub_tree2 = arma::zeros<arma::vec>((5+K)*d+6);
+  arma::vec sub_tree2 = arma::zeros<arma::vec>((5+K)*d+5);
   
   //until we met a stopping criterion, divergent transitions or
   //the maximum depth has been reached, continue to double the tree
@@ -4187,63 +4338,70 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       
       //double the tree on the right
       sub_tree2 = build_tree(sub_tree,
-                             nlp,
-                             args,
-                             eps,
-                             depth,
-                             d,
-                             idx_disc,
-                             log_tau,
-                             M_inv,
-                             K);
- 
-      //update the extreme values of the trajectory (only on the right)
-      sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+                              nlp,
+                              args,
+                              eps,
+                              depth,
+                              d,
+                              idx_disc,
+                              tau,
+                              M_inv,
+                              K);
       
-      //update the U value of the right end
-      sub_tree((4+K)*d + 2) = sub_tree2((4+K)*d + 2);
-
+      if(!sub_tree2((4+K)*d+1)){
+        //update the extreme values of the trajectory (only on the right)
+        sub_tree.subvec(2*d,4*d-1) = sub_tree2.subvec(2*d,4*d-1);
+        
+        //update the U value of the right end
+        sub_tree((4+K)*d + 2) = sub_tree2((4+K)*d + 2);
+      }
+      
     }else{
       
       //double the tree on the left
       sub_tree2 = build_tree(sub_tree,
-                             nlp,
-                             args,
-                             -eps,
-                             depth,
-                             d,
-                             idx_disc,
-                             log_tau,
-                             M_inv,
-                             K);
-
-      //update the extreme values of the trajectory (only on the left)
-      sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+                              nlp,
+                              args,
+                              -eps,
+                              depth,
+                              d,
+                              idx_disc,
+                              tau,
+                              M_inv,
+                              K);
       
-      //update the U value of the left endpoint
-      sub_tree((4+K)*d) = sub_tree2((4+K)*d);
-
+      if(!sub_tree2((4+K)*d+1)){
+        //update the extreme values of the trajectory (only on the left)
+        sub_tree.subvec(0,2*d-1) = sub_tree2.subvec(0,2*d-1);
+        
+        //update the U value of the left endpoint
+        sub_tree((4+K)*d) = sub_tree2((4+K)*d);
+      }
+      
     }
     
-    //if haven't encountered any divergences, update the trajectory extreme value
-    if(!sub_tree2((4+K)*d+1)){
-      sub_tree((5+K)*d+4) = sub_tree2((5+K)*d+4);
+    //accumulate the rest: metropolis acceptance rates and number of leaves
+    sub_tree((4+K)*d+1) += sub_tree2((4+K)*d+1);
+    sub_tree.subvec((4+K)*d+3,(5+K)*d+3) += sub_tree2.subvec((4+K)*d+3,(5+K)*d+3);
+    
+    //if haven't encountered any divergences, update the trajectory proposed value
+    if(!sub_tree((4+K)*d+1)){
+      //sample with probability one the proposed value
+      sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
       
-      //accumulate the rest: metropolis acceptance rates and number of leaves
-      sub_tree((4+K)*d+1) += sub_tree2((4+K)*d+1);
-      sub_tree.subvec((4+K)*d+3,(5+K)*d+3) += sub_tree2.subvec((4+K)*d+3,(5+K)*d+3);
-      
+      //sample with probability 0.5 the recycled values
+      for(unsigned int i = 1; i < K; i++){
+        if(arma::randu() < 0.5){
+          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
+        }
+      }
       //then, cumulates the virial
-      sub_tree((5+K)*d + 5) += sub_tree2((5+K)*d + 5);
+      sub_tree((5+K)*d + 4) += sub_tree2((5+K)*d + 4);
       
       //and check the termination condition
       sub_tree((4+K)*d+1) += 
-        (sub_tree((5+K)*d+5) / (1+sub_tree((5+K)*d+3)) / sub_tree((5+K)*d+3) ) < log_tau;
+        std::abs( sub_tree((5+K)*d+4) / (1+sub_tree((5+K)*d+3)) / sub_tree((5+K)*d+3) ) < tau;
       
-      //in this case it always takes the extremes of the trajectory
-      //so we must update the direction of the trajectory
-      sub_tree((5+K)*d+4) = sub_tree2((5+K)*d+4);
-
     }
     
     //increase the depth of the tree
@@ -4252,11 +4410,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
   //return the proposed value, the average acceptance rate,
   //the length of the trajectory and the current energy level
   
-  //which trajectory extreme value must be returned?
-  unsigned int idx = (1 + segno(sub_tree((5+K)*d+4))) * d;
-
-  return Rcpp::List::create(Rcpp::Named("theta") = sub_tree.subvec(idx,idx+d-1),
-                            Rcpp::Named("theta_rec") = sub_tree.subvec(4*d,(4+K)*d-1),
+  return Rcpp::List::create(Rcpp::Named("theta") = sub_tree.subvec(4*d,(4+K)*d-1),
                             Rcpp::Named("alpha") = sub_tree.subvec((4+K)*d+3,(5+K)*d+2) / sub_tree((5+K)*d+3),
                             Rcpp::Named("n") = sub_tree((5+K)*d+3),
                             Rcpp::Named("E") = H0);

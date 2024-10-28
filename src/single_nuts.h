@@ -415,7 +415,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                         const unsigned int& max_treedepth,
                         const unsigned int& d,
                         arma::uvec& idx_disc,
-                        const double& log_tau);
+                        const double& tau);
 
 // diagonal matrix case
 Rcpp::List nuts_singolo(const arma::vec& theta0,
@@ -426,7 +426,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                         const unsigned int& max_treedepth,
                         const unsigned int& d,
                         arma::uvec& idx_disc,
-                        const double& log_tau,
+                        const double& tau,
                         const arma::vec& M_inv);
 
 /* ---------------------------- RECYCLED VERSION ---------------------------- */
@@ -440,7 +440,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                         const unsigned int& max_treedepth,
                         const unsigned int& d,
                         arma::uvec& idx_disc,
-                        const double& log_tau,
+                        const double& tau,
                         const unsigned int& K);
 
 // identity matrix case
@@ -452,7 +452,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
                         const unsigned int& max_treedepth,
                         const unsigned int& d,
                         arma::uvec& idx_disc, 
-                        const double& log_tau,
+                        const double& tau,
                         const arma::vec& M_inv,
                         const unsigned int& K);
 

@@ -72,7 +72,7 @@ void adapt_stepsize(arma::vec& theta0,
   double gain = 0;
   
   //distinguish the three algorithms
-  if(log_tau == 0 && L == 0){
+  if(log_tau == 1000 && L == 0){
     //dnuts
     
     //sequentially updates the step size
@@ -442,7 +442,7 @@ void adapt_stepsize(arma::vec& theta0,
   double gain = 0;
   
   //distinguish the three algorithms
-  if(log_tau == 0 && L == 0){
+  if(log_tau == 1000 && L == 0){
     //dnuts
     
     //sequentially updates the step size
@@ -555,7 +555,7 @@ void adapt_stepsize(arma::vec& theta0,
           
           //update the mass matrix
           M_inv_disc(j) = std::exp(l_eps_init(1+j) - l_eps_init(0));
-          M_disc(j) = 1.0 / M_inv_disc(j);
+          //M_disc(j) = 1.0 / M_inv_disc(j);
           
         }
         
@@ -567,7 +567,7 @@ void adapt_stepsize(arma::vec& theta0,
           //reupdate the mass matrix
           for(j = 0; j < k; j++){
             M_inv_disc(j) = std::exp(l_eps_init(1+j) - l_eps_init(0));
-            M_disc(j) = 1.0 / M_inv_disc(j);
+            //M_disc(j) = 1.0 / M_inv_disc(j);
           }
         }
         
@@ -723,7 +723,7 @@ void adapt_stepsize(arma::vec& theta0,
           
           //update the mass matrix
           M_inv_disc(j) = std::exp(l_eps_init(1+j) - l_eps_init(0));
-          M_disc(j) = 1.0 / M_inv_disc(j);
+          //M_disc(j) = 1.0 / M_inv_disc(j);
           
         }
         
@@ -735,7 +735,7 @@ void adapt_stepsize(arma::vec& theta0,
           //reupdate the mass matrix
           for(j = 0; j < k; j++){
             M_inv_disc(j) = std::exp(l_eps_init(1+j) - l_eps_init(0));
-            M_disc(j) = 1.0 / M_inv_disc(j);
+            //M_disc(j) = 1.0 / M_inv_disc(j);
           }
         }
         
@@ -886,7 +886,7 @@ void adapt_stepsize(arma::vec& theta0,
           
           //update the mass matrix
           M_inv_disc(j) = std::exp(l_eps_init(1+j) - l_eps_init(0));
-          M_disc(j) = 1.0 / M_inv_disc(j);
+          //M_disc(j) = 1.0 / M_inv_disc(j);
           
         }
         
@@ -898,7 +898,7 @@ void adapt_stepsize(arma::vec& theta0,
           //reupdate the mass matrix
           for(j = 0; j < k; j++){
             M_inv_disc(j) = std::exp(l_eps_init(1+j) - l_eps_init(0));
-            M_disc(j) = 1.0 / M_inv_disc(j);
+            //M_disc(j) = 1.0 / M_inv_disc(j);
           }
         }
         
@@ -1034,7 +1034,7 @@ void adapt_stepsize(arma::vec& theta0,
   double gain = 0;
   
   //distinguish the three algorithms
-  if(L == 0 && log_tau == 0){
+  if(L == 0 && log_tau == 1000){
     //dnuts
     
     //sequentially updates the step size
@@ -1147,7 +1147,7 @@ void adapt_stepsize(arma::vec& theta0,
           
           //update the mass matrix
           M_inv_disc(j) = std::exp(l_eps_init(1+j) - l_eps_init(0));
-          M_disc(j) = 1.0 / M_inv_disc(j);
+          //M_disc(j) = 1.0 / M_inv_disc(j);
           
         }
         
@@ -1159,7 +1159,7 @@ void adapt_stepsize(arma::vec& theta0,
           //reupdate the mass matrix
           for(j = 0; j < k; j++){
             M_inv_disc(j) = std::exp(l_eps_init(1+j) - l_eps_init(0));
-            M_disc(j) = 1.0 / M_inv_disc(j);
+            //M_disc(j) = 1.0 / M_inv_disc(j);
           }
         }
         
@@ -1313,7 +1313,7 @@ void adapt_stepsize(arma::vec& theta0,
           
           //update the mass matrix
           M_inv_disc(j) = std::exp(l_eps_init(1+j) - l_eps_init(0));
-          M_disc(j) = 1.0 / M_inv_disc(j);
+          //M_disc(j) = 1.0 / M_inv_disc(j);
           
         }
         
@@ -1325,7 +1325,7 @@ void adapt_stepsize(arma::vec& theta0,
           //reupdate the mass matrix
           for(j = 0; j < k; j++){
             M_inv_disc(j) = std::exp(l_eps_init(1+j) - l_eps_init(0));
-            M_disc(j) = 1.0 / M_inv_disc(j);
+            //M_disc(j) = 1.0 / M_inv_disc(j);
           }
         }
         
@@ -1477,7 +1477,7 @@ void adapt_stepsize(arma::vec& theta0,
           
           //update the mass matrix
           M_inv_disc(j) = std::exp(l_eps_init(1+j) - l_eps_init(0));
-          M_disc(j) = 1.0 / M_inv_disc(j);
+          //M_disc(j) = 1.0 / M_inv_disc(j);
           
         }
         
@@ -1489,7 +1489,7 @@ void adapt_stepsize(arma::vec& theta0,
           //reupdate the mass matrix
           for(j = 0; j < k; j++){
             M_inv_disc(j) = std::exp(l_eps_init(1+j) - l_eps_init(0));
-            M_disc(j) = 1.0 / M_inv_disc(j);
+            //M_disc(j) = 1.0 / M_inv_disc(j);
           }
         }
         

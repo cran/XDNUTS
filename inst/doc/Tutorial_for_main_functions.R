@@ -1,13 +1,16 @@
 ## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = NULL
 )
 
-## ----echo = FALSE, eval = TRUE------------------------------------------------
-set.seed(123)
+## ----eval = FALSE-------------------------------------------------------------
+#  theta0 <- lapply(seq_len(N_chains),myfunction)
 
-## ----setup, eval = TRUE-------------------------------------------------------
+## ----echo = FALSE, eval = FALSE-----------------------------------------------
+#  set.seed(123)
+
+## ----setup, eval = TRUE, echo = FALSE-----------------------------------------
 library(XDNUTS)
 
 ## ----eval = TRUE--------------------------------------------------------------
@@ -33,7 +36,7 @@ nlp <- function(par,args,eval_nlp = TRUE){
     if(any(par > 30)) return(Inf) 
     
     #conversion of the r value
-    r <- floor(1 + args$data*plogis(par[2]))
+    r <- ceiling(1 + args$data*plogis(par[2])) - 1
     
     #output
     out <- sum(log(seq_len(r-1))) + 
@@ -50,7 +53,7 @@ nlp <- function(par,args,eval_nlp = TRUE){
     if(any(par > 30)) return(Inf) 
     
     #conversion of the r value
-    r <- floor(1 + args$data*plogis(par[2]))
+    r <- ceiling(1 + args$data*plogis(par[2])) - 1
     
     #output
     return( (args$data - r + args$hyp[2]) - 
@@ -71,31 +74,34 @@ chains <- xdnuts(theta0 = lapply(1:4,function(x) c(omega = rnorm(1),r_hat = rnor
                  method = "NUTS",
                  hide = TRUE)
 
-## ----out.width='60%', out.height='60%', eval = TRUE---------------------------
+## -----------------------------------------------------------------------------
+chains
+
+## ----out.width='70%', out.height='70%', eval = TRUE, dpi = 300----------------
 plot(chains)
 
-## ----out.width='60%', out.height='60%', eval = TRUE---------------------------
-plot(chains, type = 2)
+## ----out.width='70%', out.height='70%', eval = TRUE, dpi = 300----------------
+plot(chains, type = 2, gg = FALSE)
 
-## ----out.width='60%', out.height='60%', eval = TRUE---------------------------
+## ----out.width='70%', out.height='70%', eval = TRUE, dpi = 300----------------
 plot(chains, type = 3)
 
-## ----out.width='60%', out.height='60%', eval = TRUE---------------------------
+## ----out.width='70%', out.height='70%', eval = TRUE, dpi = 300----------------
 plot(chains, type = 4)
 
-## ----out.width='60%', out.height='60%', eval = TRUE---------------------------
+## ----out.width='70%', out.height='70%', eval = TRUE, dpi = 300----------------
 plot(chains, type = 5)
 
-## ----out.width='60%', out.height='60%', eval = TRUE---------------------------
+## ----out.width='70%', out.height='70%', eval = TRUE, dpi = 300----------------
 plot(chains, type = 6)
 
-## ----out.width='60%', out.height='60%', eval = TRUE---------------------------
+## ----out.width='70%', out.height='70%', eval = TRUE, dpi = 300----------------
 plot(chains, type = 7)
 
-## ----warning=FALSE, message=FALSE, out.width='60%',out.height='60%', eval = TRUE----
+## ----warning=FALSE, message=FALSE, out.width='70%',out.height='70%', eval = TRUE----
 summary(chains)
 
-## ----eval = TRUE--------------------------------------------------------------
+## ----eval = TRUE, dpi = 300---------------------------------------------------
 #MCMC
 set.seed(1)
 chains <- xdnuts(theta0 = lapply(1:4,function(x) rnorm(2)),
@@ -106,30 +112,30 @@ chains <- xdnuts(theta0 = lapply(1:4,function(x) rnorm(2)),
                  parallel = FALSE,
                  method = "XHMC",
                  hide = TRUE,
-                 tau = 1)
+                 tau = 0.01)
 
 ## ----eval = TRUE--------------------------------------------------------------
 #define the function to be applied to each sample
 f <- function(x,XX) {
   c(
     plogis(x[1]), #inverse logistic for the probability
-    floor(1 + XX*plogis(x[2])) #number of trials
+    ceiling(1 + XX*plogis(x[2])) - 1 #number of trials
   )
 }
 original_chains <- xdtransform(X = chains, which = NULL,
                                FUN = f,XX = arglist$data,
                                new.names = c("p","r"))
 
-## ----out.width='60%', out.height='60%', eval = TRUE---------------------------
-plot(original_chains, type = 2)
+## ----out.width='70%', out.height='70%', eval = TRUE, dpi = 300----------------
+plot(original_chains, type = 2, gg = FALSE)
 
-## ----out.width='60%', out.height='60%', eval = TRUE---------------------------
+## ----out.width='70%', out.height='70%', eval = TRUE, dpi = 300----------------
 plot(original_chains, type = 4)
 
-## ----out.width='60%', out.height='60%', eval = TRUE---------------------------
+## ----out.width='70%', out.height='70%', eval = TRUE, dpi = 300----------------
 plot(original_chains, type = 6)
 
-## ----out.width='60%', out.height='60%', eval = TRUE---------------------------
+## ----out.width='70%', out.height='70%', eval = TRUE, dpi = 300----------------
 summary(original_chains)
 
 ## ----eval = TRUE--------------------------------------------------------------
@@ -193,7 +199,7 @@ nlp <- function(par,args,eval_nlp = TRUE){
 set.seed(1)
 chains <- xdnuts(theta0 = lapply(1:4,function(x) {
                       out <- rnorm(3 + 6)
-                      names(out) <- c("mu","log_sigma2","log_sigma2_a",
+                      names(out) <- c("mu","log_s2","log_s2_a",
                                       paste0("mu",1:6))
                       out}),
                  nlp = nlp,
@@ -203,29 +209,34 @@ chains <- xdnuts(theta0 = lapply(1:4,function(x) {
                  parallel = FALSE,
                  method = "HMC",
                  hide = TRUE,
-                 L = 20,
-                 control = set_parameters(L_jitter = 5))
+                 L = 31,
+                 control = set_parameters(L_jitter = 5,
+                                          N_adapt = 1e3,
+                                          keep_warm_up = TRUE))
+
+## ----out.width='70%', out.height='70%', eval = TRUE, dpi = 300----------------
+plot(chains,warm_up = TRUE)
 
 ## ----eval = TRUE--------------------------------------------------------------
 original_chains <- xdtransform(X = chains,which = 2:3,
-                               FUN = exp,new.names = c("sigma2","sigma2_a"))
+                               FUN = exp,new.names = c("s2","s2_a"))
 
-## ----out.width='60%', out.height='60%', eval = TRUE---------------------------
+## ----out.width='70%', out.height='70%', eval = TRUE, dpi = 300----------------
 plot(original_chains, type = 3)
 
-## ----out.width='60%', out.height='60%', eval = TRUE---------------------------
-plot(original_chains, type = 2, which = 1:3) #fixed
+## ----out.width='70%', out.height='70%', eval = TRUE, dpi = 300----------------
+plot(original_chains, type = 2, which = 1:3, gg = FALSE, scale = 0.5)#fixed
 
-## ----out.width='60%', out.height='60%', eval = TRUE---------------------------
-plot(original_chains, type = 2, which = 4:9) #random
+## ----out.width='70%', out.height='70%', eval = TRUE, dpi = 300----------------
+plot(original_chains, type = 2, which = 4:9, gg = FALSE, scale = 0.5)#random
 
-## ----out.width='60%', out.height='60%', eval = TRUE---------------------------
+## ----out.width='70%', out.height='70%', eval = TRUE, dpi = 300----------------
 plot(original_chains, type = 6)
 
-## ----out.width='60%', out.height='60%', eval = TRUE---------------------------
-summary(original_chains)
+## ----out.width='70%', out.height='70%', eval = TRUE---------------------------
+summary(original_chains, q.val = c(0.05,0.5,0.95))
 
-## ----eval = TRUE--------------------------------------------------------------
+## ----out.width='70%', out.height='70%', eval = TRUE, dpi = 300----------------
 #extract samples into matrix
 theta <- xdextract(original_chains,collapse = TRUE)
 

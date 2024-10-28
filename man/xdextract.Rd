@@ -4,7 +4,14 @@
 \alias{xdextract}
 \title{Function to extract samples from the output of an XDNUTS model.}
 \usage{
-xdextract(X, which = NULL, which_chains = NULL, collapse = FALSE)
+xdextract(
+  X,
+  which = NULL,
+  which_chains = NULL,
+  collapse = FALSE,
+  thin = NULL,
+  burn = NULL
+)
 }
 \arguments{
 \item{X}{an object of class \code{XDNUTS}.}
@@ -18,6 +25,10 @@ where both \eqn{d} and \eqn{k} are elements contained in the output of the funct
 \item{which_chains}{a vector of indices containing the chains to extract. By default, all chains are considered.}
 
 \item{collapse}{a boolean value. If TRUE, all samples from every chain are collapsed into one. The default value is FALSE.}
+
+\item{thin}{an integer value indicating how many samples should be discarded before returning an iteration of the chain.}
+
+\item{burn}{an integer value indicating how many initial samples for each chain to burn.}
 }
 \value{
 an \eqn{N \times d} matrix or an \eqn{N \times d \times C} array, where C is the number of chains, containing the MCMC samples.

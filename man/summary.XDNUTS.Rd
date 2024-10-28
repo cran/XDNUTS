@@ -9,8 +9,7 @@
   ...,
   q.val = c(0.05, 0.25, 0.5, 0.75, 0.95),
   which = NULL,
-  which_chains = NULL,
-  digits = 5
+  which_chains = NULL
 )
 }
 \arguments{
@@ -28,8 +27,6 @@ Default values are \code{0.05,0.25,0.5,0.75,0.95}.}
 where both \eqn{d} and \eqn{k} are elements contained in the output of the function \link{xdnuts}.}
 
 \item{which_chains}{a numerical vector indicating the index of the chains of interest.}
-
-\item{digits}{number of digits in the summary table.}
 }
 \value{
 a list containing a data frame named \code{stats} with the following columns: \describe{\item{mean}{the mean of the posterior distribution.}
@@ -43,7 +40,9 @@ Other quantities returned are:\describe{
 \item{Gelman.Test}{the value of the multivariate Potential Scale Reduction Factor test \insertCite{gelman1992inference}{XDNUTS}.}
 \item{BFMI}{the value of the empirical Bayesian Fraction of Information Criteria \insertCite{betancourt2016diagnosing}{XDNUTS}. 
 A value below 0.2 indicates a bad random walk behavior in the energy Markov Chain, mostly due to a suboptimal
-specification of the momentum parameters probability density.}}
+specification of the momentum parameters probability density.}
+\item{n_div}{the total number of trajectory ended with a divergent transition.}
+\item{n_premature}{the total number of trajectory with a premature termination.}}
 }
 \description{
 Function to print the summary of an XDNUTS model.

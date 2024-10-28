@@ -68,7 +68,7 @@ void mcmc(arma::vec& theta0,
   double delta_E = 0;
   
   //let's distinguish the various algorithms
-  if(L == 0 && log_tau == 0){
+  if(L == 0 && log_tau == 1000){
     //dnuts
     
     //for loop
@@ -240,7 +240,7 @@ void mcmc(arma::vec& theta0,
                                    max_treedepth,
                                    d,
                                    idx_disc,
-                                   log_tau);
+                                   std::exp(log_tau));
           
           theta = Rcpp::as<arma::vec>(iteration["theta"]);
           //if you get to the last iteration calculate the delta E
@@ -507,8 +507,8 @@ void mcmc(arma::vec& theta0,
   //define the energy leap
   double delta_E = 0;
   
-  //distinguiamo i diversi algoritmi
-  if(L == 0 && log_tau == 0){
+  //let's distinguish the various algorithms
+  if(L == 0 && log_tau == 1000){
     //dnuts
     
     //for loop
@@ -684,7 +684,7 @@ void mcmc(arma::vec& theta0,
                                    max_treedepth,
                                    d,
                                    idx_disc,
-                                   log_tau,
+                                   std::exp(log_tau),
                                    M_inv_disc);
           
           theta = Rcpp::as<arma::vec>(iteration["theta"]);
@@ -768,7 +768,7 @@ void mcmc(arma::vec& theta0,
     
     //for loop
     for(unsigned int i = 0; i < N; i++){
-    
+      
       if(k == 0){
         //classi nuts
         
@@ -960,7 +960,7 @@ void mcmc(arma::vec& theta0,
   double delta_E = 0;
   
   //let's distinguish the various algorithms
-  if(L == 0 && log_tau == 0){
+  if(L == 0 && log_tau == 1000){
     //dnuts 
     
     //for loop
@@ -1137,7 +1137,7 @@ void mcmc(arma::vec& theta0,
                                    max_treedepth,
                                    d,
                                    idx_disc,
-                                   log_tau,
+                                   std::exp(log_tau),
                                    M_inv_disc);
           
           theta = Rcpp::as<arma::vec>(iteration["theta"]);
@@ -1399,9 +1399,9 @@ void mcmc(arma::vec& theta0,
   
   //calculate the current value of energy with momentum equal to zero
   double H0 = Rcpp::as<double>(nlp(theta0,args,1));
-
+  
   //let's distinguish the various algorithms
-  if(L == 0 && log_tau == 0){
+  if(L == 0 && log_tau == 1000){
     //dnuts
     
     //for loop
@@ -1438,7 +1438,7 @@ void mcmc(arma::vec& theta0,
                                  max_treedepth,
                                  d,
                                  idx_disc,
-                                 K-1);
+                                 K);
         
       }else {
         // dnuts
@@ -1462,27 +1462,13 @@ void mcmc(arma::vec& theta0,
       
       
       //mcmc
-      if(k == d){
-        //pure dnuts
-        
-        //recycled samples
-        out.row(K*i) = Rcpp::as<arma::vec>(iteration["theta"]).t();
-        out.rows(K*i + 1,K*i + K - 1) = arma::reshape(Rcpp::as<arma::vec>(iteration["theta_rec"]),d,K-1).t();
-        
-        //update the current value of the chain
-        theta = out.row(K*i).t();
-        
-        
-      }else{
-        //ohter
-        
-        //recycled samples
-        out.rows(K*i,K*i + K - 1) = arma::reshape(Rcpp::as<arma::vec>(iteration["theta"]),d,K).t();
-        
-        //update the current value of the chain
-        theta = out.row(K*i).t();
-      }
+
+      //recycled samples
+      out.rows(K*i,K*i + K - 1) = arma::reshape(Rcpp::as<arma::vec>(iteration["theta"]),d,K).t();
       
+      //update the current value of the chain
+      theta = out.row(K*i).t();
+
       //check if the console update condition is met
       if(i == seq_idx(conta)){
         //print to console
@@ -1549,8 +1535,8 @@ void mcmc(arma::vec& theta0,
                                  max_treedepth,
                                  d,
                                  idx_disc,
-                                 log_tau,
-                                 K-1);
+                                 std::exp(log_tau),
+                                 K);
         
       }else {
         // dnuts
@@ -1575,26 +1561,12 @@ void mcmc(arma::vec& theta0,
       
       
       //mcmc
-      if(k == d){
-        //pure dnuts
-        
-        //recycled samples
-        out.row(K*i) = Rcpp::as<arma::vec>(iteration["theta"]).t();
-        out.rows(K*i + 1,K*i + K - 1) = arma::reshape(Rcpp::as<arma::vec>(iteration["theta_rec"]),d,K-1).t();
-        
-        //update the current value of the chain
-        theta = out.row(K*i).t();
-        
-        
-      }else{
-        //other
-        
-        //recycled samples
-        out.rows(K*i,K*i + K - 1) = arma::reshape(Rcpp::as<arma::vec>(iteration["theta"]),d,K).t();
-        
-        //update the current value of the chain
-        theta = out.row(K*i).t();
-      }
+      
+      //recycled samples
+      out.rows(K*i,K*i + K - 1) = arma::reshape(Rcpp::as<arma::vec>(iteration["theta"]),d,K).t();
+      
+      //update the current value of the chain
+      theta = out.row(K*i).t();
       
       //check if the console update condition is met
       if(i == seq_idx(conta)){
@@ -1780,9 +1752,9 @@ void mcmc(arma::vec& theta0,
   
   //calculate the current value of energy with momentum equal to zero
   double H0 = Rcpp::as<double>(nlp(theta0,args,1));
-
+  
   //let's distinguish the various algorithms
-  if(L == 0 && log_tau == 0){
+  if(L == 0 && log_tau == 1000){
     //dnuts
     
     //for loop
@@ -1821,7 +1793,7 @@ void mcmc(arma::vec& theta0,
                                  d,
                                  idx_disc,
                                  M_inv_disc,
-                                 K-1);
+                                 K);
         
       }else {
         // dnuts
@@ -1848,26 +1820,12 @@ void mcmc(arma::vec& theta0,
       
       
       //mcmc
-      if(k == d){
-        //pure dnuts
-        
-        //recycled samples
-        out.row(K*i) = Rcpp::as<arma::vec>(iteration["theta"]).t();
-        out.rows(K*i + 1,K*i + K - 1) = arma::reshape(Rcpp::as<arma::vec>(iteration["theta_rec"]),d,K-1).t();
-        
-        //update the current value of the chain
-        theta = out.row(K*i).t();
-        
-        
-      }else{
-        //other
-        
-        //recycled samples
-        out.rows(K*i,K*i + K - 1) = arma::reshape(Rcpp::as<arma::vec>(iteration["theta"]),d,K).t();
-        
-        //update the current value of the chain
-        theta = out.row(K*i).t();
-      }
+      
+      //recycled samples
+      out.rows(K*i,K*i + K - 1) = arma::reshape(Rcpp::as<arma::vec>(iteration["theta"]),d,K).t();
+      
+      //update the current value of the chain
+      theta = out.row(K*i).t();
       
       //check if the console update condition is met
       if(i == seq_idx(conta)){
@@ -1936,9 +1894,9 @@ void mcmc(arma::vec& theta0,
                                  max_treedepth,
                                  d,
                                  idx_disc,
-                                 log_tau,
+                                 std::exp(log_tau),
                                  M_inv_disc,
-                                 K-1);
+                                 K);
         
       }else {
         // dnuts
@@ -1966,26 +1924,12 @@ void mcmc(arma::vec& theta0,
       
       
       //mcmc
-      if(k == d){
-        //pure dnuts
-        
-        //recycled samples
-        out.row(K*i) = Rcpp::as<arma::vec>(iteration["theta"]).t();
-        out.rows(K*i + 1,K*i + K - 1) = arma::reshape(Rcpp::as<arma::vec>(iteration["theta_rec"]),d,K-1).t();
-        
-        //update the current value of the chain
-        theta = out.row(K*i).t();
-        
-        
-      }else{
-        //other
-        
-        //recycled samples
-        out.rows(K*i,K*i + K - 1) = arma::reshape(Rcpp::as<arma::vec>(iteration["theta"]),d,K).t();
-        
-        //update the current value of the chain
-        theta = out.row(K*i).t();
-      }
+      
+      //recycled samples
+      out.rows(K*i,K*i + K - 1) = arma::reshape(Rcpp::as<arma::vec>(iteration["theta"]),d,K).t();
+      
+      //update the current value of the chain
+      theta = out.row(K*i).t();
       
       //check if the console update condition is met
       if(i == seq_idx(conta)){
@@ -2017,7 +1961,7 @@ void mcmc(arma::vec& theta0,
     }
   }else {
     // dhmc
-   
+    
     //for loop
     for(unsigned int i = 0; i < N; i++){
       
@@ -2178,7 +2122,7 @@ void mcmc(arma::vec& theta0,
   double H0 = Rcpp::as<double>(nlp(theta0,args,1));
   
   //let's distinguish the various algorithms
-  if(L == 0 && log_tau == 0){
+  if(L == 0 && log_tau == 1000){
     //dnuts
     
     //for loop
@@ -2217,7 +2161,7 @@ void mcmc(arma::vec& theta0,
                                  d,
                                  idx_disc,
                                  M_inv_disc,
-                                 K-1);
+                                 K);
         
       }else {
         // dnuts
@@ -2244,26 +2188,12 @@ void mcmc(arma::vec& theta0,
       
       
       //mcmc
-      if(k == d){
-        //pure dnuts
-        
-        //recycled samples
-        out.row(K*i) = Rcpp::as<arma::vec>(iteration["theta"]).t();
-        out.rows(K*i + 1,K*i + K - 1) = arma::reshape(Rcpp::as<arma::vec>(iteration["theta_rec"]),d,K-1).t();
-        
-        //update the current value of the chain
-        theta = out.row(K*i).t();
-        
-        
-      }else{
-        //other
-        
-        //recycled samples
-        out.rows(K*i,K*i + K - 1) = arma::reshape(Rcpp::as<arma::vec>(iteration["theta"]),d,K).t();
-        
-        //update the current value of the chain
-        theta = out.row(K*i).t();
-      }
+      
+      //recycled samples
+      out.rows(K*i,K*i + K - 1) = arma::reshape(Rcpp::as<arma::vec>(iteration["theta"]),d,K).t();
+      
+      //update the current value of the chain
+      theta = out.row(K*i).t();
       
       //check if the console update condition is met
       if(i == seq_idx(conta)){
@@ -2332,9 +2262,9 @@ void mcmc(arma::vec& theta0,
                                  max_treedepth,
                                  d,
                                  idx_disc,
-                                 log_tau,
+                                 std::exp(log_tau),
                                  M_inv_disc,
-                                 K-1);
+                                 K);
         
       }else {
         // dnuts
@@ -2362,26 +2292,12 @@ void mcmc(arma::vec& theta0,
       
       
       //mcmc
-      if(k == d){
-        //pure dnuts
+      
+      //recycled samples
+      out.rows(K*i,K*i + K - 1) = arma::reshape(Rcpp::as<arma::vec>(iteration["theta"]),d,K).t();
         
-        //recycled samples
-        out.row(K*i) = Rcpp::as<arma::vec>(iteration["theta"]).t();
-        out.rows(K*i + 1,K*i + K - 1) = arma::reshape(Rcpp::as<arma::vec>(iteration["theta_rec"]),d,K-1).t();
-        
-        //update the current value of the chain
-        theta = out.row(K*i).t();
-        
-        
-      }else{
-        //other
-        
-        //recycled samples
-        out.rows(K*i,K*i + K - 1) = arma::reshape(Rcpp::as<arma::vec>(iteration["theta"]),d,K).t();
-        
-        //update the current value of the chain
-        theta = out.row(K*i).t();
-      }
+      //update the current value of the chain
+      theta = out.row(K*i).t();
       
       //check if the console update condition is met
       if(i == seq_idx(conta)){
@@ -2481,7 +2397,7 @@ void mcmc(arma::vec& theta0,
       
       //recycled samples
       out.rows(K*i,K*i + K - 1) = arma::reshape(Rcpp::as<arma::vec>(iteration["theta"]),d,K).t();
-        
+      
       //update the current value of the chain
       theta = out.row(K*i).t();
       
@@ -2561,7 +2477,7 @@ void mcmc_wrapper(arma::mat& out,
     
     if(K == 1 || (M_type == "identity" && warm_up)){
       //without recycling samples
-
+      
       mcmc(theta,
            nlp,
            args,
@@ -2583,7 +2499,7 @@ void mcmc_wrapper(arma::mat& out,
            log_tau,
            L,
            L_jitter);
-
+      
     }else{
       //with recycling samples
       mcmc(theta,
@@ -2658,7 +2574,7 @@ void mcmc_wrapper(arma::mat& out,
              M_disc,
              M_inv_cont_diag,
              M_inv_disc);
-      
+        
       }else{
         //with recycling
         mcmc(theta,
