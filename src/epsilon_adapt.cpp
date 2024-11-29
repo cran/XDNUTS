@@ -1568,6 +1568,9 @@ void adapt_stepsize_wrapper(arma::vec& theta,
   //initialize momentum vector
   arma::vec m(d);
   
+  //initialize the epsilon vector
+  arma::vec epsilon;
+  
   if(M_type == "identity" || (M_cont_diag.n_elem == 0 && M_cont_dense.n_elem == 0 && M_disc.n_elem == 0)){
     //identity matrix case
     
@@ -1585,7 +1588,8 @@ void adapt_stepsize_wrapper(arma::vec& theta,
                            m,
                            nlp,
                            args,
-                           d);
+                           d,
+                           0);
         
       }else if(k == d){
         //pure dnuts
@@ -1594,12 +1598,26 @@ void adapt_stepsize_wrapper(arma::vec& theta,
         m = rlaplace(d); //laplace
         
         //initialization
-        eps = init_epsilon(theta,
+        epsilon = init_epsilon(theta,
                            m,
                            nlp,
                            args,
                            d,
                            idx_disc);
+        
+        //if different step size is enable change the inverse mass matrix
+        if(Rcpp::as<bool>(control["different_stepsize"])){
+          //take the mean value
+          eps = arma::mean(epsilon);
+          
+          //update the mass matrix
+          M_inv_disc = epsilon / eps;
+            
+        }else{
+          //take the mean of epsilon as the global initial step size
+          eps = arma::mean(epsilon);
+        }
+        
         
       }else {
         //mixed dnuts
@@ -1609,13 +1627,27 @@ void adapt_stepsize_wrapper(arma::vec& theta,
         m.subvec(d-k,d-1) = rlaplace(k); //laplace
         
         //initialization
-        eps = init_epsilon(theta,
+        epsilon = init_epsilon(theta,
                            m,
                            nlp,
                            args,
                            d,
                            k,
                            idx_disc);
+        
+        //if different step size is enable change the inverse mass matrix
+        if(Rcpp::as<bool>(control["different_stepsize"])){
+          //take the global initial step size
+          eps = epsilon(0);
+          
+          //update the discontinuous mass matrix
+          M_inv_disc = epsilon.subvec(1,k) / eps;
+          M_disc = arma::ones<arma::vec>(k);
+          
+        }else{
+          //take the mean value
+          eps = arma::mean(epsilon);
+        }
       }
     }
     
@@ -1626,17 +1658,38 @@ void adapt_stepsize_wrapper(arma::vec& theta,
     }
     
     //adaptive calibration via dual averaging
-    adapt_stepsize(theta,
-                   nlp,
-                   args,
-                   eps,
-                   d,
-                   k,
-                   idx_disc,
-                   control,
-                   N_init,
-                   log_tau,
-                   L);
+    if(Rcpp::as<bool>(control["different_stepsize"])){
+      //create a fictitiuous M_cont_diag matrix
+      arma::vec M_cont_diag_one = arma::ones<arma::vec>(d-k);
+      adapt_stepsize(theta,
+                     nlp,
+                     args,
+                     eps,
+                     d,
+                     k,
+                     idx_disc,
+                     control,
+                     N_init,
+                     log_tau,
+                     L,
+                     M_cont_diag_one,
+                     M_disc,
+                     M_cont_diag_one,
+                     M_inv_disc);
+    }else{
+      //no matrix needed
+      adapt_stepsize(theta,
+                     nlp,
+                     args,
+                     eps,
+                     d,
+                     k,
+                     idx_disc,
+                     control,
+                     N_init,
+                     log_tau,
+                     L);
+    }
       
   }else if(M_type == "diagonal"){
     //diagonal matrix case
@@ -1656,6 +1709,7 @@ void adapt_stepsize_wrapper(arma::vec& theta,
                            nlp,
                            args,
                            d,
+                           0,
                            M_inv_cont_diag);
         
       }else if(k == d){
@@ -1665,13 +1719,26 @@ void adapt_stepsize_wrapper(arma::vec& theta,
         m = M_disc % rlaplace(d); //laplace
         
         //initialization
-        eps = init_epsilon(theta,
+        epsilon = init_epsilon(theta,
                            m,
                            nlp,
                            args,
                            d,
                            idx_disc,
                            M_inv_disc);
+        
+        //if different step size is enable change the inverse mass matrix
+        if(Rcpp::as<bool>(control["different_stepsize"])){
+          //take the mean value
+          eps = arma::mean(epsilon);
+          
+          //update the mass matrix
+          M_inv_disc %= epsilon / eps;
+          
+        }else{
+          //take the mean of epsilon as the global initial step size
+          eps = arma::mean(epsilon);
+        }
         
       }else {
         //mixed dnuts
@@ -1681,7 +1748,7 @@ void adapt_stepsize_wrapper(arma::vec& theta,
         m.subvec(d-k,d-1) = M_disc % rlaplace(k); //laplace
         
         //initialization
-        eps = init_epsilon(theta,
+        epsilon = init_epsilon(theta,
                            m,
                            nlp,
                            args,
@@ -1690,6 +1757,19 @@ void adapt_stepsize_wrapper(arma::vec& theta,
                            idx_disc,
                            M_inv_cont_diag,
                            M_inv_disc);
+        
+        //if different step size is enable change the inverse mass matrix
+        if(Rcpp::as<bool>(control["different_stepsize"])){
+          //take the first value
+          eps = epsilon(0);
+          
+          //update the mass matrix
+          M_inv_disc %= epsilon.subvec(1,k) / eps;
+          
+        }else{
+          //take the mean of epsilon as the global initial step size
+          eps = arma::mean(epsilon);
+        }
       }
     }
     
@@ -1728,6 +1808,7 @@ void adapt_stepsize_wrapper(arma::vec& theta,
                            nlp,
                            args,
                            d,
+                           0,
                            M_inv_cont_dense);
         
       }else if(k == d){
@@ -1737,13 +1818,26 @@ void adapt_stepsize_wrapper(arma::vec& theta,
         m = M_disc % rlaplace(d); //laplace
         
         //initialization
-        eps = init_epsilon(theta,
+        epsilon = init_epsilon(theta,
                            m,
                            nlp,
                            args,
                            d,
                            idx_disc,
                            M_inv_disc);
+        
+        //if different step size is enable change the inverse mass matrix
+        if(Rcpp::as<bool>(control["different_stepsize"])){
+          //take the mean value
+          eps = arma::mean(epsilon);
+          
+          //update the mass matrix
+          M_inv_disc %= epsilon / eps;
+          
+        }else{
+          //take the mean of epsilon as the global initial step size
+          eps = arma::mean(epsilon);
+        }
         
       }else {
         //mixed dnuts
@@ -1753,7 +1847,7 @@ void adapt_stepsize_wrapper(arma::vec& theta,
         m.subvec(d-k,d-1) = M_disc % rlaplace(k); //laplace
         
         //initialization
-        eps = init_epsilon(theta,
+        epsilon = init_epsilon(theta,
                            m,
                            nlp,
                            args,
@@ -1762,6 +1856,19 @@ void adapt_stepsize_wrapper(arma::vec& theta,
                            idx_disc,
                            M_inv_cont_dense,
                            M_inv_disc);
+        
+        //if different step size is enable change the inverse mass matrix
+        if(Rcpp::as<bool>(control["different_stepsize"])){
+          //take the first value
+          eps = epsilon(0);
+          
+          //update the mass matrix
+          M_inv_disc %= epsilon.subvec(1,k) / eps;
+          
+        }else{
+          //take the mean of epsilon as the global initial step size
+          eps = arma::mean(epsilon);
+        }
       }
     }
     

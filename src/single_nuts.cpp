@@ -511,24 +511,24 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
       
       //sample from the trajectory
-      if(arma::randu() < alpha){
-        sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
-      }
-      
+      // if(arma::randu() < alpha){
+      //   sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
+      // }
+      // 
       //uniform for the others
+      
+      //sample from the trajectory
+      for(unsigned int i = 0; i < K; i++){
+        if(arma::randu() < alpha){
+          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
+        }
+      }
       
       //cumulate the log multinomial weights
       sub_tree((5+K)*d) = arma::log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
       
       //recalculate alpha
-      alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
-      
-      //sample from the trajectory
-      for(unsigned int i = 1; i < K; i++){
-        if(arma::randu() < alpha){
-          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
-        }
-      }
+      //alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
       
       //and update the cumulative sum of the kinetic energy gradients
       sub_tree.subvec((4+K)*d,(5+K)*d-1) += sub_tree2.subvec((4+K)*d,(5+K)*d-1);
@@ -667,8 +667,15 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
       
       //sample from the trajectory
-      if(arma::randu() < alpha){
-        sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
+      // if(arma::randu() < alpha){
+      //   sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
+      // }
+      
+      //sample from the trajectory
+      for(unsigned int i = 0; i < K; i++){
+        if(arma::randu() < alpha){
+          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
+        }
       }
       
       //uniform for the others
@@ -677,15 +684,8 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       sub_tree((5+K)*d) = arma::log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
       
       //recalculate alpha
-      alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
+      //alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
       
-      //sample from the trajectory
-      for(unsigned int i = 1; i < K; i++){
-        if(arma::randu() < alpha){
-          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
-        }
-      }
-
       //and update the cumulative sum of the kinetic energy gradients
       sub_tree.subvec((4+K)*d,(5+K)*d-1) += sub_tree2.subvec((4+K)*d,(5+K)*d-1);
       
@@ -825,24 +825,24 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
       
       //sample from the trajectory
-      if(arma::randu() < alpha){
-        sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
-      }
+      // if(arma::randu() < alpha){
+      //   sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
+      // }
       
       //uniform for the others
+      
+      //sample from the trajectory
+      for(unsigned int i = 0; i < K; i++){
+        if(arma::randu() < alpha){
+          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
+        }
+      }
       
       //cumulate the log multinomial weights
       sub_tree((5+K)*d) = arma::log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
       
       //recalculate alpha
-      alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
-      
-      //sample from the trajectory
-      for(unsigned int i = 1; i < K; i++){
-        if(arma::randu() < alpha){
-          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
-        }
-      }
+      //alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
       
       //and update the cumulative sum of the kinetic energy gradients
       sub_tree.subvec((4+K)*d,(5+K)*d-1) += sub_tree2.subvec((4+K)*d,(5+K)*d-1);
@@ -1331,8 +1331,15 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
       
       //sample from the trajectory
-      if(arma::randu() < alpha){
-        sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
+      // if(arma::randu() < alpha){
+      //   sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
+      // }
+      
+      //sample from the trajectory
+      for(unsigned int i = 0; i < K; i++){
+        if(arma::randu() < alpha){
+          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
+        }
       }
       
       //uniform for the others
@@ -1341,14 +1348,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       sub_tree((5+K)*d) = arma::log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
       
       //recalculate alpha
-      alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
-      
-      //sample from the trajectory
-      for(unsigned int i = 1; i < K; i++){
-        if(arma::randu() < alpha){
-          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
-        }
-      }
+      //alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
       
       //and update the cumulative sum of the kinetic energy gradients
       sub_tree.subvec((4+K)*d,(5+K)*d-1) += sub_tree2.subvec((4+K)*d,(5+K)*d-1);
@@ -1472,8 +1472,15 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
       
       //sample from the trajectory
-      if(arma::randu() < alpha){
-        sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
+      // if(arma::randu() < alpha){
+      //   sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
+      // }
+      
+      //sample from the trajectory
+      for(unsigned int i = 0; i < K; i++){
+        if(arma::randu() < alpha){
+          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
+        }
       }
       
       //uniform for the others
@@ -1482,14 +1489,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       sub_tree((5+K)*d) = arma::log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
       
       //recalculate alpha
-      alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
-      
-      //sample from the trajectory
-      for(unsigned int i = 1; i < K; i++){
-        if(arma::randu() < alpha){
-          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
-        }
-      }
+      //alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
       
       //and update the cumulative sum of the kinetic energy gradients
       sub_tree.subvec((4+K)*d,(5+K)*d-1) += sub_tree2.subvec((4+K)*d,(5+K)*d-1);
@@ -1613,8 +1613,15 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
       
       //sample from the trajectory
-      if(arma::randu() < alpha){
-        sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
+      // if(arma::randu() < alpha){
+      //   sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
+      // }
+      
+      //sample from the trajectory
+      for(unsigned int i = 0; i < K; i++){
+        if(arma::randu() < alpha){
+          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
+        }
       }
       
       //uniform for the others
@@ -1623,15 +1630,8 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       sub_tree((5+K)*d) = arma::log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
       
       //recalculate alpha
-      alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
+      //alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
       
-      //sample from the trajectory
-      for(unsigned int i = 1; i < K; i++){
-        if(arma::randu() < alpha){
-          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
-        }
-      }
-
       //and update the cumulative sum of the kinetic energy gradients
       sub_tree.subvec((4+K)*d,(5+K)*d-1) += sub_tree2.subvec((4+K)*d,(5+K)*d-1);
       
@@ -2006,14 +2006,15 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
     if(!sub_tree2((5+K)*d+1)){
       
       //biased probability for the proposed value
-      sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
+      //sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
+      sub_tree.subvec(4*d,(4+K)*d-1) = sub_tree2.subvec(4*d,(4+K)*d-1);
       
       //uniform for the others
-      for(unsigned int i = 1; i < K; i++){
-        if(arma::randu() < 0.5){
-          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
-        }
-      }
+      // for(unsigned int i = 1; i < K; i++){
+      //   if(arma::randu() < 0.5){
+      //     sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
+      //   }
+      // }
       
       //and update the cumulative sum of the kinetic energy gradients
       sub_tree.subvec((4+K)*d,(5+K)*d-1) += sub_tree2.subvec((4+K)*d,(5+K)*d-1);
@@ -2142,14 +2143,15 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
     if(!sub_tree2((5+K)*d+1)){
       
       //biased probability for the proposed value
-      sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
+      //sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
+      sub_tree.subvec(4*d,(4+K)*d-1) = sub_tree2.subvec(4*d,(4+K)*d-1);
       
       //uniform for the others
-      for(unsigned int i = 1; i < K; i++){
-        if(arma::randu() < 0.5){
-          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
-        }
-      }
+      // for(unsigned int i = 1; i < K; i++){
+      //   if(arma::randu() < 0.5){
+      //     sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
+      //   }
+      // }
       
       //and update the cumulative sum of the kinetic energy gradients
       sub_tree.subvec((4+K)*d,(5+K)*d-1) += sub_tree2.subvec((4+K)*d,(5+K)*d-1);
@@ -2695,24 +2697,23 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
       
       //sample from the trajectory
-      if(arma::randu() < alpha){
-        sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
+      // if(arma::randu() < alpha){
+      //   sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
+      // }
+      for(unsigned int i = 0; i < K; i++){
+        if(arma::randu() < alpha){
+          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
+        }
       }
-      
       //uniform sampling for the recycled values
       
       //cumulate the log multinomial weights
       sub_tree((4+K)*d) = arma::log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
       
       //update alpha
-      alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
+      //alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
       
       //sample from the trajectory
-      for(unsigned int i = 1; i < K; i++){
-        if(arma::randu() < alpha){
-          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
-        }
-      }
       
       //check the condition of the virial:
       
@@ -2860,24 +2861,24 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
       
       //sample from the trajectory
-      if(arma::randu() < alpha){
-        sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
+      // if(arma::randu() < alpha){
+      //   sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
+      // }
+      for(unsigned int i = 0; i < K; i++){
+        if(arma::randu() < alpha){
+          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
+        }
       }
-      
       //uniform sampling for the recycled values
       
       //cumulate the log multinomial weights
       sub_tree((4+K)*d) = arma::log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
       
       //update alpha
-      alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
+      //alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
       
       //sample from the trajectory
-      for(unsigned int i = 1; i < K; i++){
-        if(arma::randu() < alpha){
-          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
-        }
-      }
+      
 
       //check the condition of the virial:
       
@@ -3025,24 +3026,24 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
       
       //sample from the trajectory
-      if(arma::randu() < alpha){
-        sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
+      // if(arma::randu() < alpha){
+      //   sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
+      // }
+      for(unsigned int i = 0; i < K; i++){
+        if(arma::randu() < alpha){
+          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
+        }
       }
-      
       //uniform sampling for the recycled values
       
       //cumulate the log multinomial weights
       sub_tree((4+K)*d) = arma::log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
       
       //update alpha
-      alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
+      //alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
       
       //sample from the trajectory
-      for(unsigned int i = 1; i < K; i++){
-        if(arma::randu() < alpha){
-          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
-        }
-      }
+      
 
       //check the condition of the virial:
       
@@ -3555,24 +3556,23 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
       
       //sample from the trajectory
-      if(arma::randu() < alpha){
-        sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
+      // if(arma::randu() < alpha){
+      //   sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
+      // }
+      for(unsigned int i = 0; i < K; i++){
+        if(arma::randu() < alpha){
+          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
+        }
       }
-      
       //uniform sampling for the recycled values
       
       //cumulate the log multinomial weights
       sub_tree((4+K)*d) = arma::log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
       
       //update alpha
-      alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
+      //alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
       
       //sample from the trajectory
-      for(unsigned int i = 1; i < K; i++){
-        if(arma::randu() < alpha){
-          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
-        }
-      }
       
       //check the condition of the virial:
       
@@ -3703,24 +3703,24 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
       
       //sample from the trajectory
-      if(arma::randu() < alpha){
-        sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
+      // if(arma::randu() < alpha){
+      //   sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
+      // }
+      for(unsigned int i = 0; i < K; i++){
+        if(arma::randu() < alpha){
+          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
+        }
       }
-      
       //uniform sampling for the recycled values
       
       //cumulate the log multinomial weights
       sub_tree((4+K)*d) = arma::log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
       
       //update alpha
-      alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
+      //alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
       
       //sample from the trajectory
-      for(unsigned int i = 1; i < K; i++){
-        if(arma::randu() < alpha){
-          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
-        }
-      }
+      
 
       //check the condition of the virial:
       
@@ -3851,24 +3851,24 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
       
       //sample from the trajectory
-      if(arma::randu() < alpha){
-        sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
-      }
+      // if(arma::randu() < alpha){
+      //   sub_tree.subvec(4*d,5*d-1) = sub_tree.subvec(4*d,5*d-1);
+      // }
       
+      for(unsigned int i = 0; i < K; i++){
+        if(arma::randu() < alpha){
+          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
+        }
+      }
       //uniform sampling for the recycled values
       
       //cumulate the log multinomial weights
       sub_tree((4+K)*d) = arma::log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
       
       //update alpha
-      alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
+      //alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
       
       //sample from the trajectory
-      for(unsigned int i = 1; i < K; i++){
-        if(arma::randu() < alpha){
-          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
-        }
-      }
       
       //check the condition of the virial:
       
@@ -4252,14 +4252,15 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
     if(!sub_tree((4+K)*d+1)){
       
       //sample with probability one the proposed value
-      sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
+      //sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
+      sub_tree.subvec(4*d,(4+K)*d-1) = sub_tree2.subvec(4*d,(4+K)*d-1);
       
       //sample with probability 0.5 the recycled values
-      for(unsigned int i = 1; i < K; i++){
-        if(arma::randu() < 0.5){
-          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
-        }
-      }
+      // for(unsigned int i = 1; i < K; i++){
+      //   if(arma::randu() < 0.5){
+      //     sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
+      //   }
+      // }
       
       //then, cumulates the virial
       sub_tree((5+K)*d + 4) += sub_tree2((5+K)*d + 4);
@@ -4387,14 +4388,15 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
     //if haven't encountered any divergences, update the trajectory proposed value
     if(!sub_tree((4+K)*d+1)){
       //sample with probability one the proposed value
-      sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
+      //sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
+      sub_tree.subvec(4*d,(4+K)*d-1) = sub_tree2.subvec(4*d,(4+K)*d-1);
       
       //sample with probability 0.5 the recycled values
-      for(unsigned int i = 1; i < K; i++){
-        if(arma::randu() < 0.5){
-          sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
-        }
-      }
+      // for(unsigned int i = 1; i < K; i++){
+      //   if(arma::randu() < 0.5){
+      //     sub_tree.subvec((4+i)*d,(5+i)*d-1) = sub_tree2.subvec((4+i)*d,(5+i)*d-1);
+      //   }
+      // }
       //then, cumulates the virial
       sub_tree((5+K)*d + 4) += sub_tree2((5+K)*d + 4);
       

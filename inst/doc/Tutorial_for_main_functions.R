@@ -38,6 +38,11 @@ nlp <- function(par,args,eval_nlp = TRUE){
     #conversion of the r value
     r <- ceiling(1 + args$data*plogis(par[2])) - 1
     
+    #ensure that r is not zero
+    if(r == 0){
+      r <- 1
+    }
+    
     #output
     out <- sum(log(seq_len(r-1))) + 
       (args$data + args$hyp[1] + args$hyp[2])*log(1+exp(-par[1])) + 
@@ -51,6 +56,9 @@ nlp <- function(par,args,eval_nlp = TRUE){
     
     #overflow
     if(any(par > 30)) return(Inf) 
+    
+    #conversion of the r value
+    r <- ceiling(1 + args$data*plogis(par[2])) - 1
     
     #conversion of the r value
     r <- ceiling(1 + args$data*plogis(par[2])) - 1
@@ -74,7 +82,7 @@ chains <- xdnuts(theta0 = lapply(1:4,function(x) c(omega = rnorm(1),r_hat = rnor
                  method = "NUTS",
                  hide = TRUE)
 
-## -----------------------------------------------------------------------------
+## ----eval = TRUE--------------------------------------------------------------
 chains
 
 ## ----out.width='70%', out.height='70%', eval = TRUE, dpi = 300----------------

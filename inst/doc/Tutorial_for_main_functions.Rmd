@@ -40,7 +40,7 @@ This requires the creation of two R objects:
 
  * A function to be passed to the `nlp` argument of the `xdnuts` function. `nlp` refers to negative log probability (posterior). The name of this function and its arguments are not important, but it must have three arguments, which are as follows:
    
-   1. `par`, a vector of length dd representing a value for $\theta$. This vector must be ordered such that the first $d-k$ components correspond to the continuous ones, for which the gradient must be evaluated, and the last $k$ components refer to the discontinuous ones, for which no derivation is required.
+   1. `par`, a vector of length $d$ representing a value for $\theta$. This vector must be ordered such that the first $d-k$ components correspond to the continuous ones, for which the gradient must be evaluated, and the last $k$ components refer to the discontinuous ones, for which no derivation is required.
    
    2. `args`, a list containing the arguments needed for the negative log posterior computation, namely the data and hyperparameters.
    
@@ -136,7 +136,7 @@ This function focuses more on the model outcomes rather than the characteristics
  \]
  should be approximately one. Larger values provide evidence against the null hypothesis of chain convergence. The empirical estimator is obtained using the `coda::gelman.diag` function, which returns both the statistic and its upper confidence interval. Typically, values greater than $1.1$ are considered indicative of poor convergence, which can often be addressed through reparameterization or by increasing the length of the chains.
 
- * BFMI is a summary statistic that assesses the adequacy of the momenta distribution specification. A more detailed explanation of this topic can be found in @betancourt2016diagnosing, specifically in the section on Hamiltonian Monte Carlo's other degrees of freedom. The concept is similar to the PSRF statistic discussed earlier: the variance of the energy level set explored by Hamiltonian Monte Carlo can be partitioned using the law of total variance:
+ * BFMI is a summary statistic that assesses the adequacy of the momenta distribution specification. A more detailed explanation of this topic can be found in @betancourt2016diagnosing. The concept is similar to the PSRF statistic discussed earlier: the variance of the energy level set explored by Hamiltonian Monte Carlo can be partitioned using the law of total variance:
  \[
  \mathbb{V}(E) = \mathbb{V}_{\theta}[\mathbb{E}(E|\theta)] + \mathbb{E}[\mathbb{V}(E|\theta)]
  \]
@@ -316,6 +316,11 @@ nlp <- function(par,args,eval_nlp = TRUE){
     #conversion of the r value
     r <- ceiling(1 + args$data*plogis(par[2])) - 1
     
+    #ensure that r is not zero
+    if(r == 0){
+      r <- 1
+    }
+    
     #output
     out <- sum(log(seq_len(r-1))) + 
       (args$data + args$hyp[1] + args$hyp[2])*log(1+exp(-par[1])) + 
@@ -329,6 +334,9 @@ nlp <- function(par,args,eval_nlp = TRUE){
     
     #overflow
     if(any(par > 30)) return(Inf) 
+    
+    #conversion of the r value
+    r <- ceiling(1 + args$data*plogis(par[2])) - 1
     
     #conversion of the r value
     r <- ceiling(1 + args$data*plogis(par[2])) - 1
@@ -356,7 +364,7 @@ chains <- xdnuts(theta0 = lapply(1:4,function(x) c(omega = rnorm(1),r_hat = rnor
 ```
 
 After sampling, you can examine the model output with the `print` function.
-```{r}
+```{r, eval = TRUE}
 chains
 ```
 
@@ -600,7 +608,7 @@ chains <- xdnuts(theta0 = lapply(1:4,function(x) {
 plot(chains,warm_up = TRUE)
 ```
 
-As we can see, for the warm up phase, the default burn-in of $10%$ seems reasonable.
+As we can see, for the warm up phase, the default burn-in of $10\%$ seems reasonable.
 
 We can transform the variance components back from their logarithmic parameterization using the `xdtransform` function. This time, only these components should be selected.
 ```{r, eval = TRUE}

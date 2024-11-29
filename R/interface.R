@@ -645,8 +645,12 @@ print.XDNUTS <- function(x,... , digits = 3, show_all = FALSE){
   
   #calculate the mean absolute differences
   mae0 <- alpha0 - deltas[1]
-  mae1 <- base::apply(abs(alphas - deltas[-1]),2,base::mean)
-  
+  if(x$k == 0){
+    mae1 <- 0
+  }else{
+    mae1 <- base::apply(abs(alphas - deltas[-1]),2,base::mean)
+  }
+
   #compute the number of problematic chains
   n0_min <- sum(mae0 < -0.1)
   n0_max <- sum(mae0 > 0.19)
@@ -838,6 +842,10 @@ plot.XDNUTS <- function(x,type = 1,which = NULL,warm_up = FALSE,
   
   if(gg){
     #GRAMMAR OF GRAPHICS
+    
+    #set to null all the possible variable names
+    Chain <- Index <- Value <- Freq <- Var1 <- Var2 <- Type <- Var <- Par <- Color <- NULL
+    
     #plot1: marginal chains
     if(type == 1){
       
@@ -858,7 +866,7 @@ plot.XDNUTS <- function(x,type = 1,which = NULL,warm_up = FALSE,
       df$Chain <- base::as.factor(df$Chain)
       
       #create the graphic
-      G <- ggplot2::ggplot(df, ggplot2::aes(x = df$Index, y = df$Value, color = df$Chain)) +
+      G <- ggplot2::ggplot(df, ggplot2::aes(x = Index, y = Value, color = Chain)) +
         ggplot2::geom_line(linewidth = 0.1) +  #add trace lines
         ggplot2::scale_color_manual(values = colori) +  # paletta
         ggplot2::guides(color = ggplot2::guide_legend( 
@@ -873,7 +881,7 @@ plot.XDNUTS <- function(x,type = 1,which = NULL,warm_up = FALSE,
           axis.title.x = ggplot2::element_blank(),
           panel.grid.major.x = ggplot2::element_blank(),  # remove vertical grid
           panel.grid.minor.x = ggplot2::element_blank()) + 
-        ggplot2::facet_wrap(~ df$Var, scales = "free_y")  # make a trace plot for every variable
+        ggplot2::facet_wrap(~ Var, scales = "free_y")  # make a trace plot for every variable
       
       #return the plot
       return(G)
@@ -915,9 +923,8 @@ plot.XDNUTS <- function(x,type = 1,which = NULL,warm_up = FALSE,
       #add diagonal plots one at the time
       for(i in seq_len(d)){
         #create the sub plot
-        tmp <- base::data.frame(Value = df[,nomi[i]],Chain = df$Chain)
-        tmp <- ggplot2::ggplot(tmp,
-                               ggplot2::aes(x = tmp$Value, color = tmp$Chain)) +
+        tmp <- ggplot2::ggplot(base::data.frame(Value = df[,nomi[i]],Chain = df$Chain),
+                               ggplot2::aes(x = Value, color = Chain)) +
           ggplot2::geom_density(alpha = 0.5, linewidth = 0.5, show.legend = FALSE) + 
           ggplot2::scale_color_manual(values = colori) +  # paletta
           ggplot2::labs(title = nomi[i], x = NULL, y = NULL) + 
@@ -939,14 +946,13 @@ plot.XDNUTS <- function(x,type = 1,which = NULL,warm_up = FALSE,
       for(i in seq_along(nomi)){
         for(j in base::setdiff(seq_along(nomi),seq_len(i))){
           #create the subplot
-          tmp <- base::data.frame(Var1 = df[,nomi[j]],
-                                  Var2 = df[,nomi[i]],
-                                  Color = grDevices::densCols(df[,nomi[i]], df[,nomi[j]],
-                                                              colramp = grDevices::colorRampPalette(c("gray90", grDevices::blues9)) ))
-          tmp <- ggplot2::ggplot(tmp) + 
+          tmp <- ggplot2::ggplot(base::data.frame(Var1 = df[,nomi[j]],
+                                                  Var2 = df[,nomi[i]],
+                                                  Color = grDevices::densCols(df[,nomi[i]], df[,nomi[j]],
+                                                                              colramp = grDevices::colorRampPalette(c("gray90", grDevices::blues9)) ))) + 
             ggplot2::xlim(xy_range[1,j],xy_range[2,j]) + 
             ggplot2::ylim(xy_range[1,i],xy_range[2,i]) + 
-            ggplot2::geom_point(ggplot2::aes(x = tmp$Var1,y =  tmp$Var2, col = tmp$Color)) + 
+            ggplot2::geom_point(ggplot2::aes(x = Var1,y =  Var2, col = Color)) + 
             ggplot2::scale_color_identity() +
             ggplot2::labs(title = "", x = NULL, y = NULL) + 
             ggplot2::theme_gray() + 
@@ -963,10 +969,9 @@ plot.XDNUTS <- function(x,type = 1,which = NULL,warm_up = FALSE,
       }
       
       #create the legend
-      tmp <- base::data.frame(Value = df[,nomi[1]],Chain = df$Chain)
       tmp <- ggplot2::ggplot_gtable(ggplot2::ggplot_build(
-        ggplot2::ggplot(tmp,
-                        ggplot2::aes(x = tmp$Value, color = tmp$Chain)) +
+        ggplot2::ggplot(base::data.frame(Value = df[,nomi[1]],Chain = df$Chain),
+                        ggplot2::aes(x = Value, color = Chain)) +
           ggplot2::scale_color_manual(values = colori) +  
           ggplot2::stat_density(alpha = 0.5, geom = "line") + 
           ggplot2::guides(color = ggplot2::guide_legend( 
@@ -1132,7 +1137,7 @@ plot.XDNUTS <- function(x,type = 1,which = NULL,warm_up = FALSE,
       df$Chain <- base::as.factor(df$Chain)
       
       #create the graphical object
-      G <- ggplot2::ggplot(df,ggplot2::aes(x = df$Index, y = df$Value, color = df$Chain)) + 
+      G <- ggplot2::ggplot(df,ggplot2::aes(x = Index, y = Value, color = Chain)) + 
         ggplot2::geom_line(linewidth = 0.2) +  #add trace lines
         ggplot2::scale_color_manual(values = colori) +  #palette
         ggplot2::guides(color = ggplot2::guide_legend( 
@@ -1176,8 +1181,8 @@ plot.XDNUTS <- function(x,type = 1,which = NULL,warm_up = FALSE,
           c(breaks[1:10],base::range(breaks)),decreasing = FALSE))
       
       #create the graphical object
-      G <- ggplot2::ggplot(df,ggplot2::aes(x = df$Var1, y = df$Freq)) + 
-        ggplot2::geom_segment(ggplot2::aes(xend = df$Var1, yend = 0, color = df$Chain),
+      G <- ggplot2::ggplot(df,ggplot2::aes(x = Var1, y = Freq)) + 
+        ggplot2::geom_segment(ggplot2::aes(xend = Var1, yend = 0, color = Chain),
                               position = ggplot2::position_jitter(width = 0.2)) +
         ggplot2::scale_x_continuous(breaks = breaks) + 
         ggplot2::scale_color_manual(values = colori) +  #palette
@@ -1215,7 +1220,7 @@ plot.XDNUTS <- function(x,type = 1,which = NULL,warm_up = FALSE,
       Delta <- NULL
       
       #create the graphical object
-      G <- ggplot2::ggplot(df, ggplot2::aes(x = df$Value, fill = df$Type)) +
+      G <- ggplot2::ggplot(df, ggplot2::aes(x = Value, fill = Type)) +
         ggplot2::geom_density(alpha = 0.5, color = NA) +  #energy densities
         ggplot2::scale_fill_manual( #legend
           values = c("E" = "dimgray", "dE" = "coral3"), 
@@ -1263,7 +1268,7 @@ plot.XDNUTS <- function(x,type = 1,which = NULL,warm_up = FALSE,
       df$Chain <- base::as.factor(df$Chain)
       
       #create the graphic
-      G <- ggplot2::ggplot(df, ggplot2::aes(x = df$Index, y = df$Value, color = df$Chain)) +
+      G <- ggplot2::ggplot(df, ggplot2::aes(x = Index, y = Value, color = Chain)) +
         ggplot2::geom_line(linewidth = 0.2) +  #add trace lines
         ggplot2::scale_color_manual(values = colori) +  #palette
         ggplot2::guides(color = ggplot2::guide_legend( 
@@ -1277,7 +1282,7 @@ plot.XDNUTS <- function(x,type = 1,which = NULL,warm_up = FALSE,
           plot.title = ggplot2::element_text(hjust = 0.5),  #center the title
           panel.grid.major.x = ggplot2::element_blank(),  # remove vertical grid
           panel.grid.minor.x = ggplot2::element_blank()) + 
-        ggplot2::facet_wrap(~ df$Var, scales = "free_y")  # make a trace plot for every variable
+        ggplot2::facet_wrap(~ Var, scales = "free_y")  # make a trace plot for every variable
       
       #return the plot
       return(G)
@@ -1325,12 +1330,12 @@ plot.XDNUTS <- function(x,type = 1,which = NULL,warm_up = FALSE,
       df$Type <- c("Global","Refraction")[2 - (df$Par == 0)]
       
       #create the graphical object                 
-      G <- ggplot2::ggplot(df,ggplot2::aes(x = df$Index, y = df$Value)) + ggplot2::ylim(0,1) #set the y limits
+      G <- ggplot2::ggplot(df,ggplot2::aes(x = Index, y = Value)) + ggplot2::ylim(0,1) #set the y limits
       
       if(x$k == 0 || length(which) == 1 ){
         #no legend
-        G <- G + ggplot2::geom_line(ggplot2::aes(color = df$Par, linetype = df$Type), show.legend = FALSE) + #add lines
-          ggplot2::geom_point(ggplot2::aes(color = df$Par),show.legend = FALSE) +  #add points
+        G <- G + ggplot2::geom_line(ggplot2::aes(color = Par, linetype = Type), show.legend = FALSE) + #add lines
+          ggplot2::geom_point(ggplot2::aes(color = Par),show.legend = FALSE) +  #add points
           ggplot2::scale_color_manual(values = colori) +  #palette
           ggplot2::labs(title = titolo, x = "Chain", y = "Rate", #add labels
                         color = NULL,linetype = NULL) + 
@@ -1341,8 +1346,8 @@ plot.XDNUTS <- function(x,type = 1,which = NULL,warm_up = FALSE,
             panel.grid.minor.x = ggplot2::element_blank())
       }else if(x$k > 0 && x$k < x$d && any(which == 1)){
         #use different linetype
-        G <- G + ggplot2::geom_line(ggplot2::aes(color = df$Par, linetype = df$Type)) + #add lines
-          ggplot2::geom_point(ggplot2::aes(color = df$Par)) +  #add points
+        G <- G + ggplot2::geom_line(ggplot2::aes(color = Par, linetype = Type)) + #add lines
+          ggplot2::geom_point(ggplot2::aes(color = Par)) +  #add points
           ggplot2::scale_color_manual(values = colori) +  #palette
           ggplot2::labs(title = titolo, x = "Chain", y = "Rate", #add labels
                         color = NULL,linetype = "Type") + 
@@ -1355,8 +1360,8 @@ plot.XDNUTS <- function(x,type = 1,which = NULL,warm_up = FALSE,
             panel.grid.minor.x = ggplot2::element_blank())
       }else{
         #use the same linetype
-        G <- G + ggplot2::geom_line(ggplot2::aes(color = df$Par)) + #add lines
-          ggplot2::geom_point(ggplot2::aes(color = df$Par)) +  #add points
+        G <- G + ggplot2::geom_line(ggplot2::aes(color = Par)) + #add lines
+          ggplot2::geom_point(ggplot2::aes(color = Par)) +  #add points
           ggplot2::scale_color_manual(values = colori) +  #palette
           ggplot2::labs(title = titolo, x = "Chain", y = "Rate", #add labels
                         color = NULL) + 

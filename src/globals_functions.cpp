@@ -331,14 +331,27 @@ arma::vec rlaplace(const unsigned int& k){
 
 // FUNCTION THAT CREATES A VECTOR OF INDEXES WITH WHICH TO RETURN A MESSAGE ON THE CONSOLE
 arma::uvec sequenza(const unsigned int& N,const double& p){
+  
   //divide N by p and take the smallest integer
   unsigned int n = std::floor(N * p);
+  
+  //check that it is admissible
+  if(n == 0){
+    arma::uvec x = {N+1};
+    return x;
+  }
   
   //calculate the length of the vector
   unsigned int K = std::floor(N / n);
   
+  //check that it is admissible
+  if(K == 0){
+    arma::uvec x = {N+1};
+    return x;
+  }
+  
   //create a vector of length K
-  arma::uvec idx(K);
+  arma::uvec idx(K+1);
   
   //put the values inside
   for(unsigned int i = 0; i < K; i++){
@@ -363,7 +376,7 @@ void MM(arma::vec& M_cont_diag,
   //if the matrix is specified we define the type of structure for the kinetic energy
   
   M_disc = arma::sqrt(Rcpp::as<arma::vec>(control["M_disc"]));
-  M_inv_disc = 1.0 / Rcpp::as<arma::vec>(control["M_disc"]);
+  M_inv_disc = 1.0 / M_disc;//Rcpp::as<arma::vec>(control["M_disc"]);
   
   //diagonal matrix
   if( M_type == "diagonal"){
@@ -399,13 +412,21 @@ void update_MM(arma::vec& M_cont_diag,
                const std::string& M_type){
   
   //which iteration do we start from for estimation
-  unsigned int init = N_adapt*K*bar - 1;
+  unsigned int init = N_adapt*K*bar;
+  
+  //compute the new warm up size
+  unsigned int N_new = warm_up.n_rows-1-init;
+  
+  //throw an error if the sample are not enough for the estimate
+  if( N_new < 2 ){
+    Rcpp::stop("Insufficient warm-up samples to estimate the mass matrix! \nPlease consider decreasing the 'burn_adapt_ratio' or increasing 'N_adapt' in the 'control' argument using the 'set_parameter' function.");
+  }
   
   //sample to use for the estimation
   arma::mat warm_up_subset = warm_up.rows(init,warm_up.n_rows-1);
   
   //covariance matrix of the posterior
-  arma::mat M_inv = (N_adapt * K * arma::cov(warm_up_subset) + 5*1e-3*arma::eye<arma::mat>(d,d) )/ (N_adapt*K + 5);
+  arma::mat M_inv = (N_new * arma::cov(warm_up_subset) + 5*1e-3*arma::eye<arma::mat>(d,d) )/ (N_new + 5);
   
   //diagonal of the posterior covariance matrix
   arma::vec diagonale = arma::diagvec(M_inv);

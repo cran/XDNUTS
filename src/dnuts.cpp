@@ -511,6 +511,17 @@ Rcpp::List main_function(const arma::vec& theta0,
     K = 1;
   }
   
+  //print to console the mass matrices
+  // if(verbose){
+  //   Rcpp::Rcout << "M_cont_diag: " << M_cont_diag << std::endl;
+  //   Rcpp::Rcout << "M_disc: " << M_disc << std::endl;
+  //   Rcpp::Rcout << "M_inv_cont_diag: " << M_inv_cont_diag << std::endl;
+  //   Rcpp::Rcout << "M_inv_disc: " << M_inv_disc << std::endl;
+  //   Rcpp::Rcout << "M_cont_dense: " << M_cont_dense << std::endl;
+  //   Rcpp::Rcout << "M_inv_cont_dense: " << M_inv_cont_dense << std::endl;
+  //   
+  // }
+  
   //initialize the counting of divergent transition and allow storing of their location
   stora();
   
