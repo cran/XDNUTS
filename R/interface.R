@@ -273,7 +273,7 @@ xdnuts <- function(theta0,
       
       #let's give the name of the parameters to each chain
       base::colnames(mcmc_out$chains[[i]]$values) <- nomi
-      if(control$keep_warm_up == TRUE){
+      if(control$keep_warm_up == TRUE && control$N_adapt > 0){
         #do the same on the warm up matrices if present
         base::colnames(mcmc_out$chains[[i]]$warm_up) <- nomi
       }

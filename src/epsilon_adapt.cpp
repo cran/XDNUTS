@@ -389,7 +389,7 @@ void adapt_stepsize(arma::vec& theta0,
   arma::vec mu(k+1);
   mu(0) = std::log(10*eps0);
   if(condition){
-    mu.subvec(1,k) = std::log(10*eps0) * M_inv_disc;
+    mu.subvec(1,k) = arma::log(10*eps0* M_inv_disc);
   }
   
   //initialize the log value of the current step size
@@ -398,7 +398,7 @@ void adapt_stepsize(arma::vec& theta0,
   
   //initialize the different step size
   if(condition){
-    l_eps_init.subvec(1,k) = std::log(eps0) * M_inv_disc;
+    l_eps_init.subvec(1,k) = arma::log(eps0*M_inv_disc);
   }
   
   //initialize the moving average of the log step size value
@@ -981,7 +981,7 @@ void adapt_stepsize(arma::vec& theta0,
   arma::vec mu(k+1);
   mu(0) = std::log(10*eps0);
   if(condition){
-    mu.subvec(1,k) = std::log(10*eps0) * M_inv_disc;
+    mu.subvec(1,k) = arma::log(10*eps0 * M_inv_disc);
   }
   
   //initialize the log value of the current step size
@@ -990,7 +990,7 @@ void adapt_stepsize(arma::vec& theta0,
   
   //initialize the different step size
   if(condition){
-    l_eps_init.subvec(1,k) = std::log(eps0) * M_inv_disc;
+    l_eps_init.subvec(1,k) = arma::log(10*eps0 * M_inv_disc);
   }
   
   //initialize the moving average of the log step size value

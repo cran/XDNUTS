@@ -1,10 +1,10 @@
-0b971767f0c63b3a70c4c9646a4125fb *DESCRIPTION
+7f1b7c08c5e78a4b2f997f98071cba4a *DESCRIPTION
 8834b3b4f13ac200a29b2fdaad264add *LICENSE
 379abb6fca0fc93b710fe36ae7e45cb9 *NAMESPACE
 85dbc7f32096764b6a6587817f6d5fb0 *R/RcppExports.R
 278a5a1b36ebb4800a76a9a9cf58094f *R/data.R
-d891ac2692ead3d0a903a5042a244eb4 *R/interface.R
-adc4feb47e11c80807719671c1930f69 *build/partial.rdb
+6e622f2351d047da3b418dd3341d423e *R/interface.R
+db5803ae777023f557eb9cf238324439 *build/partial.rdb
 f6e382572d4ccdfef9f82dfbb9e1b759 *build/vignette.rds
 0149c4a626ec11f87f7f21c3e9b45b9c *data/viscosity.rda
 4d4ace2614e043dacfcbe013d9b66032 *inst/REFERENCES.bib
@@ -26,9 +26,9 @@ e62585629948e7dd143efbad43c2a6eb *src/Makevars
 e62585629948e7dd143efbad43c2a6eb *src/Makevars.win
 bb0a07425c496b31271743dbd39581a1 *src/RcppExports.cpp
 fb50b12497694b6f6dc6a24796be0d26 *src/dnuts.cpp
-a2543fe5758ef7c229d4841f9ec688ec *src/epsilon_adapt.cpp
+000925b06d8c18070176ecb66d2f9d9c *src/epsilon_adapt.cpp
 cff4e0bfdc5162f7661bde96dafceed3 *src/epsilon_adapt.h
-919100eb329f58d1646f8a02f9ad5ea5 *src/epsilon_init.cpp
+d96595b448dbfbd63c345f0af3096497 *src/epsilon_init.cpp
 4e3860ad710bf33149a74a505a3de9b6 *src/epsilon_init.h
 634e9306c5340677c35699a0e79f0019 *src/globals.cpp
 13c4adf8a97916362f3af77fe3d5a5cf *src/globals.h

@@ -317,14 +317,14 @@ double init_epsilon(const arma::vec& theta0,
     m.subvec(0,d-k-1) -= 0.5 * eps * Rcpp::as<arma::vec>(nlp(theta,args,false));
     
     //continuous parameter update by half step size
-    theta.subvec(0,d-k-1) += eps * M_inv_cont %  m.subvec(0,d-k-1);
+    theta.subvec(0,d-k-1) += eps * M_inv_cont *  m.subvec(0,d-k-1);
     
     //continuous momentum update by half step size
     m.subvec(0,d-k-1) -= 0.5 * eps * Rcpp::as<arma::vec>(nlp(theta,args,false));
     
     //calculate the contribution to the sum of the metropolis log weights
-    H1 = Rcpp::as<double>(nlp(theta,args,true)) + 
-      0.5 * arma::dot(arma::square( m.subvec(0,d-k-1) ),M_inv_cont );
+    H1 =  Rcpp::as<double>(nlp(theta,args,true)) + 
+      0.5 * arma::dot(m.subvec(0,d-k-1), M_inv_cont * m.subvec(0,d-k-1));
     
     //let's make sure it's not NaN, in which case let's set it equal to -Inf
     if(!arma::is_finite(H1)){
