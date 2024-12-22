@@ -2196,17 +2196,21 @@ xdtransform <- function(X, which = NULL, FUN = NULL, ...,
       if(!is.null(out$chains[[1]]$warm_up)){
         
         #get the length of the warm up chain
-        chain_length <- base::NROW(out$chains[[1]]$warm_up)
+        chain_length_warm <- base::NROW(out$chains[[1]]$warm_up)
           
         #if the thinning is greater don't apply it
-        if(thin > chain_length){
-          idx_thin <- seq_len(chain_length)
+        if(!is.null(thin)){
+          if(thin > chain_length_warm){
+            idx_thin_warm <- seq_len(chain_length_warm)
+          }else{
+            idx_thin_warm <- base::seq(1,chain_length_warm,by = thin)
+          }
         }else{
-          idx_thin <- base::seq(1,chain_length,by = thin)
+          idx_thin_warm <- seq_len(chain_length_warm)
         }
         
         #apply transformation
-        tmp <- base::apply(X$chains[[cc]]$warm_up[idx_thin,] , 1 , FUN , ... )
+        tmp <- base::apply(X$chains[[cc]]$warm_up[idx_thin_warm,] , 1 , FUN , ... )
         
         #check if the object is a matrix
         if(is.matrix(tmp)){
