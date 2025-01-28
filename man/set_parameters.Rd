@@ -12,6 +12,7 @@ set_parameters(
   keep_warm_up = FALSE,
   recycle_only_init = TRUE,
   max_treedepth = 10L,
+  max_treedepth_init = 10L,
   eps_jitter = 0.1,
   L_jitter = 3L,
   gamma = 0.05,
@@ -48,6 +49,11 @@ samples from each trajectory once the warm-up phase has terminated.}
 \item{max_treedepth}{an integer that regulates the maximum depth of
 the binary tree used to approximate Hamilton equation for the exploration
 of each energy level set of the phase space.}
+
+\item{max_treedepth_init}{an integer that controls the maximum depth of
+the binary tree during the step-size adaptation phase. Setting a smaller value 
+can help avoid wasting valuable time on low-probability areas with suboptimal 
+algorithm parameters.}
 
 \item{eps_jitter}{a numeric scalar which regulates the amount of jittering
 used to perturb the value of the step size for each iteration of the chain

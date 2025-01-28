@@ -54,6 +54,7 @@ a named list containing: \describe{
 \item{values}{a \eqn{N \times d} matrix containing the sample from the
 target distribution (if convergence has been reached).}
 \item{energy}{a vector of length-\eqn{N} containing the Markov Chain of the energy level sets.}
+\item{delta_energy}{a vector of length-\eqn{N} containing the Markov Chain of the first difference energy level sets.}
 \item{step_size}{a vector of length-\eqn{N} containing the sampled step size used for each iteration.}
 \item{step_length}{a vector of length-\eqn{N} containing the length of each trajectory of the chain.}
 \item{alpha}{a vector of length-\eqn{k + 1} containing the estimate of the Metropolis acceptance probabilities.

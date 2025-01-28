@@ -34,6 +34,10 @@ using namespace std;
 //' @param max_treedepth an integer that regulates the maximum depth of
 //' the binary tree used to approximate Hamilton equation for the exploration
 //' of each energy level set of the phase space.
+//' @param max_treedepth_init an integer that controls the maximum depth of
+//' the binary tree during the step-size adaptation phase. Setting a smaller value 
+//' can help avoid wasting valuable time on low-probability areas with suboptimal 
+//' algorithm parameters.
 //' @param eps_jitter a numeric scalar which regulates the amount of jittering
 //' used to perturb the value of the step size for each iteration of the chain
 //' after the warm-up phase.
@@ -87,6 +91,7 @@ Rcpp::List set_parameters(const unsigned int N_init1 = 50,
                           const bool keep_warm_up = false,
                           const bool recycle_only_init = true,
                           const unsigned int max_treedepth = 10,
+                          const unsigned int max_treedepth_init = 10,
                           const double eps_jitter = 0.1,
                           const unsigned int L_jitter = 3,
                           const double gamma = 0.05,
@@ -158,6 +163,7 @@ Rcpp::List set_parameters(const unsigned int N_init1 = 50,
                                           Rcpp::Named("keep_warm_up") = keep_warm_up,
                                           Rcpp::Named("recycle_only_init") = recycle_only_init,
                                           Rcpp::Named("max_treedepth") = max_treedepth,
+                                          Rcpp::Named("max_treedepth_init") = max_treedepth_init,
                                           Rcpp::Named("eps_jitter") = eps_jitter,
                                           Rcpp::Named("L_jitter") = L_jitter,
                                           Rcpp::Named("gamma") = gamma,
@@ -213,6 +219,7 @@ Rcpp::List set_parameters(const unsigned int N_init1 = 50,
 //'\item{values}{a \eqn{N \times d} matrix containing the sample from the
 //'target distribution (if convergence has been reached).}
 //'\item{energy}{a vector of length-\eqn{N} containing the Markov Chain of the energy level sets.}
+//'\item{delta_energy}{a vector of length-\eqn{N} containing the Markov Chain of the first difference energy level sets.}
 //'\item{step_size}{a vector of length-\eqn{N} containing the sampled step size used for each iteration.}
 //'\item{step_length}{a vector of length-\eqn{N} containing the length of each trajectory of the chain.}
 //'\item{alpha}{a vector of length-\eqn{k + 1} containing the estimate of the Metropolis acceptance probabilities.

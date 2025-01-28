@@ -6,9 +6,10 @@
 \usage{
 xdtransform(
   X,
-  which = NULL,
   FUN = NULL,
   ...,
+  which = NULL,
+  which_chains = NULL,
   new.names = NULL,
   thin = NULL,
   burn = NULL
@@ -17,12 +18,14 @@ xdtransform(
 \arguments{
 \item{X}{an object of class \code{XDNUTS}.}
 
-\item{which}{a vector of indices indicating which parameter the transformation should be applied to.
-If \code{NULL}, the function is applied to all of them.}
-
 \item{FUN}{a function object which takes one or more components of an MCMC iteration and any other possible arguments.}
 
 \item{...}{optional arguments for FUN.}
+
+\item{which}{a vector of indices indicating which parameter the transformation should be applied to.
+If \code{NULL}, the function is applied to all of them.}
+
+\item{which_chains}{a numerical vector indicating the index of the chains of interest.}
 
 \item{new.names}{a character vector containing the parameter names in the new parameterization.
 If only one value is provided, but the transformation involves more, the name is iterated with an increasing index.}

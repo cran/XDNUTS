@@ -20,7 +20,8 @@ xdnuts(
   loadLibraries = NULL,
   loadRObject = NULL,
   verbose = FALSE,
-  hide = FALSE
+  hide = FALSE,
+  logfile = ""
 )
 }
 \arguments{
@@ -75,6 +76,10 @@ in particular the one described in \insertCite{betancourt2017conceptual}{XDNUTS}
 \item{verbose}{a boolean value for printing all the information regarding the sampling process.}
 
 \item{hide}{a boolean value that omits the printing to the console if set to \code{TRUE}.}
+
+\item{logfile}{The pathname of the log file. The default value is \code{""}. 
+On Linux or macOS systems, this allows the output to be printed directly to the console. 
+Unfortunately, this is not possible on Windows systems.}
 }
 \value{
 a list of class \code{XDNUTS} containing \describe{

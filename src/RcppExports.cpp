@@ -12,8 +12,8 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // set_parameters
-Rcpp::List set_parameters(const unsigned int N_init1, const unsigned int N_adapt, const unsigned int N_init2, const double burn_adapt_ratio, const bool keep_warm_up, const bool recycle_only_init, const unsigned int max_treedepth, const double eps_jitter, const unsigned int L_jitter, const double gamma, const double kappa, const Rcpp::Nullable<Rcpp::NumericVector> delta, const unsigned int t0, const std::string M_type, const double refresh, const double l_eps_init, const bool different_stepsize, const double mu, const Rcpp::RObject M_cont, const Rcpp::RObject M_disc);
-RcppExport SEXP _XDNUTS_set_parameters(SEXP N_init1SEXP, SEXP N_adaptSEXP, SEXP N_init2SEXP, SEXP burn_adapt_ratioSEXP, SEXP keep_warm_upSEXP, SEXP recycle_only_initSEXP, SEXP max_treedepthSEXP, SEXP eps_jitterSEXP, SEXP L_jitterSEXP, SEXP gammaSEXP, SEXP kappaSEXP, SEXP deltaSEXP, SEXP t0SEXP, SEXP M_typeSEXP, SEXP refreshSEXP, SEXP l_eps_initSEXP, SEXP different_stepsizeSEXP, SEXP muSEXP, SEXP M_contSEXP, SEXP M_discSEXP) {
+Rcpp::List set_parameters(const unsigned int N_init1, const unsigned int N_adapt, const unsigned int N_init2, const double burn_adapt_ratio, const bool keep_warm_up, const bool recycle_only_init, const unsigned int max_treedepth, const unsigned int max_treedepth_init, const double eps_jitter, const unsigned int L_jitter, const double gamma, const double kappa, const Rcpp::Nullable<Rcpp::NumericVector> delta, const unsigned int t0, const std::string M_type, const double refresh, const double l_eps_init, const bool different_stepsize, const double mu, const Rcpp::RObject M_cont, const Rcpp::RObject M_disc);
+RcppExport SEXP _XDNUTS_set_parameters(SEXP N_init1SEXP, SEXP N_adaptSEXP, SEXP N_init2SEXP, SEXP burn_adapt_ratioSEXP, SEXP keep_warm_upSEXP, SEXP recycle_only_initSEXP, SEXP max_treedepthSEXP, SEXP max_treedepth_initSEXP, SEXP eps_jitterSEXP, SEXP L_jitterSEXP, SEXP gammaSEXP, SEXP kappaSEXP, SEXP deltaSEXP, SEXP t0SEXP, SEXP M_typeSEXP, SEXP refreshSEXP, SEXP l_eps_initSEXP, SEXP different_stepsizeSEXP, SEXP muSEXP, SEXP M_contSEXP, SEXP M_discSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -24,6 +24,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const bool >::type keep_warm_up(keep_warm_upSEXP);
     Rcpp::traits::input_parameter< const bool >::type recycle_only_init(recycle_only_initSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type max_treedepth(max_treedepthSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type max_treedepth_init(max_treedepth_initSEXP);
     Rcpp::traits::input_parameter< const double >::type eps_jitter(eps_jitterSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type L_jitter(L_jitterSEXP);
     Rcpp::traits::input_parameter< const double >::type gamma(gammaSEXP);
@@ -37,7 +38,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double >::type mu(muSEXP);
     Rcpp::traits::input_parameter< const Rcpp::RObject >::type M_cont(M_contSEXP);
     Rcpp::traits::input_parameter< const Rcpp::RObject >::type M_disc(M_discSEXP);
-    rcpp_result_gen = Rcpp::wrap(set_parameters(N_init1, N_adapt, N_init2, burn_adapt_ratio, keep_warm_up, recycle_only_init, max_treedepth, eps_jitter, L_jitter, gamma, kappa, delta, t0, M_type, refresh, l_eps_init, different_stepsize, mu, M_cont, M_disc));
+    rcpp_result_gen = Rcpp::wrap(set_parameters(N_init1, N_adapt, N_init2, burn_adapt_ratio, keep_warm_up, recycle_only_init, max_treedepth, max_treedepth_init, eps_jitter, L_jitter, gamma, kappa, delta, t0, M_type, refresh, l_eps_init, different_stepsize, mu, M_cont, M_disc));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -65,7 +66,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_XDNUTS_set_parameters", (DL_FUNC) &_XDNUTS_set_parameters, 20},
+    {"_XDNUTS_set_parameters", (DL_FUNC) &_XDNUTS_set_parameters, 21},
     {"_XDNUTS_main_function", (DL_FUNC) &_XDNUTS_main_function, 12},
     {NULL, NULL, 0}
 };

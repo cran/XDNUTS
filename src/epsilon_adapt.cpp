@@ -56,7 +56,7 @@ void adapt_stepsize(arma::vec& theta0,
   double kappa = Rcpp::as<double>(control["kappa"]);
   
   //maximum depth of the binary tree
-  unsigned int max_treedepth = Rcpp::as<unsigned int>(control["max_treedepth"]);
+  unsigned int max_treedepth = Rcpp::as<unsigned int>(control["max_treedepth_init"]);
   
   //initialize the current value of the particle's position in space
   arma::vec theta = theta0;
@@ -420,7 +420,7 @@ void adapt_stepsize(arma::vec& theta0,
   double kappa = Rcpp::as<double>(control["kappa"]);
   
   //maximum depth of the binary tree
-  unsigned int max_treedepth = Rcpp::as<unsigned int>(control["max_treedepth"]);
+  unsigned int max_treedepth = Rcpp::as<unsigned int>(control["max_treedepth_init"]);
   
   //index
   unsigned int j = 0;
@@ -1012,7 +1012,7 @@ void adapt_stepsize(arma::vec& theta0,
   double kappa = Rcpp::as<double>(control["kappa"]);
   
   //maximum depth of the binary tree
-  unsigned int max_treedepth = Rcpp::as<unsigned int>(control["max_treedepth"]);
+  unsigned int max_treedepth = Rcpp::as<unsigned int>(control["max_treedepth_init"]);
   
   //index
   unsigned int j = 0;

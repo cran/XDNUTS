@@ -16,6 +16,10 @@
 #' @param max_treedepth an integer that regulates the maximum depth of
 #' the binary tree used to approximate Hamilton equation for the exploration
 #' of each energy level set of the phase space.
+#' @param max_treedepth_init an integer that controls the maximum depth of
+#' the binary tree during the step-size adaptation phase. Setting a smaller value 
+#' can help avoid wasting valuable time on low-probability areas with suboptimal 
+#' algorithm parameters.
 #' @param eps_jitter a numeric scalar which regulates the amount of jittering
 #' used to perturb the value of the step size for each iteration of the chain
 #' after the warm-up phase.
@@ -61,8 +65,8 @@
 #' @return an object of class \code{control_xdnuts} containing a named list with all the above parameters.
 #'
 #' @export set_parameters
-set_parameters <- function(N_init1 = 50L, N_adapt = 200L, N_init2 = 75L, burn_adapt_ratio = 0.1, keep_warm_up = FALSE, recycle_only_init = TRUE, max_treedepth = 10L, eps_jitter = 0.1, L_jitter = 3L, gamma = 0.05, kappa = 0.75, delta = NULL, t0 = 10L, M_type = "dense", refresh = 0.1, l_eps_init = NA_real_, different_stepsize = FALSE, mu = NA_real_, M_cont = NULL, M_disc = NULL) {
-    .Call(`_XDNUTS_set_parameters`, N_init1, N_adapt, N_init2, burn_adapt_ratio, keep_warm_up, recycle_only_init, max_treedepth, eps_jitter, L_jitter, gamma, kappa, delta, t0, M_type, refresh, l_eps_init, different_stepsize, mu, M_cont, M_disc)
+set_parameters <- function(N_init1 = 50L, N_adapt = 200L, N_init2 = 75L, burn_adapt_ratio = 0.1, keep_warm_up = FALSE, recycle_only_init = TRUE, max_treedepth = 10L, max_treedepth_init = 10L, eps_jitter = 0.1, L_jitter = 3L, gamma = 0.05, kappa = 0.75, delta = NULL, t0 = 10L, M_type = "dense", refresh = 0.1, l_eps_init = NA_real_, different_stepsize = FALSE, mu = NA_real_, M_cont = NULL, M_disc = NULL) {
+    .Call(`_XDNUTS_set_parameters`, N_init1, N_adapt, N_init2, burn_adapt_ratio, keep_warm_up, recycle_only_init, max_treedepth, max_treedepth_init, eps_jitter, L_jitter, gamma, kappa, delta, t0, M_type, refresh, l_eps_init, different_stepsize, mu, M_cont, M_disc)
 }
 
 #' Function to generate a Markov chain for both continuous and discontinuous posterior distributions.
@@ -97,6 +101,7 @@ set_parameters <- function(N_init1 = 50L, N_adapt = 200L, N_init2 = 75L, burn_ad
 #'\item{values}{a \eqn{N \times d} matrix containing the sample from the
 #'target distribution (if convergence has been reached).}
 #'\item{energy}{a vector of length-\eqn{N} containing the Markov Chain of the energy level sets.}
+#'\item{delta_energy}{a vector of length-\eqn{N} containing the Markov Chain of the first difference energy level sets.}
 #'\item{step_size}{a vector of length-\eqn{N} containing the sampled step size used for each iteration.}
 #'\item{step_length}{a vector of length-\eqn{N} containing the length of each trajectory of the chain.}
 #'\item{alpha}{a vector of length-\eqn{k + 1} containing the estimate of the Metropolis acceptance probabilities.

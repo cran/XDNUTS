@@ -47,7 +47,9 @@
 #' \code{parallel} is set to \code{TRUE}.
 #' @param verbose a boolean value for printing all the information regarding the sampling process.
 #' @param hide a boolean value that omits the printing to the console if set to \code{TRUE}.
-#'
+#' @param logfile The pathname of the log file. The default value is \code{""}. 
+#' On Linux or macOS systems, this allows the output to be printed directly to the console. 
+#' Unfortunately, this is not possible on Windows systems.
 #' @return a list of class \code{XDNUTS} containing \describe{
 #' \item{chains}{a list of the same length of \code{theta0}, each element containing the output from the function \link{main_function}.}
 #' \item{d}{the dimension of the parameter space.}
@@ -86,7 +88,8 @@ xdnuts <- function(theta0,
                   loadLibraries = NULL,
                   loadRObject = NULL,
                   verbose = FALSE,
-                  hide = FALSE){
+                  hide = FALSE,
+                  logfile = ""){
   #require(purrr)
   
   #let's make sure that the first input is a list
@@ -217,6 +220,11 @@ xdnuts <- function(theta0,
   #MCMC
   if(!parallel){
     
+    #sink the output in the log file if specified
+    if(!hide && logfile != ""){
+      base::sink(logfile)
+    }
+    
     #initialize the output list
     mcmc_out <- list(chains = list(),
                      d = length(theta0[[1]]),
@@ -285,6 +293,11 @@ xdnuts <- function(theta0,
     #let's make the output an S3 object by assigning it a class
     class(mcmc_out) <- "XDNUTS"
     
+    #unsink the output in the log file if specified
+    if(!hide && logfile != ""){
+      base::sink()
+    }
+    
   }else{
     #parallel chains
     #require(parallel)
@@ -319,7 +332,7 @@ xdnuts <- function(theta0,
       cl <- parallel::makeCluster(n_chains)
     }else{
       #the output are printed to console
-      cl <- parallel::makeCluster(n_chains, outfile = "")
+      cl <- parallel::makeCluster(n_chains, outfile = logfile)
     }
     
     #pass the libraries and object required to each core
@@ -1188,7 +1201,7 @@ plot.XDNUTS <- function(x,type = 1,which = NULL,warm_up = FALSE,
         ggplot2::scale_color_manual(values = colori) +  #palette
         ggplot2::guides(color = ggplot2::guide_legend( 
           override.aes=list(linewidth = 1, alpha = 0.8))) + #make the legend line bigger
-        ggplot2::labs(title = "Iterarion's Step Length", 
+        ggplot2::labs(title = "Iteration's Step Length", 
                       x = "L", y = "Frequency", color = "Chain") + 
         ggplot2::theme_gray() +  
         ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
@@ -1821,7 +1834,9 @@ summary.XDNUTS <- function(object, ..., q.val = c(0.05,0.25,0.5,0.75,0.95),
   res <- coda::as.mcmc.list(res)
   
   #compute petential scale reduction factor
-  gelman.test <- base::tryCatch(coda::gelman.diag(res), error = function(x) list(psrf = NULL, mpsrf = NULL))
+  gelman.test <- base::tryCatch(coda::gelman.diag(res), error = function(x) 
+    base::tryCatch(coda::gelman.diag(res,multivariate = FALSE),
+                   error = function(x) list(psrf = NULL, mpsrf = NULL)))
   
   #compute posterior statistics
   out <- base::t(base::apply(base::do.call(base::rbind,res),2,function(x) 
@@ -2055,10 +2070,11 @@ xdextract <- function(X, which = NULL, which_chains = NULL,
 #' Function to apply a transformation to the samples from the output of an XDNUTS model.
 #'
 #' @param X an object of class \code{XDNUTS}.
-#' @param which a vector of indices indicating which parameter the transformation should be applied to.
-#'  If \code{NULL}, the function is applied to all of them.
 #' @param FUN a function object which takes one or more components of an MCMC iteration and any other possible arguments.
 #' @param ... optional arguments for FUN.
+#' @param which a vector of indices indicating which parameter the transformation should be applied to.
+#'  If \code{NULL}, the function is applied to all of them.
+#' @param which_chains a numerical vector indicating the index of the chains of interest.
 #' @param new.names a character vector containing the parameter names in the new parameterization.  
 #'  If only one value is provided, but the transformation involves more, the name is iterated with an increasing index.
 #' @param thin an integer value indicating how many samples should be discarded before returning an iteration of the chain.
@@ -2067,7 +2083,7 @@ xdextract <- function(X, which = NULL, which_chains = NULL,
 #' @return an object of class \code{XDNUTS} with the specified transformation applied to each chain.
 #'
 #' @export xdtransform
-xdtransform <- function(X, which = NULL, FUN = NULL, ...,
+xdtransform <- function(X, FUN = NULL, ..., which = NULL, which_chains = NULL,
                         new.names = NULL, thin = NULL, burn = NULL){
   
   #check inputs
@@ -2081,6 +2097,19 @@ xdtransform <- function(X, which = NULL, FUN = NULL, ...,
   
   if(!is.function(FUN)){
     base::stop("'FUN' must be a function object!")
+  }
+  
+  #get the initial number of chains
+  nc <- length(X$chains)
+  
+  #get the indexes of desired chains and make sure they are admissible
+  if(is.null(which_chains)){
+    which_chains <- seq_len(nc)
+  }else{
+    if(any(which_chains > nc | which_chains < 1)){
+      base::stop("Incorrect chain indexes!")
+    }
+    which_chains <- base::unique(which_chains)
   }
   
   #copy the original XDNUTS object
@@ -2111,19 +2140,22 @@ xdtransform <- function(X, which = NULL, FUN = NULL, ...,
   }
   
   #process the thin argument
-    if(!is.null(thin)){
+  if(!is.null(thin)){
     
-      if(length(thin) > 1 || !is.numeric(thin) || any(thin < 0)){
-        base::stop("'thin' must be a positive integer scalar value!")
-      }  
-      
-      #make sure that this value isn't greater than sample size
-      if(thin > chain_length - burn){
-        base::stop("'thin' can't be greater than the Monte Carlo sample size!")
-      }else{
-        idx_thin <- base::seq(burn+1,chain_length,by = thin)
+    if(length(thin) > 1 || !is.numeric(thin) || any(thin < 0)){
+      base::stop("'thin' must be a positive integer scalar value!")
+    }  
+    
+    #make sure that this value isn't greater than sample size
+    if(thin > chain_length - burn){
+      base::stop("'thin' can't be greater than the Monte Carlo sample size!")
+    }else{
+      idx_thin <- base::seq(burn+1,chain_length,by = thin)
     }
   }else{
+    
+    #set the default value to one
+    thin <- 1
     
     #get all samples
     idx_thin <- (burn+1):chain_length
@@ -2159,10 +2191,10 @@ xdtransform <- function(X, which = NULL, FUN = NULL, ...,
   if(length(which) == length(old_names) && !is.null(old_names)){
     
     #loop for every chain and apply the transformation
-    for(cc in seq_along(X$chains)){
+    for(cc in which_chains){
       
       #apply transformation
-      tmp <- base::apply(X$chains[[cc]]$values[idx_thin,] , 1 , FUN , ... )
+      tmp <- base::apply(X$chains[[cc]]$values[idx_thin,,drop = FALSE] , 1 , FUN , ... )
       
       #check if the object is a matrix
       if(is.matrix(tmp)){
@@ -2210,7 +2242,7 @@ xdtransform <- function(X, which = NULL, FUN = NULL, ...,
         }
         
         #apply transformation
-        tmp <- base::apply(X$chains[[cc]]$warm_up[idx_thin_warm,] , 1 , FUN , ... )
+        tmp <- base::apply(X$chains[[cc]]$warm_up[idx_thin_warm,,drop = FALSE] , 1 , FUN , ... )
         
         #check if the object is a matrix
         if(is.matrix(tmp)){
@@ -2264,7 +2296,7 @@ xdtransform <- function(X, which = NULL, FUN = NULL, ...,
     }
     
     #loop for every chain and apply the transformation
-    for(cc in seq_along(X$chains)){
+    for(cc in seq_along(which_chains)){
       out$chains[[cc]]$values[,which] <- 
         (base::apply(X$chains[[cc]]$values[idx_thin,which,drop = FALSE] , 2 , FUN , ... ))
     
@@ -2307,6 +2339,36 @@ xdtransform <- function(X, which = NULL, FUN = NULL, ...,
     }
   }
   
+  #if burn != 0 or thin != 1 reduce also the other posterior quantities
+  if(burn != 0 || thin != 1){
+    
+    #loop for every chain and apply the transformation
+    for(cc in seq_along(which_chains)){
+      
+      #substitute the energy levels
+      out$chains[[cc]]$energy <- out$chains[[cc]]$energy[idx_thin]
+      
+      #substitute the delta energy levels
+      out$chains[[cc]]$delta_energy <- out$chains[[cc]]$delta_energy[idx_thin]
+      
+      #substitute the step sizes
+      out$chains[[cc]]$step_size <- out$chains[[cc]]$step_size[idx_thin]
+      
+      #substitute the step lengths
+      out$chains[[cc]]$step_length <- out$chains[[cc]]$step_length[idx_thin]
+      
+    }
+  }
+  
+  #delete the unnecessary chains
+  k <- 0 #counter set to zero
+  for( cc in setdiff(seq_len(nc),which_chains)){
+    #erase the unwanted chain
+    out$chains[[cc - k]] <- NULL
+    
+    #update the counter
+    k <- k + 1
+  }
 
   #return the new XDNUTS object
   return(out)
