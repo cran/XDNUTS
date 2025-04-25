@@ -435,7 +435,7 @@ xdnuts <- function(theta0,
 #' @param show_all logical scalar indicating where to print all the summary statistics 
 #'  even if these are more than 10.
 #'  
-#' @return Return a graphical object.
+#' @return Return a data frame object.
 #' 
 #' @export print.XDNUTS
 print.XDNUTS <- function(x,... , digits = 3, show_all = FALSE){
@@ -672,7 +672,7 @@ print.XDNUTS <- function(x,... , digits = 3, show_all = FALSE){
   if(n0_min == 1){
     base::message("\n\n1 chain has a global acceptance rate that is significantly lower than the nominal value!")
   }else if(n0_min > 1){
-    base::message("\n\n,",n0_min," chains has a global acceptance rate that are significantly lower than the nominal value!")
+    base::message("\n\n",n0_min," chains has a global acceptance rate that are significantly lower than the nominal value!")
   }
   if(n1 == 1){
     if(x$k == 1){
@@ -697,7 +697,6 @@ print.XDNUTS <- function(x,... , digits = 3, show_all = FALSE){
   invisible(oo)
   
 }
-
 
 ### PLOTS FUNCTION OF THE MCMC OUTPUT
 #' Function to view the draws from the posterior distribution.
@@ -2373,3 +2372,37 @@ xdtransform <- function(X, FUN = NULL, ..., which = NULL, which_chains = NULL,
   #return the new XDNUTS object
   return(out)
 }
+
+# plot.XDNUTS.trajectories <- function(x,...){
+#   
+#   #phase plane plot
+#   which <- 10
+#   
+#   plot(x[,which],x[,which+10], type = "l")
+#   
+#   #position plot
+#   matplot(x[,1:10], type = "l")
+#   
+#   #momentum plot
+#   matplot(x[,11:20], type = "l")
+#   
+#   #Hamiltonian criterion
+#   ts.plot(x[,20+1])
+#   
+#   #NUTS criterion
+#   ts.plot(x[,22]); abline(h = 0, col = 2)
+#   
+#   #virial criterion
+#   ts.plot(log(abs(x[,23]))); abline(h = 0, col = 2)
+#   
+#   #acceptance rates
+#   ts.plot(x[,20+4])
+#   
+#   matplot(x[,20+4+1:4], type = "l")
+#   
+#   apply(x[,20+4+4+1:4],2,mean)
+#   
+#   mean(x[,20+4])
+#
+#   #grafico 3d con posizione momento e livello di energia (potenziale)
+# }

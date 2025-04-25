@@ -64,10 +64,30 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// trajectories
+Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0, const arma::vec& m0, const Rcpp::Function& nlp, const Rcpp::List& args, const double& eps, const unsigned int& k, const Rcpp::RObject& M_cont, const Rcpp::RObject& M_disc, const unsigned int& max_it);
+RcppExport SEXP _XDNUTS_trajectories(SEXP theta0SEXP, SEXP m0SEXP, SEXP nlpSEXP, SEXP argsSEXP, SEXP epsSEXP, SEXP kSEXP, SEXP M_contSEXP, SEXP M_discSEXP, SEXP max_itSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type theta0(theta0SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type m0(m0SEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Function& >::type nlp(nlpSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::List& >::type args(argsSEXP);
+    Rcpp::traits::input_parameter< const double& >::type eps(epsSEXP);
+    Rcpp::traits::input_parameter< const unsigned int& >::type k(kSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::RObject& >::type M_cont(M_contSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::RObject& >::type M_disc(M_discSEXP);
+    Rcpp::traits::input_parameter< const unsigned int& >::type max_it(max_itSEXP);
+    rcpp_result_gen = Rcpp::wrap(trajectories(theta0, m0, nlp, args, eps, k, M_cont, M_disc, max_it));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_XDNUTS_set_parameters", (DL_FUNC) &_XDNUTS_set_parameters, 21},
     {"_XDNUTS_main_function", (DL_FUNC) &_XDNUTS_main_function, 12},
+    {"_XDNUTS_trajectories", (DL_FUNC) &_XDNUTS_trajectories, 9},
     {NULL, NULL, 0}
 };
 

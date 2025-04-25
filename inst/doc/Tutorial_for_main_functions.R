@@ -5,10 +5,10 @@ knitr::opts_chunk$set(
 )
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  theta0 <- lapply(seq_len(N_chains),myfunction)
+# theta0 <- lapply(seq_len(N_chains),myfunction)
 
 ## ----echo = FALSE, eval = FALSE-----------------------------------------------
-#  set.seed(123)
+# set.seed(123)
 
 ## ----setup, eval = TRUE, echo = FALSE-----------------------------------------
 library(XDNUTS)

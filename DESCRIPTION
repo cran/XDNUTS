@@ -2,8 +2,8 @@ Package: XDNUTS
 Type: Package
 Title: Discontinuous Hamiltonian Monte Carlo with Varying Trajectory
         Length
-Version: 1.5.6
-Date: 2025-01-27
+Version: 1.6
+Date: 2025-04-25
 Authors@R: person("Paolo", "Manildo", email = "paolo.manildo@phd.unipd.it",
   role = c("aut", "cre"), comment = c(ORCID = "0009-0006-7056-7012"))
 Description: Hamiltonian Monte Carlo for both continuous and discontinuous
@@ -24,8 +24,8 @@ VignetteBuilder: knitr
 Depends: R (>= 2.10)
 LazyData: true
 NeedsCompilation: yes
-Packaged: 2025-01-27 15:31:38 UTC; paolomanildo
+Packaged: 2025-04-25 17:53:33 UTC; paolomanildo
 Author: Paolo Manildo [aut, cre] (<https://orcid.org/0009-0006-7056-7012>)
 Maintainer: Paolo Manildo <paolo.manildo@phd.unipd.it>
 Repository: CRAN
-Date/Publication: 2025-01-28 13:40:11 UTC
+Date/Publication: 2025-04-25 18:20:02 UTC

@@ -125,3 +125,38 @@ main_function <- function(theta0, nlp, args, k, N, K, tau, L, thin, chain_id, ve
     .Call(`_XDNUTS_main_function`, theta0, nlp, args, k, N, K, tau, L, thin, chain_id, verbose, control)
 }
 
+#' Function that approximate the Hamiltonian Flow for given starting values
+#' of the position and momentum of a particle in the phase space defined by the 
+#' kinetic and potential energy provided in input. 
+#' @param theta0 a numeric vector of length \eqn{d} representing
+#'  the starting position vector for the particle.
+#' @param m0 a numeric vector of length \eqn{d} representing 
+#' the starting momenta vector for the particle.
+#' @param nlp a function object that evaluate the negative of the logarithm of 
+#' a probability density function, and its gradient, i.e. the potential energy function of the system.
+#' @param args a list object containing the arguments to be passed to the function \code{nlp}.
+#' @param eps a numeric scalar indicating the step size for the \emph{leapfrog} integrator.
+#' @param k an integer scalar indicating the number of discontinuous components of \code{theta0}.
+#' @param M_cont either a vector or a squared matrix, of the same length/dimension of
+#' the position/momenta vector, representing the continuous components mass matrix.
+#' @param M_disc a vector of the same length of the position/momenta vector,
+#'  representing the discontinuous components mass matrix.
+#' @param max_it an integer value indicating the length of the trajectory. 
+#' This quantity times \code{eps} is equal to the approximated integration time
+#' of the Hamiltonian flow.
+#' @return a data frame that summarizes the approximated Hamiltonian flow.
+#' \itemize{
+#' \item{The first \eqn{d} columns contain the particle position evolution.}
+#' \item{The second \eqn{d} columns contain the particle momenta evolution.}
+#' \item{The \eqn{2d + 1} column contains the Hamiltonian evolution.}
+#' \item{The \eqn{2d + 2} column contains the evolution of the No U-Turn Sampler termination criterion.}
+#' \item{The \eqn{2d + 3} column contains the evolution of the virial exhaustion termination criterion.}
+#' \item{Acceptance and or refraction probabilities. This depends on the value of \code{k}.}
+#' \item{Reflession dummy indicators.}
+#' \item{Divergent transition dummy indicators.}
+#' } 
+#' @export trajectories
+trajectories <- function(theta0, m0, nlp, args, eps, k, M_cont, M_disc, max_it) {
+    .Call(`_XDNUTS_trajectories`, theta0, m0, nlp, args, eps, k, M_cont, M_disc, max_it)
+}
+

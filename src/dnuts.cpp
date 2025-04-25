@@ -617,3 +617,1461 @@ Rcpp::List main_function(const arma::vec& theta0,
   return output;
   
 }
+
+// FUNCTIONS TO BUILD THE TRAJECTORIES
+//' Function that approximate the Hamiltonian Flow for given starting values
+//' of the position and momentum of a particle in the phase space defined by the 
+//' kinetic and potential energy provided in input. 
+//' @param theta0 a numeric vector of length \eqn{d} representing
+//'  the starting position vector for the particle.
+//' @param m0 a numeric vector of length \eqn{d} representing 
+//' the starting momenta vector for the particle.
+//' @param nlp a function object that evaluate the negative of the logarithm of 
+//' a probability density function, and its gradient, i.e. the potential energy function of the system.
+//' @param args a list object containing the arguments to be passed to the function \code{nlp}.
+//' @param eps a numeric scalar indicating the step size for the \emph{leapfrog} integrator.
+//' @param k an integer scalar indicating the number of discontinuous components of \code{theta0}.
+//' @param M_cont either a vector or a squared matrix, of the same length/dimension of
+//' the position/momenta vector, representing the continuous components mass matrix.
+//' @param M_disc a vector of the same length of the position/momenta vector,
+//'  representing the discontinuous components mass matrix.
+//' @param max_it an integer value indicating the length of the trajectory. 
+//' This quantity times \code{eps} is equal to the approximated integration time
+//' of the Hamiltonian flow.
+//' @return a data frame that summarizes the approximated Hamiltonian flow.
+//' \itemize{
+//' \item{The first \eqn{d} columns contain the particle position evolution.}
+//' \item{The second \eqn{d} columns contain the particle momenta evolution.}
+//' \item{The \eqn{2d + 1} column contains the Hamiltonian evolution.}
+//' \item{The \eqn{2d + 2} column contains the evolution of the No U-Turn Sampler termination criterion.}
+//' \item{The \eqn{2d + 3} column contains the evolution of the virial exhaustion termination criterion.}
+//' \item{Acceptance and or refraction probabilities. This depends on the value of \code{k}.}
+//' \item{Reflession dummy indicators.}
+//' \item{Divergent transition dummy indicators.}
+//' } 
+//' @export trajectories
+// [[Rcpp::export]]
+Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
+                             const arma::vec& m0,
+                             const Rcpp::Function& nlp,
+                             const Rcpp::List& args,
+                             const double& eps,
+                             const unsigned int& k,
+                             const Rcpp::RObject& M_cont,
+                             const Rcpp::RObject& M_disc,
+                             const unsigned int& max_it){
+  
+  // get the dimension of the parameter
+  unsigned int d = theta0.size();
+  
+  // get the dimension names
+  Rcpp::RObject dim_names0 = theta0.names();
+  
+  // initialize the position names
+  Rcpp::CharacterVector position_names(d);
+  
+  // initialize the momentum names
+  Rcpp::CharacterVector momentum_names(d);
+  
+  // define position and momenutm names
+  if(dim_names0 == R_NilValue){
+    for(unsigned int i = 0; i < d; i++){
+      position_names[i] = "theta_" + std::to_string(1+i);
+      momentum_names[i] = "m_" + std::to_string(1+i);
+    }
+  }else{
+    position_names = theta0.names();
+    for(unsigned int i = 0; i < d; i++){
+      momentum_names[i] = Rcpp::as<std::string>(position_names[i]) + "'";
+    }
+  }
+  
+  // create the index for the discontiuous components
+  arma::uvec idx_disc(k);
+  for(unsigned int i=0; i< k; i++){
+    idx_disc(i) = d-k+i;
+  }
+  
+  // get the dimension of the output matrix
+  unsigned int out_dim = 2*d + 5;
+  
+  if(k == d){
+    
+    // if we are in the full discontinuous case we must add d values
+    // for the refraction alphas and d for the refraction indicator
+    out_dim += 2*d;
+    
+  }else if(k == 0){
+    
+    // if we are in the full continuous case we must add only one value
+    out_dim += 1;
+    
+  }else{
+    
+    // if we are in the mixed case we must add one for the global, 
+    // and 2*k for the refractions
+    
+    out_dim += 1 + 2*k;
+  }
+  
+  // initialize the output matrix
+  arma::mat out(max_it,out_dim);
+  
+  // initialize the position
+  arma::vec theta = theta0;
+  out.row(0).subvec(0,d-1) = theta.t();
+  
+  // initialize the momentum
+  arma::vec m = m0;
+  out.row(0).subvec(d,2*d-1) = m.t();
+  
+  // create a vector for the cumulated momenta
+  arma::vec cum_momenta(d);
+  
+  // initializze the current value of the virial
+  double virial = arma::sum(theta % m);
+  
+  // initialize the current value of the virial first difference
+  double delta_virial;
+  
+  // create the scalar for the log absolute value of the cumulative virial exchange rate
+  double log_abs_sum_virial;
+  
+  // create the sign for the virial
+  double delta_virial_sign;
+  
+  // initialize the cumulate hamiltonian (normalization constant for the virial criterion)
+  double sum_H = -arma::datum::inf;
+  
+  // initialize the hamiltonian
+  double H;
+  
+  // discriminate the variouos cases
+  if(Rf_isNull(M_cont) | Rf_isNull(M_disc)){
+    
+    // identity matrix case
+    
+    if(d == k){
+      
+      // initialize the cumulated momenta vector
+      cum_momenta = arma::sign(m0);
+      
+      // compute the potential energy
+      double U = Rcpp::as<double>(nlp(theta0,args,true));
+      
+      // set the initial alphas equal to one
+      out.row(0).subvec(2*d+4,3*d+3) = arma::ones<arma::rowvec>(k);
+      
+      // save the current potential energy
+      out(0,2*d) = U;
+      
+      // compute the hamiltonian for the function
+      H = U + arma::sum(arma::abs(m0));
+      out.col(2*d+1) = arma::ones<arma::vec>(max_it) * H;
+      
+      // add the NUTS criterion
+      out(0,2*d+2) = 1.0;
+      
+      // add the virial exhaustion criterion
+      //out(0,2*d+2) = arma::sum(m % theta);
+      
+      // initialize the log_abs_sum del virial and its sign
+      //log_abs_sum_virial = std::log(std::abs(out(0,2*d+2))) - H;
+      log_abs_sum_virial = -arma::datum::inf;
+      //delta_virial_sign = segno(out(0,2*d+2));
+      delta_virial_sign = 0.0;
+      
+      //initialization of the new vector and the potential difference
+      double theta_old;
+      double delta_U;
+      unsigned int j;
+      
+      // loop for each iteration
+      for( unsigned int i = 1; i < max_it; i++){
+        
+        //permute the order of the discrete parameters
+        idx_disc = arma::shuffle(idx_disc);
+        
+        //loop for every discontinuous component
+        for(unsigned int ii = 0; ii < d; ii++){
+          
+          //set the current index
+          j = idx_disc(ii);
+          
+          //modify the discrete parameter
+          theta_old = theta(j);
+          
+          theta(j) = theta_old + eps * segno(m(j));
+          
+          //calculation of the difference in potential energy
+          delta_U = Rcpp::as<double>(nlp(theta,args,true)) - U;
+          
+          //let's make sure it's finite
+          if(std::isnan(delta_U)){
+            delta_U = -arma::datum::inf;
+            theta(j) = theta_old;
+            
+            //report the divergent transition
+            out(i,4*d+4) = 1.0;
+            
+            break;
+            
+          }else{
+            
+            //calculation of the Metropolis acceptance rate
+            out(i,2*d+4+j) += std::exp(-delta_U);
+            
+            //refraction or reflection?
+            if( std::abs(m(j)) > delta_U ){
+              
+              //refraction
+              m(j) -= segno(m(j)) * delta_U;
+              U += delta_U;
+              
+            }else{
+              
+              //reflection
+              theta(j) = theta_old;
+              m(j) *= -1.0;
+              
+              // report it
+              out(i,3*d+4 + j) = 1.0;
+              
+            }
+          }
+        }
+        
+        // save the evolution of the flow in the phase space
+        out.row(i).subvec(0,d-1) = theta.t();
+        out.row(i).subvec(d,2*d-1) = m.t();
+        
+        // add the potential energy of the current system
+        out(i,2*d) = U;
+        
+        //1) compute the NUTS criterion
+        
+        // cumulate the momenta vector
+        cum_momenta += arma::sign(m);
+        
+        // compute the criterion
+        out(i,2*d+2) = arma::sum(cum_momenta % m);
+        
+        //2) compute the virial criterion
+        
+        // save the last value of the virial
+        delta_virial = virial;
+        
+        // compute the new virial
+        virial = sum(theta % m);
+        
+        // approximate the exchange rate
+        delta_virial = (virial - delta_virial) / eps;
+        
+        // update the log sum exp of the virial log virial exchange rates
+        add_sign_log_sum_exp(log_abs_sum_virial,
+                             delta_virial_sign,
+                             std::log(std::abs(delta_virial)) - out(i,2*d+1),
+                             segno(delta_virial));
+        
+        // cumulate the Hamiltonians
+        sum_H = arma::log_add_exp(sum_H,-out(i,2*d+1));
+        
+        // save the virial exhaustion criterion
+        out(i,2*d+3) = std::exp(log_abs_sum_virial - sum_H - std::log(i+1));
+        
+      }
+      
+    }else if(k == 0){
+      
+      // initialize the cumulative momenta vector
+      cum_momenta = m0;
+      
+      // set the current acceptance rate
+      out(0,2*d+4) = 1.0;
+      
+      // compute the potential energy of the system
+      out(0,2*d) = Rcpp::as<double>(nlp(theta0,args,true));
+      
+      // compute the hamiltonian for the function
+      H = out(0,2*d) + arma::sum(arma::abs(m0));
+      out(0,2*d+1) = H;
+      
+      // add the NUTS criterion
+      out(0,2*d+2) = 1.0;
+      
+      // add the virial exhaustion criterion
+      //out(0,2*d+2) = arma::sum(m % theta);
+      
+      // initialize the log_abs_sum del virial and its sign
+      //log_abs_sum_virial = std::log(std::abs(out(0,2*d+2))) - H;
+      log_abs_sum_virial = -arma::datum::inf;
+      //delta_virial_sign = segno(out(0,2*d+2));
+      delta_virial_sign = 0.0;
+      
+      // loop for each iteration
+      for( unsigned int i = 1; i < max_it; i++){
+        
+        //compute the gradient
+        arma::vec grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
+        
+        //if the gradient is finite we can continue
+        if(arma::is_finite(grad)){
+          
+          //continuous momentum update by half step size
+          m -= 0.5 * eps * grad;
+          
+          //continuous parameter update by one step size
+          theta += eps * m;
+          
+          //compute the gradient
+          grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
+          
+          //if the gradient is finite we can continue
+          if(arma::is_finite(grad)){
+            
+            //continuous momentum update by half step size
+            m -= 0.5 * eps * grad;
+            
+            // compute the potential energy of the system
+            out(i,2*d) = Rcpp::as<double>(nlp(theta,args,true));
+            
+            //compute the Hamiltonian of the system
+            out(i,2*d+1) = out(i,2*d) + 0.5*arma::sum(arma::square(m)); 
+            
+            //let's make sure it's not NaN, in which case let's set it equal to +Inf
+            if(!arma::is_finite(out(i,2*d+1))){
+              out(i,2*d+1) = arma::datum::inf;
+            }
+            
+            //let's check if there is a divergent transition
+            if( (out(i,2*d+1) - H) > 1000){
+              
+              //add the divergent transition to the global matrix
+              theta -= 0.5 * eps * m;
+              
+              //report the divergent transition
+              out(i,2*d+5) = 1.0;
+              
+            }else{
+              //report the metropolis acceptance rate
+              out(i,2*d+4) = std::exp(H-out(i,2*d+1));
+            }
+          }else{
+            //add the divergent transition to the global matrix
+            theta -= 0.5 * eps * m;
+            
+            //report the divergent transition
+            out(i,2*d+5) = 1.0;    
+          }
+          
+        }else{
+          //report the divergent transition
+          out(i,2*d+5) = 1.0;
+        }
+        
+        // save the evolution of the flow in the phase space
+        out.row(i).subvec(0,d-1) = theta.t();
+        out.row(i).subvec(d,2*d-1) = m.t();
+        
+        //1) compute the NUTS criterion
+        
+        // cumulate the momenta vector
+        cum_momenta += m;
+        
+        // compute the criterion
+        out(i,2*d+2) = arma::sum(cum_momenta % m);
+        
+        //2) compute the virial criterion
+        
+        // save the last value of the virial
+        delta_virial = virial;
+        
+        // compute the new virial
+        virial = sum(theta % m);
+        
+        // approximate the exchange rate
+        delta_virial = (virial - delta_virial) / eps;
+        
+        // update the log sum exp of the virial log virial exchange rates
+        add_sign_log_sum_exp(log_abs_sum_virial,
+                             delta_virial_sign,
+                             std::log(std::abs(delta_virial)) - out(i,2*d+1),
+                             segno(delta_virial));
+        
+        // cumulate the Hamiltonians
+        sum_H = arma::log_add_exp(sum_H,-out(i,2*d+1));
+        
+        // save the virial exhaustion criterion
+        out(i,2*d+3) = std::exp(log_abs_sum_virial - sum_H - std::log(i+1));
+        
+      }
+      
+    }else{
+      
+      // initialize the cumulative momenta vector
+      cum_momenta.subvec(0,d-k-1) = m0.subvec(0,d-k-1);
+      cum_momenta.subvec(d-k,d-1) = arma::sign(m0.subvec(d-k,d-1));
+      
+      // set the current acceptance rate equal to one
+      out.row(0).subvec(2*d+4,2*d+4+k) = arma::ones<arma::rowvec>(k+1);
+      
+      // compute the initial potential energy of the system
+      out(0,2*d) = Rcpp::as<double>(nlp(theta0,args,true));
+      
+      // add the hamiltonian for the function
+      H = out(0,2*d) + 
+        0.5*arma::sum(arma::square(m0.subvec(0,d-k-1))) + 
+        arma::sum(arma::abs(m0.subvec(d-k,d-1)));
+      out(0,2*d+1) = H;
+      
+      // add the NUTS criterion
+      out(0,2*d+2) = 1.0;
+      
+      // add the virial exhaustion criterion
+      //out(0,2*d+2) = arma::sum(m % theta);
+      
+      // initialize the log_abs_sum del virial and its sign
+      //log_abs_sum_virial = std::log(std::abs(out(0,2*d+2))) - H;
+      log_abs_sum_virial = -arma::datum::inf;
+      //delta_virial_sign = segno(out(0,2*d+2));
+      delta_virial_sign = 0.0;
+      
+      double U;
+      double theta_old;
+      double delta_U;
+      unsigned int j;
+      
+      // loop for each iteration
+      for( unsigned int i = 1; i < max_it; i++){
+        
+        //compute the gradient
+        arma::vec grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
+        
+        //if the gradient is finite we can continue
+        if(arma::is_finite(grad)){
+          
+          //continuous momentum update by half step size
+          m.subvec(0,d-k-1) -= 0.5 * eps * grad;
+          
+          //continuous parameter update by half step size
+          theta.subvec(0,d-k-1) += 0.5 * eps * m.subvec(0,d-k-1);
+          
+          //compute the value of the new potential energy
+          U = Rcpp::as<double>(nlp(theta,args,true));
+          
+          // if the potential energy is finite then we continue
+          if(arma::is_finite(U)){
+            
+            //permute the order of the discrete parameters
+            idx_disc = arma::shuffle(idx_disc);
+            
+            //loop for every discontinuous component
+            for(unsigned int ii = 0; ii < k; ii++){
+              
+              //set the current index
+              j = idx_disc(ii);
+              
+              //modify the discrete parameter
+              theta_old = theta(j);
+              
+              theta(j) = theta_old + eps * segno(m(j));
+              
+              //calculation of the difference in potential energy
+              delta_U = Rcpp::as<double>(nlp(theta,args,true)) - U;
+              
+              //calculation of the Metropolis acceptance rate
+              out(i,d+5+j+k) = std::exp(-delta_U);
+              
+              //refraction or reflection?
+              if( std::abs(m(j)) > delta_U ){
+                
+                //refraction
+                m(j) -= segno(m(j)) * delta_U;
+                U += delta_U;
+                
+              }else{
+                
+                //reflection
+                theta(j) = theta_old;
+                m(j) *= -1.0;
+                
+                //report it
+                out(i,d+5+j+2*k) = std::exp(-delta_U);
+                
+                
+              }
+              
+            }
+            
+            // continue updating continuous parameters
+            
+            //continuous parameter update by half step size
+            theta.subvec(0,d-k-1) += 0.5 * eps * m.subvec(0,d-k-1);
+            
+            //compute the gradient
+            grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
+            
+            //let's make sure it's finite
+            if(arma::is_finite(grad)){
+              
+              //continuous momentum update by half step size
+              m.subvec(0,d-k-1) -= 0.5 * eps * grad;
+              
+              // compute the new potential energy
+              out(i,2*d) = Rcpp::as<double>(nlp(theta,args,true));
+              
+              //compute the hamiltonian
+              out(i,2*d+1) = out(i,2*d) + 
+                0.5*arma::sum(arma::square(m.subvec(0 ,d-k-1))) + 
+                arma::sum(arma::abs(m.subvec(d-k,d-1)));
+              
+              //let's make sure it's not NaN, in which case let's set it equal to +Inf
+              if(!arma::is_finite(out(i,2*d))){
+                out(i,2*d+1) = out(i,2*d) = arma::datum::inf;
+              }
+              
+              //let's check if there is a divergent transition
+              if( (out(i,2*d+1) - H) > 1000){
+                
+                //add the divergent transition to the global matrix
+                theta.subvec(0,d-k-1) -= 0.5 * eps * m.subvec(0,d-k-1);
+                
+                //report the divergent transition
+                out(i,2*d+5+2*k) = 1.0;
+                
+              }else{
+                //update the metropolis acceptance rate
+                out(i,2*d+4) += std::exp(H-out(i,2*d+1));
+              }
+            }else{
+              
+              //add the divergent transition to the global matrix
+              theta.subvec(0,d-k-1) -= 0.5 * eps * m.subvec(0,d-k-1);
+              
+              //report the divergent transition
+              out(i,2*d+5+2*k) = 1.0;
+            }
+          }else{
+            
+            //add the divergent transition to the global matrix
+            theta.subvec(0,d-k-1) -= 0.5 * eps * m.subvec(0,d-k-1);
+            
+            //report the divergent transition
+            out(i,2*d+5+2*k) = 1.0;
+          }
+        }else{
+          //add the divergent transition to the global matrix
+          
+          //report the divergent transition
+          out(i,2*d+5+2*k) = 1.0;
+        }
+        
+        // save the evolution of the flow in the phase space
+        out.row(i).subvec(0,d-1) = theta.t();
+        out.row(i).subvec(d,2*d-1) = m.t();
+        
+        //1) compute the NUTS criterion
+        
+        // cumulate the momenta vector
+        cum_momenta.subvec(0,d-k-1) += m.subvec(0,d-k-1);
+        cum_momenta.subvec(d-k,d-1) += arma::sign(m.subvec(d-k,d-1));
+        
+        // compute the criterion
+        out(i,2*d+2) = arma::sum(cum_momenta % m);
+        
+        //2) compute the virial criterion
+        
+        // save the last value of the virial
+        delta_virial = virial;
+        
+        // compute the new virial
+        virial = sum(theta % m);
+        
+        // approximate the exchange rate
+        delta_virial = (virial - delta_virial) / eps;
+        
+        // update the log sum exp of the virial log virial exchange rates
+        add_sign_log_sum_exp(log_abs_sum_virial,
+                             delta_virial_sign,
+                             std::log(std::abs(delta_virial)) - out(i,2*d+1),
+                             segno(delta_virial));
+        
+        // cumulate the Hamiltonians
+        sum_H = arma::log_add_exp(sum_H,-out(i,2*d+1));
+        
+        // save the virial exhaustion criterion
+        out(i,2*d+3) = std::exp(log_abs_sum_virial - sum_H - std::log(i+1));
+        
+      }
+      
+    }
+    
+    
+  }else{
+    
+    if(!Rf_isMatrix(M_cont)){
+      
+      // diagonal matrix case
+      
+      // compute the inverses
+      arma::vec M_inv_cont = 1/ Rcpp::as<arma::vec>(M_cont);
+      arma::vec M_inv_disc = 1/arma::sqrt(Rcpp::as<arma::vec>(M_disc));
+      
+      if(d == k){
+        
+        // initialize the cumulative momenta vector
+        cum_momenta = arma::sign(m0);
+        
+        // set the current acceptance rate equal to one
+        out.row(0).subvec(2*d+4,3*d+3) = arma::ones<arma::rowvec>(k);
+        
+        // compute the potential energy
+        double U = Rcpp::as<double>(nlp(theta0,args,true));
+        out(0,2*d) = U;
+        
+        // compute the hamiltonian for the function
+        H = U + arma::dot(arma::abs(m0),M_inv_disc);
+        out.col(2*d+1) = arma::ones<arma::vec>(max_it) * H;
+        
+        // add the NUTS criterion
+        out(0,2*d+2) = 1.0;
+        
+        // add the virial exhaustion criterion
+        //out(0,2*d+2) = arma::sum(m % theta);
+        
+        // initialize the log_abs_sum del virial and its sign
+        //log_abs_sum_virial = std::log(std::abs(out(0,2*d+2))) - H;
+        log_abs_sum_virial = -arma::datum::inf;
+        //delta_virial_sign = segno(out(0,2*d+2));
+        delta_virial_sign = 0.0;
+        
+        //initialization of the new vector and the potential difference
+        double theta_old;
+        double delta_U;
+        unsigned int j;
+        
+        // loop for each iteration
+        for( unsigned int i = 1; i < max_it; i++){
+          
+          //permute the order of the discrete parameters
+          idx_disc = arma::shuffle(idx_disc);
+          
+          //loop for every discontinuous component
+          for(unsigned int ii = 0; ii < d; ii++){
+            
+            //set the current index
+            j = idx_disc(ii);
+            
+            //modify the discrete parameter
+            theta_old = theta(j);
+            
+            theta(j) = theta_old + eps * M_inv_disc(j) * segno(m(j));
+            
+            //calculation of the difference in potential energy
+            delta_U = Rcpp::as<double>(nlp(theta,args,true)) - U;
+            
+            //let's make sure it's finite
+            if(std::isnan(delta_U)){
+              delta_U = -arma::datum::inf;
+              theta(j) = theta_old;
+              
+              //report the divergent transition
+              out(i,4*d+4) = 1.0;
+              
+              break;
+              
+            }else{
+              
+              //calculation of the Metropolis acceptance rate
+              out(i,2*d+4+j) += std::exp(-delta_U);
+              
+              //refraction or reflection?
+              if( M_inv_disc(j) * std::abs(m(j)) > delta_U ){
+                
+                //refraction
+                m(j) -= segno(m(j)) * delta_U / M_inv_disc(j);
+                U += delta_U;
+                
+              }else{
+                
+                //reflection
+                theta(j) = theta_old;
+                m(j) *= -1.0;
+                
+                // report it
+                out(i,3*d+4 + j) = 1.0;
+                
+              }
+            }
+          }
+          
+          // save the evolution of the flow in the phase space
+          out.row(i).subvec(0,d-1) = theta.t();
+          out.row(i).subvec(d,2*d-1) = m.t();
+          
+          // save the current valur for the potential energy
+          out(i,2*d) = U;
+          
+          //1) compute the NUTS criterion
+          
+          // cumulate the momenta vector
+          cum_momenta += arma::sign(m);
+          
+          // compute the criterion
+          out(i,2*d+2) = arma::sum(M_inv_disc % cum_momenta % m);
+          
+          //2) compute the virial criterion
+          
+          // save the last value of the virial
+          delta_virial = virial;
+          
+          // compute the new virial
+          virial = sum(theta % m);
+          
+          // approximate the exchange rate
+          delta_virial = (virial - delta_virial) / eps;
+          
+          // update the log sum exp of the virial log virial exchange rates
+          add_sign_log_sum_exp(log_abs_sum_virial,
+                               delta_virial_sign,
+                               std::log(std::abs(delta_virial)) - out(i,2*d+1),
+                               segno(delta_virial));
+          
+          // cumulate the Hamiltonians
+          sum_H = arma::log_add_exp(sum_H,-out(i,2*d+1));
+          
+          // save the virial exhaustion criterion
+          out(i,2*d+3) = std::exp(log_abs_sum_virial - sum_H - std::log(i+1));
+          
+        }
+        
+      }else if(k == 0){
+        
+        // initialize the cumulative momenta vector
+        cum_momenta = m0;
+        
+        // set the current acceptance rate
+        out(0,2*d+4) = 1.0;
+        
+        // compute the initial potential energy of the system
+        out(0,2*d) = Rcpp::as<double>(nlp(theta0,args,true));
+        
+        // compute the hamiltonian for the function
+        H = out(0,2*d) +
+          0.5*arma::dot(arma::square(m0),M_inv_cont);
+        out(0,2*d+1) = H;
+        
+        // add the NUTS criterion
+        out(0,2*d+2) = 1.0;
+        
+        // add the virial exhaustion criterion
+        //out(0,2*d+2) = arma::sum(m % theta);
+        
+        // initialize the log_abs_sum del virial and its sign
+        //log_abs_sum_virial = std::log(std::abs(out(0,2*d+2))) - H;
+        log_abs_sum_virial = -arma::datum::inf;
+        //delta_virial_sign = segno(out(0,2*d+2));
+        delta_virial_sign = 0.0;
+        
+        // loop for each iteration
+        for( unsigned int i = 1; i < max_it; i++){
+          
+          //compute the gradient
+          arma::vec grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
+          
+          //if the gradient is finite we can continue
+          if(arma::is_finite(grad)){
+            
+            //continuous momentum update by half step size
+            m -= 0.5 * eps * grad;
+            
+            //continuous parameter update by one step size
+            theta += eps * M_inv_cont % m;
+            
+            //compute the gradient
+            grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
+            
+            //if the gradient is finite we can continue
+            if(arma::is_finite(grad)){
+              
+              //continuous momentum update by half step size
+              m -= eps * grad;
+              
+              // compute the potential energy of the system
+              out(i,2*d) = Rcpp::as<double>(nlp(theta,args,true));
+              
+              //compute the Hamiltonian of the system
+              out(i,2*d+1) = out(i,2*d) + 
+                0.5*arma::dot(arma::square(m),M_inv_cont); 
+              
+              //let's make sure it's not NaN, in which case let's set it equal to +Inf
+              if(!arma::is_finite(out(i,2*d))){
+                out(i,2*d) = out(i,2*d+1) = arma::datum::inf;
+              }
+              
+              //let's check if there is a divergent transition
+              if( (out(i,2*d+1) - H) > 1000){
+                
+                //add the divergent transition to the global matrix
+                theta -= 0.5 * eps * M_inv_cont % m;
+                
+                //report the divergent transition
+                out(i,2*d+5) = 1.0;
+                
+              }else{
+                //report the metropolis acceptance rate
+                out(i,2*d+4) = std::exp(H-out(i,2*d+1));
+              }
+            }else{
+              //add the divergent transition to the global matrix
+              theta -= 0.5 * eps * M_inv_cont % m;
+              
+              //report the divergent transition
+              out(i,2*d+5) = 1.0;    
+            }
+            
+          }else{
+            //report the divergent transition
+            out(i,2*d+5) = 1.0;
+          }
+          
+          // save the evolution of the flow in the phase space
+          out.row(i).subvec(0,d-1) = theta.t();
+          out.row(i).subvec(d,2*d-1) = m.t();
+          
+          //1) compute the NUTS criterion
+          
+          // cumulate the momenta vector
+          cum_momenta += m;
+          
+          // compute the criterion
+          out(i,2*d+2) = arma::sum(M_inv_cont % cum_momenta % m);
+          
+          //2) compute the virial criterion
+          
+          // save the last value of the virial
+          delta_virial = virial;
+          
+          // compute the new virial
+          virial = sum(theta % m);
+          
+          // approximate the exchange rate
+          delta_virial = (virial - delta_virial) / eps;
+          
+          // update the log sum exp of the virial log virial exchange rates
+          add_sign_log_sum_exp(log_abs_sum_virial,
+                               delta_virial_sign,
+                               std::log(std::abs(delta_virial)) - out(i,2*d+1),
+                               segno(delta_virial));
+          
+          // cumulate the Hamiltonians
+          sum_H = arma::log_add_exp(sum_H,-out(i,2*d+1));
+          
+          // save the virial exhaustion criterion
+          out(i,2*d+3) = std::exp(log_abs_sum_virial - sum_H - std::log(i+1));
+        }
+        
+      }else{
+        
+        // initialize the cumulative momenta vector
+        cum_momenta.subvec(0,d-k-1) = m0.subvec(0,d-k-1);
+        cum_momenta.subvec(d-k,d-1) = arma::sign(m0.subvec(d-k,d-1));
+        
+        // set the current acceptance rate equal to one
+        out.row(0).subvec(2*d+4,2*d+4+k) = arma::ones<arma::rowvec>(k+1);
+        
+        // compute the initial potential energy of the system
+        out(0,2*d) = Rcpp::as<double>(nlp(theta0,args,true));
+        
+        // add the hamiltonian for the function
+        H = out(0,2*d) + 
+          0.5*arma::dot(arma::square(m0.subvec(0,d-k-1)),M_inv_cont) + 
+          arma::dot(arma::abs(m0.subvec(d-k,d-1)),M_inv_disc);
+        out(0,2*d+1) = H;
+        
+        // add the NUTS criterion
+        out(0,2*d+2) = 1.0;
+        
+        // add the virial exhaustion criterion
+        //out(0,2*d+2) = arma::sum(m % theta);
+        
+        // initialize the log_abs_sum del virial and its sign
+        //log_abs_sum_virial = std::log(std::abs(out(0,2*d+2))) - H;
+        log_abs_sum_virial = -arma::datum::inf;
+        //delta_virial_sign = segno(out(0,2*d+2));
+        delta_virial_sign = 0.0;
+        
+        double U;
+        double theta_old;
+        double delta_U;
+        unsigned int j;
+        
+        // loop for each iteration
+        for( unsigned int i = 1; i < max_it; i++){
+          
+          //compute the gradient
+          arma::vec grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
+          
+          //if the gradient is finite we can continue
+          if(arma::is_finite(grad)){
+            
+            //continuous momentum update by half step size
+            m.subvec(0,d-k-1) -= 0.5 * eps * grad;
+            
+            //continuous parameter update by half step size
+            theta.subvec(0,d-k-1) += 0.5 * eps * M_inv_cont % m.subvec(0,d-k-1);
+            
+            //compute the value of the new potential energy
+            U = Rcpp::as<double>(nlp(theta,args,true));
+            
+            // if the potential energy is finite then we continue
+            if(arma::is_finite(U)){
+              
+              //permute the order of the discrete parameters
+              idx_disc = arma::shuffle(idx_disc);
+              
+              //loop for every discontinuous component
+              for(unsigned int ii = 0; ii < k; ii++){
+                
+                //set the current index
+                j = idx_disc(ii);
+                
+                //modify the discrete parameter
+                theta_old = theta(j);
+                
+                theta(j) = theta_old + eps * M_inv_disc(j-d+k) * segno(m(j));
+                
+                //calculation of the difference in potential energy
+                delta_U = Rcpp::as<double>(nlp(theta,args,true)) - U;
+                
+                //calculation of the Metropolis acceptance rate
+                out(i,d+5+j+k) = std::exp(-delta_U);
+                
+                //refraction or reflection?
+                if( M_inv_disc(j-d+k) * std::abs(m(j)) > delta_U ){
+                  
+                  //refraction
+                  m(j) -= segno(m(j)) * delta_U / M_inv_disc(j-d+k);
+                  U += delta_U;
+                  
+                }else{
+                  
+                  //reflection
+                  theta(j) = theta_old;
+                  m(j) *= -1.0;
+                  
+                  //report it
+                  out(i,d+5+j+2*k) = 1.0;
+                  
+                }
+                
+              }
+              
+              // continue updating continuous parameters
+              
+              //continuous parameter update by half step size
+              theta.subvec(0,d-k-1) += 0.5 * eps * M_inv_cont % m.subvec(0,d-k-1);
+              
+              //compute the gradient
+              grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
+              
+              //let's make sure it's finite
+              if(arma::is_finite(grad)){
+                
+                //continuous momentum update by half step size
+                m.subvec(0,d-k-1) -= 0.5 * eps * grad;
+                
+                // compute the potential energy of the current system
+                out(i,2*d) = Rcpp::as<double>(nlp(theta,args,true));
+                
+                //compute the hamiltonian
+                out(i,2*d+1) = out(i,2*d) + 
+                  0.5*arma::dot(arma::square(m.subvec(0,d-k-1)),M_inv_cont) + 
+                  arma::dot(arma::abs(m.subvec(d-k,d-1)),M_inv_disc);
+                
+                //let's make sure it's not NaN, in which case let's set it equal to -Inf
+                if(!arma::is_finite(out(i,2*d))){
+                  out(i,2*d) = out(i,2*d+1) = arma::datum::inf;
+                }
+                
+                //let's check if there is a divergent transition
+                if( (out(i,2*d+1) - H) > 1000){
+                  
+                  //add the divergent transition to the global matrix
+                  theta.subvec(0,d-k-1) -= 0.5 * eps * M_inv_cont % m.subvec(0,d-k-1);
+                  
+                  //report the divergent transition
+                  out(i,2*d+5+2*k) = 1.0;
+                  
+                }else{
+                  //update the metropolis acceptance rate
+                  out(i,2*d+4) += std::exp(H-out(i,2*d+1));
+                }
+              }else{
+                
+                //add the divergent transition to the global matrix
+                theta.subvec(0,d-k-1) -= 0.5 * eps * M_inv_cont % m.subvec(0,d-k-1);
+                
+                //report the divergent transition
+                out(i,2*d+5+2*k) = 1.0;
+              }
+            }else{
+              
+              //add the divergent transition to the global matrix
+              theta.subvec(0,d-k-1) -= 0.5 * eps * M_inv_cont % m.subvec(0,d-k-1);
+              
+              //report the divergent transition
+              out(i,2*d+5+2*k) = 1.0;
+            }
+          }else{
+            //add the divergent transition to the global matrix
+            
+            //report the divergent transition
+            out(i,2*d+5+2*k) = 1.0;
+          }
+          
+          // save the evolution of the flow in the phase space
+          out.row(i).subvec(0,d-1) = theta.t();
+          out.row(i).subvec(d,2*d-1) = m.t();
+          
+          //1) compute the NUTS criterion
+          
+          // cumulate the momenta vector
+          cum_momenta.subvec(0,d-k-1) += m.subvec(0,d-k-1);
+          cum_momenta.subvec(d-k,d-1) += arma::sign(m.subvec(d-k,d-1));
+          
+          // compute the criterion
+          out(i,2*d+2) = arma::sum(M_inv_cont % cum_momenta.subvec(0,d-k-1) % m.subvec(0,d-k-1));
+          out(i,2*d+2) += arma::sum(M_inv_disc % cum_momenta.subvec(d-k,d-1) % arma::sign(m.subvec(d-k,d-1)));
+          
+          //2) compute the virial criterion
+          
+          // save the last value of the virial
+          delta_virial = virial;
+          
+          // compute the new virial
+          virial = sum(theta % m);
+          
+          // approximate the exchange rate
+          delta_virial = (virial - delta_virial) / eps;
+          
+          // update the log sum exp of the virial log virial exchange rates
+          add_sign_log_sum_exp(log_abs_sum_virial,
+                               delta_virial_sign,
+                               std::log(std::abs(delta_virial)) - out(i,2*d+1),
+                               segno(delta_virial));
+          
+          // cumulate the Hamiltonians
+          sum_H = arma::log_add_exp(sum_H,-out(i,2*d+1));
+          
+          // save the virial exhaustion criterion
+          out(i,2*d+3) = std::exp(log_abs_sum_virial - sum_H - std::log(i+1));
+          
+        }
+        
+      }
+      
+    }else{
+      
+      // dense matrix case
+      
+      // compute the inverses
+      arma::mat M_inv_cont = arma::inv(Rcpp::as<arma::mat>(M_cont));
+      arma::vec M_inv_disc = 1/arma::sqrt(Rcpp::as<arma::vec>(M_disc));
+      
+      if(k == 0){
+        
+        // initialize the cumulative momenta vector
+        cum_momenta = m0;
+        
+        // set the current acceptance rate
+        out(0,2*d+4) = 1.0;
+        
+        // compute the initial potential energy of the system
+        out(0,2*d) = Rcpp::as<double>(nlp(theta0,args,true));
+        
+        // compute the hamiltonian for the function
+        H = out(0,2*d) +
+          0.5*arma::dot(m0,M_inv_cont * m0);
+        out(0,2*d+1) = H;
+        
+        // add the NUTS criterion
+        out(0,2*d+2) = 1.0;
+        
+        // add the virial exhaustion criterion
+        //out(0,2*d+2) = arma::sum(m % theta);
+        
+        // initialize the log_abs_sum del virial and its sign
+        //log_abs_sum_virial = std::log(std::abs(out(0,2*d+2))) - H;
+        log_abs_sum_virial = -arma::datum::inf;
+        //delta_virial_sign = segno(out(0,2*d+2));
+        delta_virial_sign = 0.0;
+        
+        // loop for each iteration
+        for( unsigned int i = 1; i < max_it; i++){
+          
+          //compute the gradient
+          arma::vec grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
+          
+          //if the gradient is finite we can continue
+          if(arma::is_finite(grad)){
+            
+            //continuous momentum update by half step size
+            m -= 0.5 * eps * grad;
+            
+            //continuous parameter update by half step size
+            theta += eps * M_inv_cont * m;
+            
+            //compute the gradient
+            grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
+            
+            //if the gradient is finite we can continue
+            if(arma::is_finite(grad)){
+              
+              //continuous momentum update by half step size
+              m -= 0.5 * eps * grad;
+              
+              // compute the potential energy of the current system
+              out(i,2*d) = Rcpp::as<double>(nlp(theta,args,true));
+              
+              //compute the Hamiltonian of the new system
+              out(i,2*d+1) = out(i,2*d) + 
+                0.5*arma::dot(m,M_inv_cont * m);
+              
+              //let's make sure it's not NaN, in which case let's set it equal to +Inf
+              if(!arma::is_finite(out(i,2*d))){
+                out(i,2*d) = out(i,2*d+1) = arma::datum::inf;
+              }
+              
+              //let's check if there is a divergent transition
+              if( (out(i,2*d+1) - H) > 1000){
+                
+                //add the divergent transition to the global matrix
+                theta -= 0.5 * eps * M_inv_cont * m;
+                
+                //report the divergent transition
+                out(i,2*d+5) = 1.0;
+                
+              }else{
+                //report the metropolis acceptance rate
+                out(i,2*d+4) = std::exp(H-out(i,2*d+1));
+              }
+            }else{
+              //add the divergent transition to the global matrix
+              theta -= 0.5 * eps * M_inv_cont * m;
+              
+              //report the divergent transition
+              out(i,2*d+5) = 1.0;    
+            }
+            
+          }else{
+            //report the divergent transition
+            out(i,2*d+5) = 1.0;
+          }
+          
+          // save the evolution of the flow in the phase space
+          out.row(i).subvec(0,d-1) = theta.t();
+          out.row(i).subvec(d,2*d-1) = m.t();
+          
+          //1) compute the NUTS criterion
+          
+          // cumulate the momenta vector
+          cum_momenta += m;
+          
+          // compute the criterion
+          out(i,2*d+2) = arma::sum(M_inv_cont * cum_momenta % m);
+          
+          //2) compute the virial criterion
+          
+          // save the last value of the virial
+          delta_virial = virial;
+          
+          // compute the new virial
+          virial = sum(theta % m);
+          
+          // approximate the exchange rate
+          delta_virial = (virial - delta_virial) / eps;
+          
+          // update the log sum exp of the virial log virial exchange rates
+          add_sign_log_sum_exp(log_abs_sum_virial,
+                               delta_virial_sign,
+                               std::log(std::abs(delta_virial)) - out(i,2*d+1),
+                               segno(delta_virial));
+          
+          // cumulate the Hamiltonians
+          sum_H = arma::log_add_exp(sum_H,-out(i,2*d+1));
+          
+          // save the virial exhaustion criterion
+          out(i,2*d+3) = std::exp(log_abs_sum_virial - sum_H - std::log(i+1));
+          
+        }
+        
+      }else if (k == d){
+        
+        Rcpp::stop("Dense continuous mass matrix make no sense if all the components are discontinuous!");
+        
+      }else{
+        
+        // initialize the cumulative momenta vector
+        cum_momenta.subvec(0,d-k-1) = m.subvec(0,d-k-1);
+        cum_momenta.subvec(d-k,d-1) = arma::sign(m.subvec(d-k,d-1));
+        
+        // set the current acceptance rate equal to one
+        out.row(0).subvec(2*d+4,2*d+4+k) = arma::ones<arma::rowvec>(k+1);
+        
+        // compute the initial potential energy of the system
+        out(0,2*d) = Rcpp::as<double>(nlp(theta0,args,true));
+        
+        // add the hamiltonian for the function
+        H = out(0,2*d) + 
+          0.5*arma::dot(m0.subvec(0 ,d-k-1),M_inv_cont * m0.subvec(0 ,d-k-1)) + 
+          arma::dot(arma::abs(m0.subvec(d-k,d-1)),M_inv_disc);
+        out(0,2*d+1) = H;
+        
+        // add the NUTS criterion
+        out(0,2*d+2) = 1.0;
+        
+        // add the virial exhaustion criterion
+        //out(0,2*d+2) = arma::sum(m % theta);
+        
+        // initialize the log_abs_sum del virial and its sign
+        //log_abs_sum_virial = std::log(std::abs(out(0,2*d+2))) - H;
+        log_abs_sum_virial = -arma::datum::inf;
+        //delta_virial_sign = segno(out(0,2*d+2));
+        delta_virial_sign = 0.0;
+        
+        double U;
+        double theta_old;
+        double delta_U;
+        unsigned int j;
+        
+        // loop for each iteration
+        for( unsigned int i = 1; i < max_it; i++){
+          
+          //compute the gradient
+          arma::vec grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
+          
+          //if the gradient is finite we can continue
+          if(arma::is_finite(grad)){
+            
+            //continuous momentum update by half step size
+            m.subvec(0,d-k-1) -= 0.5 * eps * grad;
+            
+            //continuous parameter update by half step size
+            theta.subvec(0,d-k-1) += 0.5 * eps * M_inv_cont * m.subvec(0,d-k-1);
+            
+            //compute the value of the new potential energy
+            U = Rcpp::as<double>(nlp(theta,args,true));
+            
+            // if the potential energy is finite then we continue
+            if(arma::is_finite(U)){
+              
+              //permute the order of the discrete parameters
+              idx_disc = arma::shuffle(idx_disc);
+              
+              //loop for every discontinuous component
+              for(unsigned int ii = 0; ii < k; ii++){
+                
+                //set the current index
+                j = idx_disc(ii);
+                
+                //modify the discrete parameter
+                theta_old = theta(j);
+                
+                theta(j) = theta_old + eps * M_inv_disc(j-d+k) * segno(m(j));
+                
+                //calculation of the difference in potential energy
+                delta_U = Rcpp::as<double>(nlp(theta,args,true)) - U;
+                
+                //calculation of the Metropolis acceptance rate
+                out(i,d+5+j+k) = std::exp(-delta_U);
+                
+                //refraction or reflection?
+                if( M_inv_disc(j-d+k) * std::abs(m(j)) > delta_U ){
+                  
+                  //refraction
+                  m(j) -= segno(m(j)) * delta_U / M_inv_disc(j-d+k);
+                  U += delta_U;
+                  
+                }else{
+                  
+                  //reflection
+                  theta(j) = theta_old;
+                  m(j) *= -1.0;
+                  
+                  //report it
+                  out(i,d+5+j+2*k) = 1.0;
+                  
+                }
+                
+              }
+              
+              // continue updating continuous parameters
+              
+              //continuous parameter update by half step size
+              theta.subvec(0,d-k-1) += 0.5 * eps * M_inv_cont * m.subvec(0,d-k-1);
+              
+              //compute the gradient
+              grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
+              
+              //let's make sure it's finite
+              if(arma::is_finite(grad)){
+                
+                //continuous momentum update by half step size
+                m.subvec(0,d-k-1) -= 0.5 * eps * grad;
+                
+                // compute the potential energy of the new system
+                out(i,2*d) = Rcpp::as<double>(nlp(theta,args,true));
+                
+                //compute the hamiltonian
+                out(i,2*d+1) = out(i,2*d) + 
+                  0.5*arma::dot(m.subvec(0 ,d-k-1),M_inv_cont * m.subvec(0 ,d-k-1)) + 
+                  arma::dot(arma::abs(m.subvec(d-k,d-1)),M_inv_disc);
+                
+                //let's make sure it's not NaN, in which case let's set it equal to +Inf
+                if(!arma::is_finite(out(i,2*d))){
+                  out(i,2*d) = out(i,2*d + 1) = arma::datum::inf;
+                }
+                
+                //let's check if there is a divergent transition
+                if( (out(i,2*d+1) - H) > 1000){
+                  
+                  //add the divergent transition to the global matrix
+                  theta.subvec(0,d-k-1) -= 0.5 * eps * M_inv_cont * m.subvec(0,d-k-1);
+                  
+                  //report the divergent transition
+                  out(i,2*d+5+2*k) = 1.0;
+                  
+                }else{
+                  //update the metropolis acceptance rate
+                  out(i,2*d+4) += std::exp(H-out(i,2*d+1));
+                }
+              }else{
+                
+                //add the divergent transition to the global matrix
+                theta.subvec(0,d-k-1) -= 0.5 * eps * M_inv_cont * m.subvec(0,d-k-1);
+                
+                //report the divergent transition
+                out(i,2*d+5+2*k) = 1.0;
+              }
+            }else{
+              
+              //add the divergent transition to the global matrix
+              theta.subvec(0,d-k-1) -= 0.5 * eps * M_inv_cont * m.subvec(0,d-k-1);
+              
+              //report the divergent transition
+              out(i,2*d+5+2*k) = 1.0;
+            }
+          }else{
+            
+            //report the divergent transition
+            out(i,2*d+5+2*k) = 1.0;
+          }
+          
+          // save the evolution of the flow in the phase space
+          out.row(i).subvec(0,d-1) = theta.t();
+          out.row(i).subvec(d,2*d-1) = m.t();
+          
+          //1) compute the NUTS criterion
+          
+          // cumulate the momenta vector
+          cum_momenta.subvec(0,d-k-1) += m.subvec(0,d-k-1);
+          cum_momenta.subvec(d-k,d-1) += arma::sign(m.subvec(d-k,d-1));
+          
+          // compute the criterion
+          out(i,2*d+2) = arma::sum(M_inv_cont * cum_momenta.subvec(0,d-k-1) % m.subvec(0,d-k-1));
+          out(i,2*d+2) += arma::sum(M_inv_disc % cum_momenta.subvec(d-k,d-1) % arma::sign(m.subvec(d-k,d-1)));
+          
+          //2) compute the virial criterion
+          
+          // save the last value of the virial
+          delta_virial = virial;
+          
+          // compute the new virial
+          virial = sum(theta % m);
+          
+          // approximate the exchange rate
+          delta_virial = (virial - delta_virial) / eps;
+          
+          // update the log sum exp of the virial log virial exchange rates
+          add_sign_log_sum_exp(log_abs_sum_virial,
+                               delta_virial_sign,
+                               std::log(std::abs(delta_virial)) - out(i,2*d+1),
+                               segno(delta_virial));
+          
+          // cumulate the Hamiltonians
+          sum_H = arma::log_add_exp(sum_H,-out(i,2*d+1));
+          
+          // save the virial exhaustion criterion
+          out(i,2*d+3) = std::exp(log_abs_sum_virial - sum_H - std::log(i+1));
+          
+        }
+        
+      }
+      
+    }
+    
+  }
+  
+  // set the first value of the virial equal to NA
+  out(0,2*d+3) = NA_REAL;
+  
+  // coerce the output matrix as a list
+  Rcpp::List df;
+  Rcpp::CharacterVector df_names(out_dim);
+  
+  // assign the names to the columns
+  for(unsigned int i = 0; i < d; i++){
+    df_names[i] = position_names[i];
+    df_names[d+i] = momentum_names[i];
+  }
+  df_names[2*d] = "Potential";
+  df_names[2*d + 1] = "Hamiltonian";
+  df_names[2*d + 2] = "NUTS";
+  df_names[2*d + 3] = "Virial";
+  df_names[out_dim - 1] = "Divergent";
+  
+  if( k == d){
+    
+    // add the alphas and the reflection dummies
+    for(unsigned int i = 0; i < d; i++){
+      df_names[2*d+4+i] = "alpha_" + position_names[i];
+      df_names[3*d+4+i] = "reflection_" + position_names[i];
+    }
+    
+  }else if(k == 0){
+    
+    // add the global acceptance probability
+    df_names[2*d + 4] = "alpha";
+    
+  }else{
+    
+    // add the global acceptance probability
+    df_names[2*d + 4] = "alpha";
+    
+    // add the alphas and the reflection dummies
+    for(unsigned int i = 0; i < k; i++){
+      df_names[2*d+5+i] = "alpha_" + position_names[i];
+      df_names[2*d+5+k+i] = "reflection_" + position_names[i];
+    }
+    
+  }
+  
+  // insert all the desired quantities
+  for(unsigned int i = 0; i < out.n_cols; i++){
+    df[Rcpp::as<string>(df_names[i])] = out.col(i);
+  }
+  
+  // coerce the list to data frame
+  df.attr("names") = df_names;
+  df.attr("class") = "data.frame";
+  df.attr("row.names") = Rcpp::IntegerVector::create(NA_INTEGER, -out.n_rows);
+  
+  Rcpp::DataFrame df_out = df;
+  
+  df_out.attr("class") = Rcpp::CharacterVector::create("XDNUTS.trajectories","data.frame");
+  
+  // return the output dataframe
+  return df_out;
+  
+}

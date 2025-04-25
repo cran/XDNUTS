@@ -17,7 +17,7 @@
 even if these are more than 10.}
 }
 \value{
-Return a graphical object.
+Return a data frame object.
 }
 \description{
 Print to console the specific of the algorithm used to generate an XDNUTS object.
