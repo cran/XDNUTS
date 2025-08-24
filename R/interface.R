@@ -277,6 +277,7 @@ xdnuts <- function(theta0,
                                               chain_id = i,
                                               verbose = verbose,
                                               control = control)
+        
       }
       
       #let's give the name of the parameters to each chain
@@ -353,6 +354,9 @@ xdnuts <- function(theta0,
       })
       
     }
+    
+    #set the seed
+    parallel::clusterSetRNGStream(cl)
 
     #parallel chains
     res <- base::tryCatch(parallel::parLapply(cl,
@@ -541,7 +545,7 @@ print.XDNUTS <- function(x,... , digits = 3, show_all = FALSE){
   #process output
   oo <- round(base::t(base::sapply(x$chains,function(y) 
     c(s1 = stats::median(y$energy), #median energy
-      s2 = stats::median(y$delta_energy), #median delta energy
+      s2 = stats::IQR(y$energy), #IQR energy
       s3 = stats::var(y$delta_energy)/stats::var(y$energy), #EBFMI
       s4 = stats::median(y$step_size), #median step size
       s5 = stats::median(y$step_length), #median step length
@@ -549,7 +553,7 @@ print.XDNUTS <- function(x,... , digits = 3, show_all = FALSE){
   
   #fix cols and rows names
   base::rownames(oo) <- base::paste0("chain",seq_along(x$chains))
-  base::colnames(oo)[1:5] <- c("Me(E)","Me(dE)","EBFMI","Me(eps)","Me(L)")
+  base::colnames(oo)[1:5] <- c("Me(E)","IQR(E)","EBFMI","Me(eps)","Me(L)")
   
   #check for problematic samples
   n_div <- base::sapply(x$chains,function(y) sum(base::NROW(y$div_trans)))
@@ -856,7 +860,7 @@ plot.XDNUTS <- function(x,type = 1,which = NULL,warm_up = FALSE,
     #GRAMMAR OF GRAPHICS
     
     #set to null all the possible variable names
-    Chain <- Index <- Value <- Freq <- Var1 <- Var2 <- Type <- Var <- Par <- Color <- NULL
+    density <- Chain <- Index <- Value <- Freq <- Var1 <- Var2 <- Type <- Var <- Par <- Color <- NULL
     
     #plot1: marginal chains
     if(type == 1){
@@ -932,6 +936,14 @@ plot.XDNUTS <- function(x,type = 1,which = NULL,warm_up = FALSE,
       #save x_axis ranges
       xy_range <- base::matrix(NA,2,d)
       
+      for(i in seq_len(d)){
+        for(j in seq(1,i)){
+          if(i > j){
+            ll[[ d*(j-1) + i ]] <- ggplot2::ggplot() + ggplot2::theme_void()
+          }
+        }
+      }
+      
       #add diagonal plots one at the time
       for(i in seq_len(d)){
         #create the sub plot
@@ -940,7 +952,7 @@ plot.XDNUTS <- function(x,type = 1,which = NULL,warm_up = FALSE,
           ggplot2::geom_density(alpha = 0.5, linewidth = 0.5, show.legend = FALSE) + 
           ggplot2::scale_color_manual(values = colori) +  # paletta
           ggplot2::labs(title = nomi[i], x = NULL, y = NULL) + 
-          ggplot2::theme_gray() + 
+          ggplot2::theme_bw() + 
           ggplot2::theme(
             panel.grid.major.y = ggplot2::element_blank(),  # remove horizontal grid
             panel.grid.minor.y = ggplot2::element_blank(),
@@ -948,7 +960,7 @@ plot.XDNUTS <- function(x,type = 1,which = NULL,warm_up = FALSE,
           )
         
         #insert the plot on the right spot on the list
-        ll[[d*(i-1)+i]] <- tmp
+        ll[[d*(i-1)+i]] <- ggplot2::ggplotGrob(tmp)
         
         #save x_axis limits
         xy_range[,i] <- ggplot2::layer_scales(tmp)$x$range$range
@@ -958,25 +970,48 @@ plot.XDNUTS <- function(x,type = 1,which = NULL,warm_up = FALSE,
       for(i in seq_along(nomi)){
         for(j in base::setdiff(seq_along(nomi),seq_len(i))){
           #create the subplot
+          # tmp <- ggplot2::ggplot(base::data.frame(Var1 = df[,nomi[j]],
+          #                                         Var2 = df[,nomi[i]],
+          #                                         Color = grDevices::densCols(df[,nomi[i]], df[,nomi[j]],
+          #                                                                     colramp = grDevices::colorRampPalette(c("white", grDevices::blues9)) ))) + 
+          #   ggplot2::xlim(xy_range[1,j],xy_range[2,j]) + 
+          #   ggplot2::ylim(xy_range[1,i],xy_range[2,i]) + 
+          #   ggplot2::geom_point(ggplot2::aes(x = Var1,y =  Var2, col = Color)) + 
+          #   ggplot2::scale_color_identity() +
+          #   ggplot2::labs(title = "", x = NULL, y = NULL) + 
+          #   ggplot2::theme_bw() + 
+          #   ggplot2::theme(
+          #     panel.grid.major.x = ggplot2::element_blank(),  # remove vertical grid
+          #     panel.grid.minor.x = ggplot2::element_blank(),
+          #     panel.grid.major.y = ggplot2::element_blank(),  # remove horizontal grid
+          #     panel.grid.minor.y = ggplot2::element_blank()
+          #   )
+          
           tmp <- ggplot2::ggplot(base::data.frame(Var1 = df[,nomi[j]],
-                                                  Var2 = df[,nomi[i]],
-                                                  Color = grDevices::densCols(df[,nomi[i]], df[,nomi[j]],
-                                                                              colramp = grDevices::colorRampPalette(c("gray90", grDevices::blues9)) ))) + 
-            ggplot2::xlim(xy_range[1,j],xy_range[2,j]) + 
-            ggplot2::ylim(xy_range[1,i],xy_range[2,i]) + 
-            ggplot2::geom_point(ggplot2::aes(x = Var1,y =  Var2, col = Color)) + 
-            ggplot2::scale_color_identity() +
-            ggplot2::labs(title = "", x = NULL, y = NULL) + 
-            ggplot2::theme_gray() + 
+                                                  Var2 = df[,nomi[i]]),
+                                 ggplot2::aes(x = Var1, y = Var2)) +
+            ggplot2::stat_density_2d(
+              ggplot2::aes(fill = (ggplot2::after_stat(density))^0.3),
+              geom = "raster",
+              contour = FALSE
+            ) +
+            ggplot2::scale_fill_gradientn(
+              colours = c("white", grDevices::blues9),
+              guide = "none"
+            ) +
+            ggplot2::theme_classic() +
             ggplot2::theme(
-              panel.grid.major.x = ggplot2::element_blank(),  # remove vertical grid
-              panel.grid.minor.x = ggplot2::element_blank(),
-              panel.grid.major.y = ggplot2::element_blank(),  # remove horizontal grid
-              panel.grid.minor.y = ggplot2::element_blank()
+              panel.grid = ggplot2::element_blank(),
+              axis.title = ggplot2::element_blank(),
+              legend.position = "none",
+              panel.border = ggplot2::element_rect(color = "black", fill = NA,
+                                                   linewidth = 0.5),
+              axis.ticks = ggplot2::element_line(),
+              axis.text = ggplot2::element_text()
             )
           
           #insert the plot in the right spot on the list
-          ll[[ d*(j-1) + i ]] <- tmp
+          ll[[ d*(j-1) + i ]] <- ggplot2::ggplotGrob(tmp)
         }
       }
       
