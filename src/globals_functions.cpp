@@ -14,6 +14,12 @@ int segno(const double& x){
   return (x > 0) - (x < 0);
 }
 
+// define our own lod_add_exp function becasuse arma doesn't support it anymore
+double log_add_exp(double x, double y) {
+  double max_val = std::max(x, y);
+  return max_val + std::log1p(std::exp(-std::abs(x - y)));
+}
+
 // FUNCTION TO LOG SUM EXP WITH SIGN
 void add_sign_log_sum_exp(double& log_abs_x,
                           double& sign_x,

@@ -3,12 +3,18 @@
 
 #include <iostream>
 #include <RcppArmadillo.h>
+#include "globals.h"
+#include "globals_interact.h"
+#include "globals_functions.h"
 // [[Rcpp::depends(RcppArmadillo)]]
 
 using namespace std;
 
 // FUNCTION THAT CALCULATES THE SIGN OF A SCALAR
 int segno(const double& x);
+
+// define our own lod_add_exp function becasuse arma doesn't support it anymore
+double log_add_exp(double x,double y);
 
 // FUNCTION TO LOG SUM EXP WITH SIGN
 void add_sign_log_sum_exp(double& log_abs_x,

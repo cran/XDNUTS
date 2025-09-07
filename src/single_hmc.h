@@ -3,6 +3,11 @@
 
 #include <iostream>
 #include <RcppArmadillo.h>
+#include "globals.h"
+#include "globals_interact.h"
+#include "globals_functions.h"
+#include "leapfrog.h"
+#include "single_hmc.h"
 // [[Rcpp::depends(RcppArmadillo)]]
 
 using namespace std;

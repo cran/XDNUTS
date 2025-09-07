@@ -206,6 +206,11 @@ xdnuts <- function(theta0,
     base::stop("'hide' must be a logical scalar!")
   }
   
+  #if different stepsize is used allow for different nominal refraction rates
+  if(control$different_stepsize && k != 0){
+    control$delta <- c(control$delta[1],rep(control$delta[-1],k))[seq_len(1+k)]
+  }
+  
   #get the number of chains from the length of the list
   n_chains <- length(theta0)
   
@@ -655,7 +660,7 @@ print.XDNUTS <- function(x,... , digits = 3, show_all = FALSE){
   }
   
   #get nominal values
-  deltas <- rep(x$control$delta,c(1,x$k))
+  deltas <- c(x$control$delta[1],rep(x$control$delta[-1],x$k))
   
   #impute missing values with the default
   deltas <- base::ifelse(is.na(deltas),0.6,deltas)

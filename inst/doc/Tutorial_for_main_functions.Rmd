@@ -378,7 +378,7 @@ plot(chains)
 By default, it displays the trace plots for each marginal chain, which is useful for checking if the chains are mixing well. To view the marginal and bivariate densities, specify `type = 2`.
 
 ```{r, out.width='70%', out.height='70%', eval = TRUE, dpi = 300}
-plot(chains, type = 2, gg = FALSE)
+plot(chains, type = 2)
 ```
 
 Examining the marginal densities can help diagnose poor convergence of the chains, though this does not seem to be an issue here.
@@ -467,7 +467,7 @@ original_chains <- xdtransform(X = chains, which = NULL,
 To avoid repetitions, not all plots are displayed.
 
 ```{r, out.width='70%', out.height='70%', eval = TRUE, dpi = 300}
-plot(original_chains, type = 2, gg = FALSE)
+plot(original_chains, type = 2)
 ```
 
 The densities for each chain behave more appropriately, primarily due to reduced autocorrelation.
@@ -625,11 +625,11 @@ plot(original_chains, type = 3)
 Although in a Bayesian context the only difference concerns the informativeness of the priors, we can plot the density plots of the *fixed* and *random* parameters separately.
 
 ```{r, out.width='70%', out.height='70%', eval = TRUE, dpi = 300}
-plot(original_chains, type = 2, which = 1:3, gg = FALSE, scale = 0.5)#fixed
+plot(original_chains, type = 2, which = 1:3, scale = 0.5)#fixed
 ```
 
 ```{r, out.width='70%', out.height='70%', eval = TRUE, dpi = 300}
-plot(original_chains, type = 2, which = 4:9, gg = FALSE, scale = 0.5)#random
+plot(original_chains, type = 2, which = 4:9, scale = 0.5, gg = FALSE)#random
 ```
 
 Next, it is useful to check the autocorrelation plots for each chain:

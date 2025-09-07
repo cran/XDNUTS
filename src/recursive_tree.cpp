@@ -1,5 +1,6 @@
 #include <iostream>
 #include <RcppArmadillo.h>
+#include <cmath>
 #include "globals.h"
 #include "globals_interact.h"
 #include "globals_functions.h"
@@ -41,7 +42,7 @@ arma::vec build_tree(arma::vec sub_tree,
     double U = Rcpp::as<double>(nlp(sub_tree.subvec(idx,idx + d - 1),args,true));
     
     // if the potential energy is finite then we continue
-    if(arma::is_finite(U)){
+    if(std::isfinite(U)){
       
       //initialization of the old value and the potential difference
       double theta_old;
@@ -94,7 +95,7 @@ arma::vec build_tree(arma::vec sub_tree,
       arma::vec grad = Rcpp::as<arma::vec>(nlp(sub_tree.subvec(idx,idx + d-1),args,false));
       
       //let's make sure it's finished
-      if(arma::is_finite(grad)){
+      if(grad.is_finite()){
         //continuous momentum update by half step size
         sub_tree.subvec(idx + d,idx +2*d-k-1) -= 0.5 * eps * grad;
         
@@ -104,7 +105,7 @@ arma::vec build_tree(arma::vec sub_tree,
           arma::sum(arma::abs(sub_tree.subvec(idx + 2*d-k,idx + 2*d-1)));
         
         //let's make sure it's not NaN, in which case let's set it equal to -Inf
-        if(!arma::is_finite(sub_tree(6*d))){
+        if(!std::isfinite(sub_tree(6*d))){
           sub_tree(6*d) = -arma::datum::inf;
         }
         
@@ -197,7 +198,7 @@ arma::vec build_tree(arma::vec sub_tree,
         if(!sub_tree(6*d + 1)){
           
           //cumulate log_sum_exp of the multinomial weights,
-          sub_tree(6*d) = arma::log_add_exp(sub_tree(6*d),sub_tree2(6*d));
+          sub_tree(6*d) = log_add_exp(sub_tree(6*d),sub_tree2(6*d));
           
           if(arma::randu() < std::exp(sub_tree2(6*d) - sub_tree(6*d))){
             sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
@@ -251,7 +252,7 @@ arma::vec build_tree(arma::vec sub_tree,
     double U = Rcpp::as<double>(nlp(sub_tree.subvec(idx,idx + d - 1),args,true));
     
     // if the potential energy is finite then we continue
-    if(arma::is_finite(U)){
+    if(std::isfinite(U)){
       
       //initialization of the old value and the potential difference
       double theta_old;
@@ -303,7 +304,7 @@ arma::vec build_tree(arma::vec sub_tree,
       arma::vec grad = Rcpp::as<arma::vec>(nlp(sub_tree.subvec(idx,idx + d-1),args,false));
       
       //let's make sure it's finished
-      if(arma::is_finite(grad)){
+      if(grad.is_finite()){
         //continuous momentum update by half step size
         sub_tree.subvec(idx + d,idx +2*d-k-1) -= 0.5 * eps * grad;
         
@@ -313,7 +314,7 @@ arma::vec build_tree(arma::vec sub_tree,
           arma::dot(arma::abs(sub_tree.subvec(idx + 2*d-k,idx + 2*d-1)),M_inv_disc);
         
         //let's make sure it's not NaN, in which case let's set it equal to -Inf
-        if(!arma::is_finite(sub_tree(6*d))){
+        if(!std::isfinite(sub_tree(6*d))){
           sub_tree(6*d) = -arma::datum::inf;
         }
         
@@ -408,7 +409,7 @@ arma::vec build_tree(arma::vec sub_tree,
         if(!sub_tree(6*d + 1)){
           
           //cumulate log_sum_exp of the multinomial weights,
-          sub_tree(6*d) = arma::log_add_exp(sub_tree(6*d),sub_tree2(6*d));
+          sub_tree(6*d) = log_add_exp(sub_tree(6*d),sub_tree2(6*d));
           
           if(arma::randu() < std::exp(sub_tree2(6*d) - sub_tree(6*d))){
             sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
@@ -461,7 +462,7 @@ arma::vec build_tree(arma::vec sub_tree,
     double U = Rcpp::as<double>(nlp(sub_tree.subvec(idx,idx + d - 1),args,true));
     
     // if the potential energy is finite then we continue
-    if(arma::is_finite(U)){
+    if(std::isfinite(U)){
       
       //initialization of the old value and the potential difference
       double theta_old;
@@ -513,7 +514,7 @@ arma::vec build_tree(arma::vec sub_tree,
       arma::vec grad = Rcpp::as<arma::vec>(nlp(sub_tree.subvec(idx,idx + d-1),args,false));
       
       //let's make sure it's finished
-      if(arma::is_finite(grad)){
+      if(grad.is_finite()){
         //continuous momentum update by half step size
         sub_tree.subvec(idx + d,idx +2*d-k-1) -= 0.5 * eps * grad;
         
@@ -523,7 +524,7 @@ arma::vec build_tree(arma::vec sub_tree,
           arma::dot(arma::abs(sub_tree.subvec(idx + 2*d-k,idx + 2*d-1)),M_inv_disc);
         
         //let's make sure it's not NaN, in which case let's set it equal to -Inf
-        if(!arma::is_finite(sub_tree(6*d))){
+        if(!std::isfinite(sub_tree(6*d))){
           sub_tree(6*d) = -arma::datum::inf;
         }
         
@@ -618,7 +619,7 @@ arma::vec build_tree(arma::vec sub_tree,
         if(!sub_tree(6*d + 1)){
           
           //cumulate log_sum_exp of the multinomial weights,
-          sub_tree(6*d) = arma::log_add_exp(sub_tree(6*d),sub_tree2(6*d));
+          sub_tree(6*d) = log_add_exp(sub_tree(6*d),sub_tree2(6*d));
           
           if(arma::randu() < std::exp(sub_tree2(6*d) - sub_tree(6*d))){
             sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
@@ -668,7 +669,7 @@ arma::vec build_tree(arma::vec sub_tree,
     double U = Rcpp::as<double>(nlp(sub_tree.subvec(idx,idx + d - 1),args,true));
     
     // if the potential energy is finite then we continue
-    if(arma::is_finite(U)){
+    if(std::isfinite(U)){
       
       //initialization of the old value and the potential difference
       double theta_old;
@@ -720,7 +721,7 @@ arma::vec build_tree(arma::vec sub_tree,
       arma::vec grad = Rcpp::as<arma::vec>(nlp(sub_tree.subvec(idx,idx + d-1),args,false));
       
       //let's make sure it's finished
-      if(arma::is_finite(grad)){
+      if(grad.is_finite()){
         //continuous momentum update by half step size
         sub_tree.subvec(idx + d,idx +2*d-k-1) -= 0.5 * eps * grad;
         
@@ -730,7 +731,7 @@ arma::vec build_tree(arma::vec sub_tree,
           arma::sum(arma::abs(sub_tree.subvec(idx + 2*d-k,idx + 2*d-1)));
         
         //let's make sure it's not NaN, in which case let's set it equal to -Inf
-        if(!arma::is_finite(sub_tree((5+K)*d))){
+        if(!std::isfinite(sub_tree((5+K)*d))){
           sub_tree((5+K)*d) = -arma::datum::inf;
         }
         
@@ -823,7 +824,7 @@ arma::vec build_tree(arma::vec sub_tree,
         if(!sub_tree((5+K)*d+1)){
           
           //cumulate the log multinomial weights
-          sub_tree((5+K)*d) = arma::log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
+          sub_tree((5+K)*d) = log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
 
           double alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
           
@@ -880,7 +881,7 @@ arma::vec build_tree(arma::vec sub_tree,
     double U = Rcpp::as<double>(nlp(sub_tree.subvec(idx,idx + d - 1),args,true));
     
     // if the potential energy is finite then we continue
-    if(arma::is_finite(U)){
+    if(std::isfinite(U)){
       
       //initialization of the old value and the potential difference
       double theta_old;
@@ -932,7 +933,7 @@ arma::vec build_tree(arma::vec sub_tree,
       arma::vec grad = Rcpp::as<arma::vec>(nlp(sub_tree.subvec(idx,idx + d-1),args,false));
       
       //let's make sure it's finished
-      if(arma::is_finite(grad)){
+      if(grad.is_finite()){
         //continuous momentum update by half step size
         sub_tree.subvec(idx + d,idx +2*d-k-1) -= 0.5 * eps * grad;
         
@@ -942,7 +943,7 @@ arma::vec build_tree(arma::vec sub_tree,
           arma::dot(arma::abs(sub_tree.subvec(idx + 2*d-k,idx + 2*d-1)),M_inv_disc);
         
         //let's make sure it's not NaN, in which case let's set it equal to -Inf
-        if(!arma::is_finite(sub_tree((5+K)*d))){
+        if(!std::isfinite(sub_tree((5+K)*d))){
           sub_tree((5+K)*d) = -arma::datum::inf;
         }
         
@@ -1036,7 +1037,7 @@ arma::vec build_tree(arma::vec sub_tree,
         if(!sub_tree((5+K)*d+1)){
 
           //cumulate the log multinomial weights
-          sub_tree((5+K)*d) = arma::log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
+          sub_tree((5+K)*d) = log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
 
           double alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
           
@@ -1093,7 +1094,7 @@ arma::vec build_tree(arma::vec sub_tree,
     double U = Rcpp::as<double>(nlp(sub_tree.subvec(idx,idx + d - 1),args,true));
     
     // if the potential energy is finite then we continue
-    if(arma::is_finite(U)){
+    if(std::isfinite(U)){
       
       //initialization of the old value and the potential difference
       double theta_old;
@@ -1145,7 +1146,7 @@ arma::vec build_tree(arma::vec sub_tree,
       arma::vec grad = Rcpp::as<arma::vec>(nlp(sub_tree.subvec(idx,idx + d-1),args,false));
       
       //let's make sure it's finished
-      if(arma::is_finite(grad)){
+      if(grad.is_finite()){
         //continuous momentum update by half step size
         sub_tree.subvec(idx + d,idx +2*d-k-1) -= 0.5 * eps * grad;
         
@@ -1155,7 +1156,7 @@ arma::vec build_tree(arma::vec sub_tree,
           arma::dot(arma::abs(sub_tree.subvec(idx + 2*d-k,idx + 2*d-1)),M_inv_disc);
         
         //let's make sure it's not NaN, in which case let's set it equal to -Inf
-        if(!arma::is_finite(sub_tree((5+K)*d))){
+        if(!std::isfinite(sub_tree((5+K)*d))){
           sub_tree((5+K)*d) = -arma::datum::inf;
         }
         
@@ -1248,7 +1249,7 @@ arma::vec build_tree(arma::vec sub_tree,
         if(!sub_tree((5+K)*d+1)){
 
           //cumulate the log multinomial weights
-          sub_tree((5+K)*d) = arma::log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
+          sub_tree((5+K)*d) = log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
           
           double alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
           
@@ -1306,7 +1307,7 @@ arma::vec build_tree(arma::vec sub_tree,
       0.5*arma::sum(arma::square(sub_tree.subvec(idx + d ,idx + 2*d-1))); 
     
     //let's make sure it's not NaN, in which case let's set it equal to -Inf
-    if(!arma::is_finite(sub_tree(6*d))){
+    if(!std::isfinite(sub_tree(6*d))){
       sub_tree(6*d) = -arma::datum::inf;
     }
     
@@ -1380,7 +1381,7 @@ arma::vec build_tree(arma::vec sub_tree,
         if(!sub_tree(6*d + 1)){
           
           //cumulate the log_sum_exp of the multinomial weights,
-          sub_tree(6*d) = arma::log_add_exp(sub_tree(6*d),sub_tree2(6*d));
+          sub_tree(6*d) = log_add_exp(sub_tree(6*d),sub_tree2(6*d));
           
           if(arma::randu() < std::exp(sub_tree2(6*d) - sub_tree(6*d))){
             sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
@@ -1428,7 +1429,7 @@ arma::vec build_tree(arma::vec sub_tree,
       0.5*arma::dot(arma::square(sub_tree.subvec(idx + d ,idx + 2*d-1)),M_inv); 
     
     //let's make sure it's not NaN, in which case let's set it equal to -Inf
-    if(!arma::is_finite(sub_tree(6*d))){
+    if(!std::isfinite(sub_tree(6*d))){
       sub_tree(6*d) = -arma::datum::inf;
     }
     
@@ -1502,7 +1503,7 @@ arma::vec build_tree(arma::vec sub_tree,
         if(!sub_tree(6*d + 1)){
           
           //cumulate the log_sum_exp of the multinomial weights,
-          sub_tree(6*d) = arma::log_add_exp(sub_tree(6*d),sub_tree2(6*d));
+          sub_tree(6*d) = log_add_exp(sub_tree(6*d),sub_tree2(6*d));
           
           if(arma::randu() < std::exp(sub_tree2(6*d) - sub_tree(6*d))){
             sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
@@ -1548,7 +1549,7 @@ arma::vec build_tree(arma::vec sub_tree,
       0.5*arma::dot(sub_tree.subvec(idx + d ,idx + 2*d-1),M_inv * sub_tree.subvec(idx + d ,idx + 2*d-1)); 
     
     //let's make sure it's not NaN, in which case let's set it equal to -Inf
-    if(!arma::is_finite(sub_tree(6*d))){
+    if(!std::isfinite(sub_tree(6*d))){
       sub_tree(6*d) = -arma::datum::inf;
     }
     
@@ -1622,7 +1623,7 @@ arma::vec build_tree(arma::vec sub_tree,
         if(!sub_tree(6*d + 1)){
           
           //cumulate the log_sum_exp of the multinomial weights,
-          sub_tree(6*d) = arma::log_add_exp(sub_tree(6*d),sub_tree2(6*d));
+          sub_tree(6*d) = log_add_exp(sub_tree(6*d),sub_tree2(6*d));
           
           if(arma::randu() < std::exp(sub_tree2(6*d) - sub_tree(6*d))){
             sub_tree.subvec(4*d,5*d-1) = sub_tree2.subvec(4*d,5*d-1);
@@ -1670,7 +1671,7 @@ arma::vec build_tree(arma::vec sub_tree,
       0.5*arma::sum(arma::square(sub_tree.subvec(idx + d ,idx + 2*d-1))); 
     
     //let's make sure it's not NaN, in which case let's set it equal to -Inf
-    if(!arma::is_finite(sub_tree((5+K)*d))){
+    if(!std::isfinite(sub_tree((5+K)*d))){
       sub_tree((5+K)*d) = -arma::datum::inf;
     }
     
@@ -1746,7 +1747,7 @@ arma::vec build_tree(arma::vec sub_tree,
         if(!sub_tree((5+K)*d+1)){
           
           //cumulate the log multinomial weights
-          sub_tree((5+K)*d) = arma::log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
+          sub_tree((5+K)*d) = log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
           
           double alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
           
@@ -1802,7 +1803,7 @@ arma::vec build_tree(arma::vec sub_tree,
       0.5*arma::dot(arma::square(sub_tree.subvec(idx + d ,idx + 2*d-1)),M_inv); 
     
     //let's make sure it's not NaN, in which case let's set it equal to -Inf
-    if(!arma::is_finite(sub_tree((5+K)*d))){
+    if(!std::isfinite(sub_tree((5+K)*d))){
       sub_tree((5+K)*d) = -arma::datum::inf;
     }
     
@@ -1878,7 +1879,7 @@ arma::vec build_tree(arma::vec sub_tree,
         if(!sub_tree((5+K)*d+1)){
 
           //cumulate the log multinomial weights
-          sub_tree((5+K)*d) = arma::log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
+          sub_tree((5+K)*d) = log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
           
           double alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
           
@@ -1932,7 +1933,7 @@ arma::vec build_tree(arma::vec sub_tree,
       0.5*arma::dot(sub_tree.subvec(idx + d ,idx + 2*d-1),M_inv * sub_tree.subvec(idx + d ,idx + 2*d-1) ); 
     
     //let's make sure it's not NaN, in which case let's set it equal to -Inf
-    if(!arma::is_finite(sub_tree((5+K)*d))){
+    if(!std::isfinite(sub_tree((5+K)*d))){
       sub_tree((5+K)*d) = -arma::datum::inf;
     }
     
@@ -2008,7 +2009,7 @@ arma::vec build_tree(arma::vec sub_tree,
         if(!sub_tree((5+K)*d+1)){
 
           //cumulate the log multinomial weights
-          sub_tree((5+K)*d) = arma::log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
+          sub_tree((5+K)*d) = log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
 
           double alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
           
@@ -2098,7 +2099,7 @@ arma::vec build_tree(arma::vec sub_tree,
     }
     
     //let's check if there is a divergent transition
-    if( !arma::is_finite(U)){
+    if( !std::isfinite(U)){
       
       //add the divergent transition to the global matrix
       add_div_trans(sub_tree.subvec(idx,idx+d-1));
@@ -2246,7 +2247,7 @@ arma::vec build_tree(arma::vec sub_tree,
     }
     
     //let's check if there is a divergent transition
-    if( !arma::is_finite(U)){
+    if( !std::isfinite(U)){
       
       //add the divergent transition to the global matrix
       add_div_trans(sub_tree.subvec(idx,idx+d-1));
@@ -2399,7 +2400,7 @@ arma::vec build_tree(arma::vec sub_tree,
     }
     
     //let's check if there is a divergent transition
-    if( !arma::is_finite(U)){
+    if( !std::isfinite(U)){
       
       //add the divergent transition to the global matrix
       add_div_trans(sub_tree.subvec(idx,idx+d-1));
@@ -2553,7 +2554,7 @@ arma::vec build_tree(arma::vec sub_tree,
     }
     
     //let's check if there is a divergent transition
-    if( !arma::is_finite(U)){
+    if( !std::isfinite(U)){
       
       //add the divergent transition to the global matrix
       add_div_trans(sub_tree.subvec(idx,idx+d-1));
@@ -2679,7 +2680,7 @@ arma::vec build_tree(arma::vec sub_tree,
     double U = Rcpp::as<double>(nlp(sub_tree.subvec(idx,idx + d - 1),args,true));
     
     // if the potential energy is finite then we continue
-    if(arma::is_finite(U)){
+    if(std::isfinite(U)){
       
       //initialization of the old value and the potential difference
       double theta_old;
@@ -2732,7 +2733,7 @@ arma::vec build_tree(arma::vec sub_tree,
       arma::vec grad = Rcpp::as<arma::vec>(nlp(sub_tree.subvec(idx,idx + d-1),args,false));
       
       //let's make sure it's finished
-      if(arma::is_finite(grad)){
+      if(grad.is_finite()){
         //continuous momentum update by half step size
         sub_tree.subvec(idx + d,idx +2*d-k-1) -= 0.5 * eps * grad;
         
@@ -2742,7 +2743,7 @@ arma::vec build_tree(arma::vec sub_tree,
           arma::sum(arma::abs(sub_tree.subvec(idx + 2*d-k,idx + 2*d-1)));
         
         //let's make sure it's not NaN, in which case let's set it equal to -Inf
-        if(!arma::is_finite(sub_tree(5*d))){
+        if(!std::isfinite(sub_tree(5*d))){
           sub_tree(5*d) = -arma::datum::inf;
         }
         
@@ -2831,7 +2832,7 @@ arma::vec build_tree(arma::vec sub_tree,
         //check the condition of the virial:
         
         //first, cumulate the log sum of the metropolis weights
-        sub_tree2(5*d) = arma::log_add_exp(sub_tree(5*d),sub_tree2(5*d));
+        sub_tree2(5*d) = log_add_exp(sub_tree(5*d),sub_tree2(5*d));
         
         //then, cumulate the virial
         add_sign_log_sum_exp(sub_tree( 5*d+k+4),
@@ -2900,7 +2901,7 @@ arma::vec build_tree(arma::vec sub_tree,
     double U = Rcpp::as<double>(nlp(sub_tree.subvec(idx,idx + d - 1),args,true));
     
     // if the potential energy is finite then we continue
-    if(arma::is_finite(U)){
+    if(std::isfinite(U)){
       
       //initialization of the old value and the potential difference
       double theta_old;
@@ -2953,7 +2954,7 @@ arma::vec build_tree(arma::vec sub_tree,
       arma::vec grad = Rcpp::as<arma::vec>(nlp(sub_tree.subvec(idx,idx + d-1),args,false));
       
       //let's make sure it's finished
-      if(arma::is_finite(grad)){
+      if(grad.is_finite()){
         //continuous momentum update by half step size
         sub_tree.subvec(idx + d,idx +2*d-k-1) -= 0.5 * eps * grad;
         
@@ -2963,7 +2964,7 @@ arma::vec build_tree(arma::vec sub_tree,
           arma::dot(arma::abs(sub_tree.subvec(idx + 2*d-k,idx + 2*d-1)),M_inv_disc);
         
         //let's make sure it's not NaN, in which case let's set it equal to -Inf
-        if(!arma::is_finite(sub_tree(5*d))){
+        if(!std::isfinite(sub_tree(5*d))){
           sub_tree(5*d) = -arma::datum::inf;
         }
         
@@ -3052,7 +3053,7 @@ arma::vec build_tree(arma::vec sub_tree,
         //check the condition of the virial:
         
         //first, cumulate the log sum of the metropolis weights
-        sub_tree(5*d) = arma::log_add_exp(sub_tree(5*d),sub_tree2(5*d));
+        sub_tree(5*d) = log_add_exp(sub_tree(5*d),sub_tree2(5*d));
         
         //then, cumulate the virial
         add_sign_log_sum_exp(sub_tree( 5*d+k+4),
@@ -3118,7 +3119,7 @@ arma::vec build_tree(arma::vec sub_tree,
     double U = Rcpp::as<double>(nlp(sub_tree.subvec(idx,idx + d - 1),args,true));
     
     // if the potential energy is finite then we continue
-    if(arma::is_finite(U)){
+    if(std::isfinite(U)){
       
       //initialization of the old value and the potential difference
       double theta_old;
@@ -3171,7 +3172,7 @@ arma::vec build_tree(arma::vec sub_tree,
       arma::vec grad = Rcpp::as<arma::vec>(nlp(sub_tree.subvec(idx,idx + d-1),args,false));
       
       //let's make sure it's finished
-      if(arma::is_finite(grad)){
+      if(grad.is_finite()){
         //continuous momentum update by half step size
         sub_tree.subvec(idx + d,idx +2*d-k-1) -= 0.5 * eps * grad;
         
@@ -3181,7 +3182,7 @@ arma::vec build_tree(arma::vec sub_tree,
           arma::dot(arma::abs(sub_tree.subvec(idx + 2*d-k,idx + 2*d-1)),M_inv_disc);
         
         //let's make sure it's not NaN, in which case let's set it equal to -Inf
-        if(!arma::is_finite(sub_tree(5*d))){
+        if(!std::isfinite(sub_tree(5*d))){
           sub_tree(5*d) = -arma::datum::inf;
         }
         
@@ -3272,7 +3273,7 @@ arma::vec build_tree(arma::vec sub_tree,
         //check the condition of the virial:
         
         //first, cumulate the log sum of the metropolis weights
-        sub_tree(5*d) = arma::log_add_exp(sub_tree(5*d),sub_tree2(5*d));
+        sub_tree(5*d) = log_add_exp(sub_tree(5*d),sub_tree2(5*d));
         
         //then, cumulate the virial
         add_sign_log_sum_exp(sub_tree( 5*d+k+4),
@@ -3335,7 +3336,7 @@ arma::vec build_tree(arma::vec sub_tree,
     double U = Rcpp::as<double>(nlp(sub_tree.subvec(idx,idx + d - 1),args,true));
     
     // if the potential energy is finite then we continue
-    if(arma::is_finite(U)){
+    if(std::isfinite(U)){
       
       //initialization of the old value and the potential difference
       double theta_old;
@@ -3387,7 +3388,7 @@ arma::vec build_tree(arma::vec sub_tree,
       arma::vec grad = Rcpp::as<arma::vec>(nlp(sub_tree.subvec(idx,idx + d-1),args,false));
       
       //let's make sure it's finished
-      if(arma::is_finite(grad)){
+      if(grad.is_finite()){
         //continuous momentum update by half step size
         sub_tree.subvec(idx + d,idx +2*d-k-1) -= 0.5 * eps * grad;
         
@@ -3397,7 +3398,7 @@ arma::vec build_tree(arma::vec sub_tree,
           arma::sum(arma::abs(sub_tree.subvec(idx + 2*d-k,idx + 2*d-1)));
         
         //let's make sure it's not NaN, in which case let's set it equal to -Inf
-        if(!arma::is_finite(sub_tree((4+K)*d))){
+        if(!std::isfinite(sub_tree((4+K)*d))){
           sub_tree((4+K)*d) = -arma::datum::inf;
         }
         
@@ -3487,7 +3488,7 @@ arma::vec build_tree(arma::vec sub_tree,
         //check the condition of the virial:
         
         //first, cumulate the log sum of the metropolis weights
-        sub_tree((4+K)*d) = arma::log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
+        sub_tree((4+K)*d) = log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
         
         //then, cumulates the virial
         add_sign_log_sum_exp(sub_tree( (4+K)*d+k+4),
@@ -3559,7 +3560,7 @@ arma::vec build_tree(arma::vec sub_tree,
     double U = Rcpp::as<double>(nlp(sub_tree.subvec(idx,idx + d - 1),args,true));
     
     // if the potential energy is finite then we continue
-    if(arma::is_finite(U)){
+    if(std::isfinite(U)){
       
       //initialization of the old value and the potential difference
       double theta_old;
@@ -3611,7 +3612,7 @@ arma::vec build_tree(arma::vec sub_tree,
       arma::vec grad = Rcpp::as<arma::vec>(nlp(sub_tree.subvec(idx,idx + d-1),args,false));
       
       //let's make sure it's finished
-      if(arma::is_finite(grad)){
+      if(grad.is_finite()){
         //continuous momentum update by half step size
         sub_tree.subvec(idx + d,idx +2*d-k-1) -= 0.5 * eps * grad;
         
@@ -3621,7 +3622,7 @@ arma::vec build_tree(arma::vec sub_tree,
           arma::dot(arma::abs(sub_tree.subvec(idx + 2*d-k,idx + 2*d-1)),M_inv_disc);
         
         //let's make sure it's not NaN, in which case let's set it equal to -Inf
-        if(!arma::is_finite(sub_tree((4+K)*d))){
+        if(!std::isfinite(sub_tree((4+K)*d))){
           sub_tree((4+K)*d) = -arma::datum::inf;
         }
         
@@ -3711,7 +3712,7 @@ arma::vec build_tree(arma::vec sub_tree,
         //check the condition of the virial:
         
         //first, cumulate the log sum of the metropolis weights
-        sub_tree((4+K)*d) = arma::log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
+        sub_tree((4+K)*d) = log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
         
         //then, cumulates the virial
         add_sign_log_sum_exp(sub_tree( (4+K)*d+k+4),
@@ -3783,7 +3784,7 @@ arma::vec build_tree(arma::vec sub_tree,
     double U = Rcpp::as<double>(nlp(sub_tree.subvec(idx,idx + d - 1),args,true));
     
     // if the potential energy is finite then we continue
-    if(arma::is_finite(U)){
+    if(std::isfinite(U)){
       
       //initialization of the old value and the potential difference
       double theta_old;
@@ -3835,7 +3836,7 @@ arma::vec build_tree(arma::vec sub_tree,
       arma::vec grad = Rcpp::as<arma::vec>(nlp(sub_tree.subvec(idx,idx + d-1),args,false));
       
       //let's make sure it's finished
-      if(arma::is_finite(grad)){
+      if(grad.is_finite()){
         //continuous momentum update by half step size
         sub_tree.subvec(idx + d,idx +2*d-k-1) -= 0.5 * eps * grad;
         
@@ -3845,7 +3846,7 @@ arma::vec build_tree(arma::vec sub_tree,
           arma::dot(arma::abs(sub_tree.subvec(idx + 2*d-k,idx + 2*d-1)),M_inv_disc);
         
         //let's make sure it's not NaN, in which case let's set it equal to -Inf
-        if(!arma::is_finite(sub_tree((4+K)*d))){
+        if(!std::isfinite(sub_tree((4+K)*d))){
           sub_tree((4+K)*d) = -arma::datum::inf;
         }
         
@@ -3935,7 +3936,7 @@ arma::vec build_tree(arma::vec sub_tree,
         //check the condition of the virial:
         
         //first, cumulate the log sum of the metropolis weights
-        sub_tree((4+K)*d) = arma::log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
+        sub_tree((4+K)*d) = log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
         
         //then, cumulates the virial
         add_sign_log_sum_exp(sub_tree( (4+K)*d+k+4),
@@ -4010,7 +4011,7 @@ arma::vec build_tree(arma::vec sub_tree,
       0.5*arma::sum(arma::square(sub_tree.subvec(idx + d ,idx + 2*d-1))); 
     
     //let's make sure it's not NaN, in which case let's set it equal to -Inf
-    if(!arma::is_finite(sub_tree(5*d))){
+    if(!std::isfinite(sub_tree(5*d))){
       sub_tree(5*d) = -arma::datum::inf;
     }
     
@@ -4082,7 +4083,7 @@ arma::vec build_tree(arma::vec sub_tree,
         //check the condition of the virial:
         
         //first, cumulate the log sum of the metropolis weights
-        sub_tree(5*d) = arma::log_add_exp(sub_tree(5*d),sub_tree2(5*d));
+        sub_tree(5*d) = log_add_exp(sub_tree(5*d),sub_tree2(5*d));
         
         //then, cumulates the virial
         add_sign_log_sum_exp(sub_tree( 5*d+4),
@@ -4150,7 +4151,7 @@ arma::vec build_tree(arma::vec sub_tree,
       0.5*arma::dot(arma::square(sub_tree.subvec(idx + d ,idx + 2*d-1)),M_inv); 
     
     //let's make sure it's not NaN, in which case let's set it equal to -Inf
-    if(!arma::is_finite(sub_tree(5*d))){
+    if(!std::isfinite(sub_tree(5*d))){
       sub_tree(5*d) = -arma::datum::inf;
     }
     
@@ -4222,7 +4223,7 @@ arma::vec build_tree(arma::vec sub_tree,
         //check the condition of the virial:
         
         //first, cumulate the log sum of the metropolis weights
-        sub_tree(5*d) = arma::log_add_exp(sub_tree(5*d),sub_tree2(5*d));
+        sub_tree(5*d) = log_add_exp(sub_tree(5*d),sub_tree2(5*d));
         
         //then, cumulates the virial
         add_sign_log_sum_exp(sub_tree( 5*d+4),
@@ -4287,7 +4288,7 @@ arma::vec build_tree(arma::vec sub_tree,
       0.5*arma::dot(sub_tree.subvec(idx + d ,idx + 2*d-1),M_inv * sub_tree.subvec(idx + d ,idx + 2*d-1)); 
     
     //let's make sure it's not NaN, in which case let's set it equal to -Inf
-    if(!arma::is_finite(sub_tree(5*d))){
+    if(!std::isfinite(sub_tree(5*d))){
       sub_tree(5*d) = -arma::datum::inf;
     }
     
@@ -4359,7 +4360,7 @@ arma::vec build_tree(arma::vec sub_tree,
         //check the condition of the virial:
         
         //first, cumulate the log sum of the metropolis weights
-        sub_tree(5*d) = arma::log_add_exp(sub_tree(5*d),sub_tree2(5*d));
+        sub_tree(5*d) = log_add_exp(sub_tree(5*d),sub_tree2(5*d));
         
         //then, cumulates the virial
         add_sign_log_sum_exp(sub_tree( 5*d+4),
@@ -4427,7 +4428,7 @@ arma::vec build_tree(arma::vec sub_tree,
       0.5*arma::sum(arma::square(sub_tree.subvec(idx + d ,idx + 2*d-1))); 
     
     //let's make sure it's not NaN, in which case let's set it equal to -Inf
-    if(!arma::is_finite(sub_tree((4+K)*d))){
+    if(!std::isfinite(sub_tree((4+K)*d))){
       sub_tree((4+K)*d) = -arma::datum::inf;
     }
     
@@ -4500,7 +4501,7 @@ arma::vec build_tree(arma::vec sub_tree,
         
         //check the condition of the virial:
         //first, cumulate the log sum of the metropolis weights
-        sub_tree((4+K)*d) = arma::log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
+        sub_tree((4+K)*d) = log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
         
         //then, cumulates the virial
         add_sign_log_sum_exp(sub_tree( (4+K)*d+4),
@@ -4574,7 +4575,7 @@ arma::vec build_tree(arma::vec sub_tree,
       0.5*arma::dot(arma::square(sub_tree.subvec(idx + d ,idx + 2*d-1)),M_inv); 
     
     //let's make sure it's not NaN, in which case let's set it equal to -Inf
-    if(!arma::is_finite(sub_tree((4+K)*d))){
+    if(!std::isfinite(sub_tree((4+K)*d))){
       sub_tree((4+K)*d) = -arma::datum::inf;
     }
     
@@ -4648,7 +4649,7 @@ arma::vec build_tree(arma::vec sub_tree,
         //check the condition of the virial:
         
         //first, cumulate the log sum of the metropolis weights
-        sub_tree((4+K)*d) = arma::log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
+        sub_tree((4+K)*d) = log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
         
         //then, cumulates the virial
         add_sign_log_sum_exp(sub_tree( (4+K)*d+4),
@@ -4717,7 +4718,7 @@ arma::vec build_tree(arma::vec sub_tree,
       0.5*arma::dot(sub_tree.subvec(idx + d ,idx + 2*d-1),M_inv * sub_tree.subvec(idx + d ,idx + 2*d-1)); 
     
     //let's make sure it's not NaN, in which case let's set it equal to -Inf
-    if(!arma::is_finite(sub_tree((4+K)*d))){
+    if(!std::isfinite(sub_tree((4+K)*d))){
       sub_tree((4+K)*d) = -arma::datum::inf;
     }
     
@@ -4791,7 +4792,7 @@ arma::vec build_tree(arma::vec sub_tree,
         //check the condition of the virial:
         
         //first, cumulate the log sum of the metropolis weights
-        sub_tree((4+K)*d) = arma::log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
+        sub_tree((4+K)*d) = log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
         
         //then, cumulates the virial
         add_sign_log_sum_exp(sub_tree( (4+K)*d+4),
@@ -4897,7 +4898,7 @@ arma::vec build_tree(arma::vec sub_tree,
     }
     
     //let's check if there is a divergent transition
-    if( !arma::is_finite(U)){
+    if( !std::isfinite(U)){
       
       //add the divergent transition to the global matrix
       add_div_trans(sub_tree.subvec(idx,idx+d-1));
@@ -5053,7 +5054,7 @@ arma::vec build_tree(arma::vec sub_tree,
     }
     
     //let's check if there is a divergent transition
-    if( !arma::is_finite(U)){
+    if( !std::isfinite(U)){
       
       //add the divergent transition to the global matrix
       add_div_trans(sub_tree.subvec(idx,idx+d-1));
@@ -5212,7 +5213,7 @@ arma::vec build_tree(arma::vec sub_tree,
     }
     
     //let's check if there is a divergent transition
-    if( !arma::is_finite(U)){
+    if( !std::isfinite(U)){
       
       //add the divergent transition to the global matrix
       add_div_trans(sub_tree.subvec(idx,idx+d-1));
@@ -5373,7 +5374,7 @@ arma::vec build_tree(arma::vec sub_tree,
     }
     
     //let's check if there is a divergent transition
-    if( !arma::is_finite(U)){
+    if( !std::isfinite(U)){
       
       //add the divergent transition to the global matrix
       add_div_trans(sub_tree.subvec(idx,idx+d-1));

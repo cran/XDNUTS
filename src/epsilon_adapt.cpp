@@ -1,5 +1,6 @@
 #include <iostream>
 #include <RcppArmadillo.h>
+#include <cmath>
 #include "globals.h"
 #include "globals_interact.h"
 #include "globals_functions.h"
@@ -136,20 +137,20 @@ void adapt_stepsize(arma::vec& theta0,
       if(k == d){
         //pure dnuts case
         gain = delta(1) - arma::mean(alpha);
-        if(!arma::is_finite(gain)){
+        if(!std::isfinite(gain)){
           gain = delta(1);
         }
       }else if(k == 0 || std::isnan(delta(1))){
         
         //clasic nuts case
         gain = delta(0) - alpha(0); 
-        if(!arma::is_finite(gain)){
+        if(!std::isfinite(gain)){
           gain = delta(0);
         }
       }else{
         //mixed dnuts case
         gain = delta(0) - alpha(0) + arma::mean(delta(1) - alpha.subvec(1,k)); //+ arma::var(alpha.subvec(1,k));
-        if(!arma::is_finite(gain)){
+        if(!std::isfinite(gain)){
           gain = delta(0);
         }
       }
@@ -231,7 +232,7 @@ void adapt_stepsize(arma::vec& theta0,
       if(k == d){
         //pure xdhmc case
         gain = delta(1) - arma::mean(alpha);
-        if(!arma::is_finite(gain)){
+        if(!std::isfinite(gain)){
           gain = delta(1);
         }
       }else if(k == 0 || std::isnan(delta(1))){
@@ -239,13 +240,13 @@ void adapt_stepsize(arma::vec& theta0,
         
         
         gain = delta(0) - alpha(0); 
-        if(!arma::is_finite(gain)){
+        if(!std::isfinite(gain)){
           gain = delta(0);
         }
       }else{
         //xdhmc
         gain = delta(0) - alpha(0) + arma::mean(delta(1) - alpha.subvec(1,k)); //+ arma::var(alpha.subvec(1,k));
-        if(!arma::is_finite(gain)){
+        if(!std::isfinite(gain)){
           gain = delta(0);
         }
       }
@@ -324,7 +325,7 @@ void adapt_stepsize(arma::vec& theta0,
       if(k == d){
         //pure dhmc case
         gain = delta(1) - arma::mean(alpha);
-        if(!arma::is_finite(gain)){
+        if(!std::isfinite(gain)){
           gain = delta(1);
         }
       }else if(k == 0 || std::isnan(delta(1))){
@@ -332,13 +333,13 @@ void adapt_stepsize(arma::vec& theta0,
         
         
         gain = delta(0) - alpha(0); 
-        if(!arma::is_finite(gain)){
+        if(!std::isfinite(gain)){
           gain = delta(0);
         }
       }else{
         //dhmc
         gain = delta(0) - alpha(0) + arma::mean(delta(1) - alpha.subvec(1,k)); //+ arma::var(alpha.subvec(1,k));
-        if(!arma::is_finite(gain)){
+        if(!std::isfinite(gain)){
           gain = delta(0);
         }
       }
@@ -517,7 +518,7 @@ void adapt_stepsize(arma::vec& theta0,
         if(k != d){
           //global gain
           gain = delta(0) - alpha(0);
-          if(!arma::is_finite(gain)){
+          if(!std::isfinite(gain)){
             gain = delta(0);
           }
           
@@ -539,9 +540,9 @@ void adapt_stepsize(arma::vec& theta0,
         for(j = 0; j < k; j++){
           
           //local gain
-          gain = delta(1) - alpha(start+j);
-          if(!arma::is_finite(gain)){
-            gain = delta(1);
+          gain = delta(1+j) - alpha(start+j);
+          if(!std::isfinite(gain)){
+            gain = delta(1+j);
           }
           
           //update the moving average of the statistic to be brought to zero
@@ -575,21 +576,21 @@ void adapt_stepsize(arma::vec& theta0,
         if(k == d){
           //pure dnuts case
           gain = delta(1) - arma::mean(alpha);
-          if(!arma::is_finite(gain)){
+          if(!std::isfinite(gain)){
             gain = delta(1);
           }
         }else if(k == 0 || std::isnan(delta(1))){
           //clasic nuts case
           
           gain = delta(0) - alpha(0); 
-          if(!arma::is_finite(gain)){
+          if(!std::isfinite(gain)){
             gain = delta(0);
           }
         }else{
           //mixed dnuts case
           gain = delta(0) - alpha(0) + arma::mean(delta(1) - alpha.subvec(1,k)); 
           //+ arma::var(alpha.subvec(1,k));
-          if(!arma::is_finite(gain)){
+          if(!std::isfinite(gain)){
             gain = delta(0);
           }
         }
@@ -685,7 +686,7 @@ void adapt_stepsize(arma::vec& theta0,
         if(k != d){
           //global gain
           gain = delta(0) - alpha(0);
-          if(!arma::is_finite(gain)){
+          if(!std::isfinite(gain)){
             gain = delta(0);
           }
           
@@ -707,9 +708,9 @@ void adapt_stepsize(arma::vec& theta0,
         for(j = 0; j < k; j++){
           
           //local gain
-          gain = delta(1) - alpha(start+j);
-          if(!arma::is_finite(gain)){
-            gain = delta(1);
+          gain = delta(1+j) - alpha(start+j);
+          if(!std::isfinite(gain)){
+            gain = delta(1+j);
           }
           
           //update the moving average of the statistic to be brought to zero
@@ -743,21 +744,21 @@ void adapt_stepsize(arma::vec& theta0,
         if(k == d){
           //pure dnuts case
           gain = delta(1) - arma::mean(alpha);
-          if(!arma::is_finite(gain)){
+          if(!std::isfinite(gain)){
             gain = delta(1);
           }
         }else if(k == 0 || std::isnan(delta(1))){
           //clasic nuts case
           
           gain = delta(0) - alpha(0); 
-          if(!arma::is_finite(gain)){
+          if(!std::isfinite(gain)){
             gain = delta(0);
           }
         }else{
           //mixed dnuts case
           gain = delta(0) - alpha(0) + arma::mean(delta(1) - alpha.subvec(1,k)); 
           //+ arma::var(alpha.subvec(1,k));
-          if(!arma::is_finite(gain)){
+          if(!std::isfinite(gain)){
             gain = delta(0);
           }
         }
@@ -848,7 +849,7 @@ void adapt_stepsize(arma::vec& theta0,
         if(k != d){
           //global gain
           gain = delta(0) - alpha(0);
-          if(!arma::is_finite(gain)){
+          if(!std::isfinite(gain)){
             gain = delta(0);
           }
           
@@ -870,9 +871,9 @@ void adapt_stepsize(arma::vec& theta0,
         for(j = 0; j < k; j++){
           
           //local gain
-          gain = delta(1) - alpha(start+j);
-          if(!arma::is_finite(gain)){
-            gain = delta(1);
+          gain = delta(1+j) - alpha(start+j);
+          if(!std::isfinite(gain)){
+            gain = delta(1+j);
           }
           
           //update the moving average of the statistic to be brought to zero
@@ -906,21 +907,21 @@ void adapt_stepsize(arma::vec& theta0,
         if(k == d){
           //pure dnuts case
           gain = delta(1) - arma::mean(alpha);
-          if(!arma::is_finite(gain)){
+          if(!std::isfinite(gain)){
             gain = delta(1);
           }
         }else if(k == 0 || std::isnan(delta(1))){
           //clasic nuts case
           
           gain = delta(0) - alpha(0); 
-          if(!arma::is_finite(gain)){
+          if(!std::isfinite(gain)){
             gain = delta(0);
           }
         }else{
           //mixed dnuts case
           gain = delta(0) - alpha(0) + arma::mean(delta(1) - alpha.subvec(1,k)); 
           //+ arma::var(alpha.subvec(1,k));
-          if(!arma::is_finite(gain)){
+          if(!std::isfinite(gain)){
             gain = delta(0);
           }
         }
@@ -1109,7 +1110,7 @@ void adapt_stepsize(arma::vec& theta0,
         if(k != d){
           //global gain
           gain = delta(0) - alpha(0);
-          if(!arma::is_finite(gain)){
+          if(!std::isfinite(gain)){
             gain = delta(0);
           }
           
@@ -1131,9 +1132,9 @@ void adapt_stepsize(arma::vec& theta0,
         for(j = 0; j < k; j++){
           
           //local gain
-          gain = delta(1) - alpha(start+j);
-          if(!arma::is_finite(gain)){
-            gain = delta(1);
+          gain = delta(1+j) - alpha(start+j);
+          if(!std::isfinite(gain)){
+            gain = delta(1+j);
           }
           
           //update the moving average of the statistic to be brought to zero
@@ -1167,21 +1168,21 @@ void adapt_stepsize(arma::vec& theta0,
         if(k == d){
           //pure dnuts case
           gain = delta(1) - arma::mean(alpha);
-          if(!arma::is_finite(gain)){
+          if(!std::isfinite(gain)){
             gain = delta(1);
           }
         }else if(k == 0 || std::isnan(delta(1))){
           //clasic nuts case
           
           gain = delta(0) - alpha(0); 
-          if(!arma::is_finite(gain)){
+          if(!std::isfinite(gain)){
             gain = delta(0);
           }
         }else{
           //mixed dnuts case
           gain = delta(0) - alpha(0) + arma::mean(delta(1) - alpha.subvec(1,k)); 
           //+ arma::var(alpha.subvec(1,k));
-          if(!arma::is_finite(gain)){
+          if(!std::isfinite(gain)){
             gain = delta(0);
           }
         }
@@ -1275,7 +1276,7 @@ void adapt_stepsize(arma::vec& theta0,
         if(k != d){
           //global gain
           gain = delta(0) - alpha(0);
-          if(!arma::is_finite(gain)){
+          if(!std::isfinite(gain)){
             gain = delta(0);
           }
           
@@ -1297,9 +1298,9 @@ void adapt_stepsize(arma::vec& theta0,
         for(j = 0; j < k; j++){
           
           //local gain
-          gain = delta(1) - alpha(start+j);
-          if(!arma::is_finite(gain)){
-            gain = delta(1);
+          gain = delta(1+j) - alpha(start+j);
+          if(!std::isfinite(gain)){
+            gain = delta(1+j);
           }
           
           //update the moving average of the statistic to be brought to zero
@@ -1333,21 +1334,21 @@ void adapt_stepsize(arma::vec& theta0,
         if(k == d){
           //pure dnuts case
           gain = delta(1) - arma::mean(alpha);
-          if(!arma::is_finite(gain)){
+          if(!std::isfinite(gain)){
             gain = delta(1);
           }
         }else if(k == 0 || std::isnan(delta(1))){
           //clasic nuts case
           
           gain = delta(0) - alpha(0); 
-          if(!arma::is_finite(gain)){
+          if(!std::isfinite(gain)){
             gain = delta(0);
           }
         }else{
           //mixed dnuts case
           gain = delta(0) - alpha(0) + arma::mean(delta(1) - alpha.subvec(1,k)); 
           //+ arma::var(alpha.subvec(1,k));
-          if(!arma::is_finite(gain)){
+          if(!std::isfinite(gain)){
             gain = delta(0);
           }
         }
@@ -1439,7 +1440,7 @@ void adapt_stepsize(arma::vec& theta0,
         if(k != d){
           //global gain
           gain = delta(0) - alpha(0);
-          if(!arma::is_finite(gain)){
+          if(!std::isfinite(gain)){
             gain = delta(0);
           }
           
@@ -1461,9 +1462,9 @@ void adapt_stepsize(arma::vec& theta0,
         for(j = 0; j < k; j++){
           
           //local gain
-          gain = delta(1) - alpha(start+j);
-          if(!arma::is_finite(gain)){
-            gain = delta(1);
+          gain = delta(1+j) - alpha(start+j);
+          if(!std::isfinite(gain)){
+            gain = delta(1+j);
           }
           
           //update the moving average of the statistic to be brought to zero
@@ -1497,21 +1498,21 @@ void adapt_stepsize(arma::vec& theta0,
         if(k == d){
           //pure dnuts case
           gain = delta(1) - arma::mean(alpha);
-          if(!arma::is_finite(gain)){
+          if(!std::isfinite(gain)){
             gain = delta(1);
           }
         }else if(k == 0 || std::isnan(delta(1))){
           //clasic nuts case
           
           gain = delta(0) - alpha(0); 
-          if(!arma::is_finite(gain)){
+          if(!std::isfinite(gain)){
             gain = delta(0);
           }
         }else{
           //mixed dnuts case
           gain = delta(0) - alpha(0) + arma::mean(delta(1) - alpha.subvec(1,k)); 
           //+ arma::var(alpha.subvec(1,k));
-          if(!arma::is_finite(gain)){
+          if(!std::isfinite(gain)){
             gain = delta(0);
           }
         }

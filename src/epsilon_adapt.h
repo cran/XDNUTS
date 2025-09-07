@@ -3,6 +3,17 @@
 
 #include <iostream>
 #include <RcppArmadillo.h>
+#include <cmath>
+#include "globals.h"
+#include "globals_interact.h"
+#include "globals_functions.h"
+#include "recursive_tree.h"
+#include "leapfrog.h"
+#include "single_hmc.h"
+#include "single_nuts.h"
+#include "epsilon_init.h"
+#include "epsilon_adapt.h"
+
 // [[Rcpp::depends(RcppArmadillo)]]
 
 using namespace std;

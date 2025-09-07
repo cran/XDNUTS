@@ -89,7 +89,7 @@ chains
 plot(chains)
 
 ## ----out.width='70%', out.height='70%', eval = TRUE, dpi = 300----------------
-plot(chains, type = 2, gg = FALSE)
+plot(chains, type = 2)
 
 ## ----out.width='70%', out.height='70%', eval = TRUE, dpi = 300----------------
 plot(chains, type = 3)
@@ -135,7 +135,7 @@ original_chains <- xdtransform(X = chains, which = NULL,
                                new.names = c("p","r"))
 
 ## ----out.width='70%', out.height='70%', eval = TRUE, dpi = 300----------------
-plot(original_chains, type = 2, gg = FALSE)
+plot(original_chains, type = 2)
 
 ## ----out.width='70%', out.height='70%', eval = TRUE, dpi = 300----------------
 plot(original_chains, type = 4)
@@ -233,10 +233,10 @@ original_chains <- xdtransform(X = chains,which = 2:3,
 plot(original_chains, type = 3)
 
 ## ----out.width='70%', out.height='70%', eval = TRUE, dpi = 300----------------
-plot(original_chains, type = 2, which = 1:3, gg = FALSE, scale = 0.5)#fixed
+plot(original_chains, type = 2, which = 1:3, scale = 0.5)#fixed
 
 ## ----out.width='70%', out.height='70%', eval = TRUE, dpi = 300----------------
-plot(original_chains, type = 2, which = 4:9, gg = FALSE, scale = 0.5)#random
+plot(original_chains, type = 2, which = 4:9, scale = 0.5, gg = FALSE)#random
 
 ## ----out.width='70%', out.height='70%', eval = TRUE, dpi = 300----------------
 plot(original_chains, type = 6)

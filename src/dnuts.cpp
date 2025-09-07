@@ -1,5 +1,6 @@
 #include <iostream>
 #include <RcppArmadillo.h>
+#include <cmath>
 #include "globals.h"
 #include "globals_interact.h"
 #include "globals_functions.h"
@@ -112,8 +113,8 @@ Rcpp::List set_parameters(const unsigned int N_init1 = 50,
     delta_val = arma::vec({0.8,0.6});
   }else{
     Rcpp::NumericVector tmp(delta);
-    if(tmp.length() != 2){
-      Rcpp::stop("'delta' must be a vector of length two!");
+    if(tmp.length() < 2){
+      Rcpp::stop("'delta' must be a vector of length at least two!");
     }
     delta_val = arma::vec(tmp.begin(),tmp.size(),false);
   }
@@ -131,8 +132,8 @@ Rcpp::List set_parameters(const unsigned int N_init1 = 50,
   if(kappa <= 0.5 || kappa > 1){
     Rcpp::stop("'kappa' must be a scalar in the interval (0.5,1]!");
   }
-  if(delta_val(0) <= 0 || delta_val(0) >= 1 || delta_val(1) <= 0 || delta_val(1) >= 1 || delta_val.size() != 2){
-    Rcpp::stop("'delta' must contain two scalar in the interval (0,1)!");
+  if(arma::any(delta_val <= 0) || arma::any(delta_val >= 1)){
+    Rcpp::stop("'delta' must contain scalars in the interval (0,1)!");
   }
   
   if(std::isnan(delta_val(1)) && different_stepsize ){
@@ -184,7 +185,7 @@ Rcpp::List set_parameters(const unsigned int N_init1 = 50,
   //return the list
   return control;
 }
- 
+
 
 // FUNCTION THAT COMPUTE A SINGLE MARKOV CHAIN
 //' Function to generate a Markov chain for both continuous and discontinuous posterior distributions.
@@ -874,7 +875,7 @@ Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
                              segno(delta_virial));
         
         // cumulate the Hamiltonians
-        sum_H = arma::log_add_exp(sum_H,-out(i,2*d+1));
+        sum_H = log_add_exp(sum_H,-out(i,2*d+1));
         
         // save the virial exhaustion criterion
         out(i,2*d+3) = std::exp(log_abs_sum_virial - sum_H - std::log(i+1));
@@ -915,7 +916,7 @@ Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
         arma::vec grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
         
         //if the gradient is finite we can continue
-        if(arma::is_finite(grad)){
+        if(grad.is_finite()){
           
           //continuous momentum update by half step size
           m -= 0.5 * eps * grad;
@@ -927,7 +928,7 @@ Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
           grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
           
           //if the gradient is finite we can continue
-          if(arma::is_finite(grad)){
+          if(grad.is_finite()){
             
             //continuous momentum update by half step size
             m -= 0.5 * eps * grad;
@@ -939,7 +940,7 @@ Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
             out(i,2*d+1) = out(i,2*d) + 0.5*arma::sum(arma::square(m)); 
             
             //let's make sure it's not NaN, in which case let's set it equal to +Inf
-            if(!arma::is_finite(out(i,2*d+1))){
+            if(!std::isfinite(out(i, 2*d + 1))){
               out(i,2*d+1) = arma::datum::inf;
             }
             
@@ -999,7 +1000,7 @@ Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
                              segno(delta_virial));
         
         // cumulate the Hamiltonians
-        sum_H = arma::log_add_exp(sum_H,-out(i,2*d+1));
+        sum_H = log_add_exp(sum_H,-out(i,2*d+1));
         
         // save the virial exhaustion criterion
         out(i,2*d+3) = std::exp(log_abs_sum_virial - sum_H - std::log(i+1));
@@ -1048,7 +1049,7 @@ Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
         arma::vec grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
         
         //if the gradient is finite we can continue
-        if(arma::is_finite(grad)){
+        if(grad.is_finite()){
           
           //continuous momentum update by half step size
           m.subvec(0,d-k-1) -= 0.5 * eps * grad;
@@ -1060,7 +1061,7 @@ Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
           U = Rcpp::as<double>(nlp(theta,args,true));
           
           // if the potential energy is finite then we continue
-          if(arma::is_finite(U)){
+          if(std::isfinite(U)){
             
             //permute the order of the discrete parameters
             idx_disc = arma::shuffle(idx_disc);
@@ -1112,7 +1113,7 @@ Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
             grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
             
             //let's make sure it's finite
-            if(arma::is_finite(grad)){
+            if(grad.is_finite()){
               
               //continuous momentum update by half step size
               m.subvec(0,d-k-1) -= 0.5 * eps * grad;
@@ -1126,7 +1127,7 @@ Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
                 arma::sum(arma::abs(m.subvec(d-k,d-1)));
               
               //let's make sure it's not NaN, in which case let's set it equal to +Inf
-              if(!arma::is_finite(out(i,2*d))){
+              if(!std::isfinite(out(i,2*d))){
                 out(i,2*d+1) = out(i,2*d) = arma::datum::inf;
               }
               
@@ -1197,7 +1198,7 @@ Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
                              segno(delta_virial));
         
         // cumulate the Hamiltonians
-        sum_H = arma::log_add_exp(sum_H,-out(i,2*d+1));
+        sum_H = log_add_exp(sum_H,-out(i,2*d+1));
         
         // save the virial exhaustion criterion
         out(i,2*d+3) = std::exp(log_abs_sum_virial - sum_H - std::log(i+1));
@@ -1338,7 +1339,7 @@ Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
                                segno(delta_virial));
           
           // cumulate the Hamiltonians
-          sum_H = arma::log_add_exp(sum_H,-out(i,2*d+1));
+          sum_H = log_add_exp(sum_H,-out(i,2*d+1));
           
           // save the virial exhaustion criterion
           out(i,2*d+3) = std::exp(log_abs_sum_virial - sum_H - std::log(i+1));
@@ -1380,7 +1381,7 @@ Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
           arma::vec grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
           
           //if the gradient is finite we can continue
-          if(arma::is_finite(grad)){
+          if(grad.is_finite()){
             
             //continuous momentum update by half step size
             m -= 0.5 * eps * grad;
@@ -1392,7 +1393,7 @@ Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
             grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
             
             //if the gradient is finite we can continue
-            if(arma::is_finite(grad)){
+            if(grad.is_finite()){
               
               //continuous momentum update by half step size
               m -= eps * grad;
@@ -1405,7 +1406,7 @@ Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
                 0.5*arma::dot(arma::square(m),M_inv_cont); 
               
               //let's make sure it's not NaN, in which case let's set it equal to +Inf
-              if(!arma::is_finite(out(i,2*d))){
+              if(!std::isfinite(out(i,2*d))){
                 out(i,2*d) = out(i,2*d+1) = arma::datum::inf;
               }
               
@@ -1465,7 +1466,7 @@ Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
                                segno(delta_virial));
           
           // cumulate the Hamiltonians
-          sum_H = arma::log_add_exp(sum_H,-out(i,2*d+1));
+          sum_H = log_add_exp(sum_H,-out(i,2*d+1));
           
           // save the virial exhaustion criterion
           out(i,2*d+3) = std::exp(log_abs_sum_virial - sum_H - std::log(i+1));
@@ -1513,7 +1514,7 @@ Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
           arma::vec grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
           
           //if the gradient is finite we can continue
-          if(arma::is_finite(grad)){
+          if(grad.is_finite()){
             
             //continuous momentum update by half step size
             m.subvec(0,d-k-1) -= 0.5 * eps * grad;
@@ -1525,7 +1526,7 @@ Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
             U = Rcpp::as<double>(nlp(theta,args,true));
             
             // if the potential energy is finite then we continue
-            if(arma::is_finite(U)){
+            if(std::isfinite(U)){
               
               //permute the order of the discrete parameters
               idx_disc = arma::shuffle(idx_disc);
@@ -1576,7 +1577,7 @@ Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
               grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
               
               //let's make sure it's finite
-              if(arma::is_finite(grad)){
+              if(grad.is_finite()){
                 
                 //continuous momentum update by half step size
                 m.subvec(0,d-k-1) -= 0.5 * eps * grad;
@@ -1590,7 +1591,7 @@ Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
                   arma::dot(arma::abs(m.subvec(d-k,d-1)),M_inv_disc);
                 
                 //let's make sure it's not NaN, in which case let's set it equal to -Inf
-                if(!arma::is_finite(out(i,2*d))){
+                if(!std::isfinite(out(i,2*d))){
                   out(i,2*d) = out(i,2*d+1) = arma::datum::inf;
                 }
                 
@@ -1662,7 +1663,7 @@ Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
                                segno(delta_virial));
           
           // cumulate the Hamiltonians
-          sum_H = arma::log_add_exp(sum_H,-out(i,2*d+1));
+          sum_H = log_add_exp(sum_H,-out(i,2*d+1));
           
           // save the virial exhaustion criterion
           out(i,2*d+3) = std::exp(log_abs_sum_virial - sum_H - std::log(i+1));
@@ -1714,7 +1715,7 @@ Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
           arma::vec grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
           
           //if the gradient is finite we can continue
-          if(arma::is_finite(grad)){
+          if(grad.is_finite()){
             
             //continuous momentum update by half step size
             m -= 0.5 * eps * grad;
@@ -1726,7 +1727,7 @@ Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
             grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
             
             //if the gradient is finite we can continue
-            if(arma::is_finite(grad)){
+            if(grad.is_finite()){
               
               //continuous momentum update by half step size
               m -= 0.5 * eps * grad;
@@ -1739,7 +1740,7 @@ Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
                 0.5*arma::dot(m,M_inv_cont * m);
               
               //let's make sure it's not NaN, in which case let's set it equal to +Inf
-              if(!arma::is_finite(out(i,2*d))){
+              if(!std::isfinite(out(i,2*d))){
                 out(i,2*d) = out(i,2*d+1) = arma::datum::inf;
               }
               
@@ -1799,7 +1800,7 @@ Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
                                segno(delta_virial));
           
           // cumulate the Hamiltonians
-          sum_H = arma::log_add_exp(sum_H,-out(i,2*d+1));
+          sum_H = log_add_exp(sum_H,-out(i,2*d+1));
           
           // save the virial exhaustion criterion
           out(i,2*d+3) = std::exp(log_abs_sum_virial - sum_H - std::log(i+1));
@@ -1852,7 +1853,7 @@ Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
           arma::vec grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
           
           //if the gradient is finite we can continue
-          if(arma::is_finite(grad)){
+          if(grad.is_finite()){
             
             //continuous momentum update by half step size
             m.subvec(0,d-k-1) -= 0.5 * eps * grad;
@@ -1864,7 +1865,7 @@ Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
             U = Rcpp::as<double>(nlp(theta,args,true));
             
             // if the potential energy is finite then we continue
-            if(arma::is_finite(U)){
+            if(std::isfinite(U)){
               
               //permute the order of the discrete parameters
               idx_disc = arma::shuffle(idx_disc);
@@ -1915,7 +1916,7 @@ Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
               grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
               
               //let's make sure it's finite
-              if(arma::is_finite(grad)){
+              if(grad.is_finite()){
                 
                 //continuous momentum update by half step size
                 m.subvec(0,d-k-1) -= 0.5 * eps * grad;
@@ -1929,7 +1930,7 @@ Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
                   arma::dot(arma::abs(m.subvec(d-k,d-1)),M_inv_disc);
                 
                 //let's make sure it's not NaN, in which case let's set it equal to +Inf
-                if(!arma::is_finite(out(i,2*d))){
+                if(!std::isfinite(out(i,2*d))){
                   out(i,2*d) = out(i,2*d + 1) = arma::datum::inf;
                 }
                 
@@ -2000,7 +2001,7 @@ Rcpp::DataFrame trajectories(const Rcpp::NumericVector& theta0,
                                segno(delta_virial));
           
           // cumulate the Hamiltonians
-          sum_H = arma::log_add_exp(sum_H,-out(i,2*d+1));
+          sum_H = log_add_exp(sum_H,-out(i,2*d+1));
           
           // save the virial exhaustion criterion
           out(i,2*d+3) = std::exp(log_abs_sum_virial - sum_H - std::log(i+1));

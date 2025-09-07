@@ -3,6 +3,11 @@
 
 #include <iostream>
 #include <RcppArmadillo.h>
+#include <cmath>
+#include "globals.h"
+#include "globals_interact.h"
+#include "globals_functions.h"
+#include "recursive_tree.h"
 // [[Rcpp::depends(RcppArmadillo)]]
 
 using namespace std;

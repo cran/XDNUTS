@@ -73,7 +73,7 @@ Rcpp::List hmc_singolo(const arma::vec& theta0,
     }
     
     //update the log sum of the multinomial weights
-    lsw = arma::log_add_exp(lsw,lsw2);
+    lsw = log_add_exp(lsw,lsw2);
     
     //increase trajectory length
     step_length++;
@@ -151,7 +151,7 @@ Rcpp::List hmc_singolo(const arma::vec& theta0,
     }
     
     //update the log sum of the multinomial weights
-    lsw = arma::log_add_exp(lsw,lsw2);
+    lsw = log_add_exp(lsw,lsw2);
     
     //increase trajectory length
     step_length++;
@@ -228,7 +228,7 @@ Rcpp::List hmc_singolo(const arma::vec& theta0,
     }
     
     //update the log sum of the multinomial weights
-    lsw = arma::log_add_exp(lsw,lsw2);
+    lsw = log_add_exp(lsw,lsw2);
     
     //increase trajectory length
     step_length++;
@@ -304,7 +304,7 @@ Rcpp::List hmc_singolo(const arma::vec& theta0,
       }
       
       //update the log sum of the multinomial weights
-      lsw = arma::log_add_exp(lsw,lsw2);
+      lsw = log_add_exp(lsw,lsw2);
       alpha_tmp = std::exp(lsw2 - lsw);
       
       //uniform for the others
@@ -329,7 +329,7 @@ Rcpp::List hmc_singolo(const arma::vec& theta0,
       }
       
       //update the log sum of the multinomial weights
-      lsw = arma::log_add_exp(lsw,lsw2);
+      lsw = log_add_exp(lsw,lsw2);
       alpha_tmp = std::exp(lsw2 - lsw);
       
       //uniform for the others
@@ -417,7 +417,7 @@ Rcpp::List hmc_singolo(const arma::vec& theta0,
       }
       
       //update the log sum of the multinomial weights
-      lsw = arma::log_add_exp(lsw,lsw2);
+      lsw = log_add_exp(lsw,lsw2);
       alpha_tmp = std::exp(lsw2 - lsw);
       
       //uniform for the others
@@ -442,7 +442,7 @@ Rcpp::List hmc_singolo(const arma::vec& theta0,
       }
       
       //update the log sum of the multinomial weights
-      lsw = arma::log_add_exp(lsw,lsw2);
+      lsw = log_add_exp(lsw,lsw2);
       alpha_tmp = std::exp(lsw2 - lsw);
       
       //uniform for the others
@@ -530,7 +530,7 @@ Rcpp::List hmc_singolo(const arma::vec& theta0,
       }
       
       //update the log sum of the multinomial weights
-      lsw = arma::log_add_exp(lsw,lsw2);
+      lsw = log_add_exp(lsw,lsw2);
       alpha_tmp = std::exp(lsw2 - lsw);
       
       //uniform for the others
@@ -555,7 +555,7 @@ Rcpp::List hmc_singolo(const arma::vec& theta0,
       }
       
       //update the log sum of the multinomial weights
-      lsw = arma::log_add_exp(lsw,lsw2);
+      lsw = log_add_exp(lsw,lsw2);
       alpha_tmp = std::exp(lsw2 - lsw);
       
       //uniform for the others
@@ -640,7 +640,7 @@ Rcpp::List hmc_singolo(const arma::vec& theta0,
     }
     
     //update the log sum of the multinomial weights
-    lsw = arma::log_add_exp(lsw,lsw2);
+    lsw = log_add_exp(lsw,lsw2);
     
     //increase trajectory length
     step_length++;
@@ -710,7 +710,7 @@ Rcpp::List hmc_singolo(const arma::vec& theta0,
     }
     
     //update the log sum of the multinomial weights
-    lsw = arma::log_add_exp(lsw,lsw2);
+    lsw = log_add_exp(lsw,lsw2);
     
     //increase trajectory length
     step_length++;
@@ -780,7 +780,7 @@ Rcpp::List hmc_singolo(const arma::vec& theta0,
     }
     
     //update the log sum of the multinomial weights
-    lsw = arma::log_add_exp(lsw,lsw2);
+    lsw = log_add_exp(lsw,lsw2);
     
     //increase trajectory length
     step_length++;
@@ -853,7 +853,7 @@ Rcpp::List hmc_singolo(const arma::vec& theta0,
       }
       
       //update the log sum of the multinomial weights
-      lsw = arma::log_add_exp(lsw,lsw2);
+      lsw = log_add_exp(lsw,lsw2);
       alpha_tmp = std::exp(lsw2 - lsw);
       
       //uniform for the others
@@ -878,7 +878,7 @@ Rcpp::List hmc_singolo(const arma::vec& theta0,
       }
       
       //update the log sum of the multinomial weights
-      lsw = arma::log_add_exp(lsw,lsw2);
+      lsw = log_add_exp(lsw,lsw2);
       alpha_tmp = std::exp(lsw2 - lsw);
       
       //uniform for the others
@@ -959,7 +959,7 @@ Rcpp::List hmc_singolo(const arma::vec& theta0,
       }
       
       //update the log sum of the multinomial weights
-      lsw = arma::log_add_exp(lsw,lsw2);
+      lsw = log_add_exp(lsw,lsw2);
       alpha_tmp = std::exp(lsw2 - lsw);
       
       //uniform for the others
@@ -984,7 +984,7 @@ Rcpp::List hmc_singolo(const arma::vec& theta0,
       }
       
       //update the log sum of the multinomial weights
-      lsw = arma::log_add_exp(lsw,lsw2);
+      lsw = log_add_exp(lsw,lsw2);
       alpha_tmp = std::exp(lsw2 - lsw);
       
       //uniform for the others
@@ -1065,7 +1065,7 @@ Rcpp::List hmc_singolo(const arma::vec& theta0,
       }
       
       //update the log sum of the multinomial weights
-      lsw = arma::log_add_exp(lsw,lsw2);
+      lsw = log_add_exp(lsw,lsw2);
       alpha_tmp = std::exp(lsw2 - lsw);
       
       //uniform for the others
@@ -1090,7 +1090,7 @@ Rcpp::List hmc_singolo(const arma::vec& theta0,
       }
       
       //update the log sum of the multinomial weights
-      lsw = arma::log_add_exp(lsw,lsw2);
+      lsw = log_add_exp(lsw,lsw2);
       alpha_tmp = std::exp(lsw2 - lsw);
       
       //uniform for the others

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <RcppArmadillo.h>
+#include <cmath>
 #include "globals.h"
 #include "globals_interact.h"
 #include "globals_functions.h"
@@ -30,7 +31,7 @@ void leapfrog(arma::vec& theta,
   arma::vec grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
   
   //if the gradient is finite we can continue
-  if(arma::is_finite(grad)){
+  if(grad.is_finite()){
     
     //continuous momentum update by half step size
     m.subvec(0,d-k-1) -= 0.5 * eps * grad;
@@ -42,7 +43,7 @@ void leapfrog(arma::vec& theta,
     double U = Rcpp::as<double>(nlp(theta,args,true));
     
     // if the potential energy is finite then we continue
-    if(arma::is_finite(U)){
+    if(std::isfinite(U)){
       
       //initialization of the new vector and the potential difference
       double theta_old;
@@ -95,7 +96,7 @@ void leapfrog(arma::vec& theta,
       grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
       
       //let's make sure it's finite
-      if(arma::is_finite(grad)){
+      if(grad.is_finite()){
         //continuous momentum update by half step size
         m.subvec(0,d-k-1) -= 0.5 * eps * grad;
         
@@ -105,7 +106,7 @@ void leapfrog(arma::vec& theta,
           arma::sum(arma::abs(m.subvec(d-k,d-1)));
         
         //let's make sure it's not NaN, in which case let's set it equal to -Inf
-        if(!arma::is_finite(lsw)){
+        if(!std::isfinite(lsw)){
           lsw = -arma::datum::inf;
         }
         
@@ -161,7 +162,7 @@ void leapfrog(arma::vec& theta,
   arma::vec grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
   
   //if the gradient is finite we can continue
-  if(arma::is_finite(grad)){
+  if(grad.is_finite()){
     //continuous momentum update by half step size
     m.subvec(0,d-k-1) -= 0.5 * eps * grad;
     
@@ -172,7 +173,7 @@ void leapfrog(arma::vec& theta,
     double U = Rcpp::as<double>(nlp(theta,args,true));
     
     // if the potential energy is finite then we continue
-    if(arma::is_finite(U)){
+    if(std::isfinite(U)){
       
       //initialization of the new vector and the potential difference
       double theta_old;
@@ -225,7 +226,7 @@ void leapfrog(arma::vec& theta,
       grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
       
       //let's make sure it's finite
-      if(arma::is_finite(grad)){
+      if(grad.is_finite()){
         //continuous momentum update by half step size
         m.subvec(0,d-k-1) -= 0.5 * eps * grad;
         
@@ -235,7 +236,7 @@ void leapfrog(arma::vec& theta,
           arma::dot(arma::abs(m.subvec(d-k,d-1)),M_inv_disc);
         
         //let's make sure it's not NaN, in which case let's set it equal to -Inf
-        if(!arma::is_finite(lsw)){
+        if(!std::isfinite(lsw)){
           lsw = -arma::datum::inf;
         }
         
@@ -291,7 +292,7 @@ void leapfrog(arma::vec& theta,
   arma::vec grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
   
   //if the gradient is finite we can continue
-  if(arma::is_finite(grad)){
+  if(grad.is_finite()){
     //continuous momentum update by half step size
     m.subvec(0,d-k-1) -= 0.5 * eps * grad;
     
@@ -302,7 +303,7 @@ void leapfrog(arma::vec& theta,
     double U = Rcpp::as<double>(nlp(theta,args,true));
     
     // if the potential energy is finite then we continue
-    if(arma::is_finite(U)){
+    if(std::isfinite(U)){
       
       //initialization of the new vector and the potential difference
       double theta_old;
@@ -355,7 +356,7 @@ void leapfrog(arma::vec& theta,
       grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
       
       //let's make sure it's finite
-      if(arma::is_finite(grad)){
+      if(grad.is_finite()){
         //continuous momentum update by half step size
         m.subvec(0,d-k-1) -= 0.5 * eps * grad;
         
@@ -365,7 +366,7 @@ void leapfrog(arma::vec& theta,
           arma::dot(arma::abs(m.subvec(d-k,d-1)),M_inv_disc);
         
         //let's make sure it's not NaN, in which case let's set it equal to -Inf
-        if(!arma::is_finite(lsw)){
+        if(!std::isfinite(lsw)){
           lsw = -arma::datum::inf;
         }
         
@@ -418,7 +419,7 @@ void leapfrog(arma::vec& theta,
   arma::vec grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
   
   //if the gradient is finite we can continue
-  if(arma::is_finite(grad)){
+  if(grad.is_finite()){
     //continuous momentum update by half step size
     m -= 0.5 * eps * grad;
     
@@ -429,7 +430,7 @@ void leapfrog(arma::vec& theta,
     grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
     
     //if the gradient is finite we can continue
-    if(arma::is_finite(grad)){
+    if(grad.is_finite()){
       //continuous momentum update by half step size
       m -= 0.5 * eps * grad;
       
@@ -438,7 +439,7 @@ void leapfrog(arma::vec& theta,
         0.5*arma::sum(arma::square(m)); 
       
       //let's make sure it's not NaN, in which case let's set it equal to -Inf
-      if(!arma::is_finite(lsw)){
+      if(!std::isfinite(lsw)){
         lsw = -arma::datum::inf;
       }
       
@@ -485,7 +486,7 @@ void leapfrog(arma::vec& theta,
   arma::vec grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
   
   //if the gradient is finite we can continue
-  if(arma::is_finite(grad)){
+  if(grad.is_finite()){
     //continuous momentum update by half step size
     m -= 0.5 * eps * grad;
     
@@ -496,7 +497,7 @@ void leapfrog(arma::vec& theta,
     grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
     
     //if the gradient is finite we can continue
-    if(arma::is_finite(grad)){
+    if(grad.is_finite()){
       //continuous momentum update by half step size
       m -= 0.5 * eps * grad;
       
@@ -505,7 +506,7 @@ void leapfrog(arma::vec& theta,
         0.5*arma::dot(arma::square(m),M_inv); 
       
       //let's make sure it's not NaN, in which case let's set it equal to -Inf
-      if(!arma::is_finite(lsw)){
+      if(!std::isfinite(lsw)){
         lsw = -arma::datum::inf;
       }
       
@@ -552,7 +553,7 @@ void leapfrog(arma::vec& theta,
   arma::vec grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
   
   //if the gradient is finite we can continue
-  if(arma::is_finite(grad)){
+  if(grad.is_finite()){
     //continuous momentum update by half step size
     m -= 0.5 * eps * grad;
     
@@ -563,7 +564,7 @@ void leapfrog(arma::vec& theta,
     grad = Rcpp::as<arma::vec>(nlp(theta,args,false));
     
     //if the gradient is finite we can continue
-    if(arma::is_finite(grad)){
+    if(grad.is_finite()){
       //continuous momentum update by half step size
       m -= 0.5 * eps * grad;
       
@@ -572,7 +573,7 @@ void leapfrog(arma::vec& theta,
         0.5*arma::dot(m,M_inv * m); 
       
       //let's make sure it's not NaN, in which case let's set it equal to -Inf
-      if(!arma::is_finite(lsw)){
+      if(!std::isfinite(lsw)){
         lsw = -arma::datum::inf;
       }
       

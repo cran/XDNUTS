@@ -1,5 +1,6 @@
 #include <iostream>
 #include <RcppArmadillo.h>
+#include <cmath>
 #include "globals.h"
 #include "globals_interact.h"
 #include "globals_functions.h"
@@ -59,7 +60,7 @@ double init_epsilon(const arma::vec& theta0,
     0.5 * arma::sum(arma::square(m.subvec(0,d-k-1)));
   
   //let's make sure it's not NaN, in which case let's set it equal to -Inf
-  if(!arma::is_finite(H1)){
+  if(!std::isfinite(H1)){
     H1 = arma::datum::inf;
   }
   
@@ -101,7 +102,7 @@ double init_epsilon(const arma::vec& theta0,
       0.5 * arma::sum(arma::square(m.subvec(0,d-k-1)));
     
     //let's make sure it's not NaN, in which case let's set it equal to -Inf
-    if(!arma::is_finite(H1)){
+    if(!std::isfinite(H1)){
       H1 = arma::datum::inf;
       
       //if we were doubling, the last doubling was too much
@@ -172,7 +173,7 @@ double init_epsilon(const arma::vec& theta0,
     0.5 * arma::dot(arma::square( m.subvec(0,d-k-1) ),M_inv_cont );
   
   //let's make sure it's not NaN, in which case let's set it equal to -Inf
-  if(!arma::is_finite(H1)){
+  if(!std::isfinite(H1)){
     H1 = arma::datum::inf;
   }
   
@@ -214,7 +215,7 @@ double init_epsilon(const arma::vec& theta0,
       0.5 * arma::dot(arma::square( m.subvec(0,d-k-1) ),M_inv_cont );
     
     //let's make sure it's not NaN, in which case let's set it equal to -Inf
-    if(!arma::is_finite(H1)){
+    if(!std::isfinite(H1)){
       H1 = arma::datum::inf;
       
       //if we were doubling, the last doubling was too much
@@ -285,7 +286,7 @@ double init_epsilon(const arma::vec& theta0,
     0.5 * arma::dot(m.subvec(0,d-k-1), M_inv_cont * m.subvec(0,d-k-1));
   
   //let's make sure it's not NaN, in which case let's set it equal to -Inf
-  if(!arma::is_finite(H1)){
+  if(!std::isfinite(H1)){
     H1 = arma::datum::inf;
   }
   
@@ -327,7 +328,7 @@ double init_epsilon(const arma::vec& theta0,
       0.5 * arma::dot(m.subvec(0,d-k-1), M_inv_cont * m.subvec(0,d-k-1));
     
     //let's make sure it's not NaN, in which case let's set it equal to -Inf
-    if(!arma::is_finite(H1)){
+    if(!std::isfinite(H1)){
       H1 = arma::datum::inf;
       
       //if we were doubling, the last doubling was too much
@@ -409,7 +410,7 @@ arma::vec init_epsilon(const arma::vec& theta0,
     arma::sum(arma::abs(m.subvec(d-k,d-1)));
   
   //let's make sure it's not NaN, in which case let's set it equal to -Inf
-  if(!arma::is_finite(H1)){
+  if(!std::isfinite(H1)){
     H1 = arma::datum::inf;
   }
   
@@ -437,7 +438,7 @@ arma::vec init_epsilon(const arma::vec& theta0,
     //calculation of the difference in potential energy
     delta_U = Rcpp::as<double>(nlp(theta,args,true)) - U;
     
-    if(!arma::is_finite(delta_U)){
+    if(!std::isfinite(delta_U)){
       delta_U = arma::datum::inf;
     }
     
@@ -500,7 +501,7 @@ arma::vec init_epsilon(const arma::vec& theta0,
         arma::sum(arma::abs(m.subvec(d-k,d-1)));
       
       //let's make sure it's not NaN, in which case let's set it equal to -Inf
-      if(!arma::is_finite(H1)){
+      if(!std::isfinite(H1)){
         H1 = arma::datum::inf;
         
         //if we were doubling, the last doubling was too much
@@ -551,7 +552,7 @@ arma::vec init_epsilon(const arma::vec& theta0,
         delta_U = Rcpp::as<double>(nlp(theta,args,true)) - U;
         
         //check that it's finite
-        if(!arma::is_finite(delta_U)){
+        if(!std::isfinite(delta_U)){
           
           //make it inf
           delta_U = arma::datum::inf;
@@ -639,7 +640,7 @@ arma::vec init_epsilon(const arma::vec& theta0,
     arma::dot(arma::abs(m.subvec(d-k,d-1)),M_inv_disc);
   
   //let's make sure it's not NaN, in which case let's set it equal to -Inf
-  if(!arma::is_finite(H1)){
+  if(!std::isfinite(H1)){
     H1 = arma::datum::inf;
   }
   
@@ -667,7 +668,7 @@ arma::vec init_epsilon(const arma::vec& theta0,
     //calculation of the difference in potential energy
     delta_U = Rcpp::as<double>(nlp(theta,args,true)) - U;
     
-    if(!arma::is_finite(delta_U)){
+    if(!std::isfinite(delta_U)){
       delta_U = arma::datum::inf;
     }
     
@@ -730,7 +731,7 @@ arma::vec init_epsilon(const arma::vec& theta0,
         arma::dot(arma::abs(m.subvec(d-k,d-1)),M_inv_disc);
       
       //let's make sure it's not NaN, in which case let's set it equal to -Inf
-      if(!arma::is_finite(H1)){
+      if(!std::isfinite(H1)){
         H1 = arma::datum::inf;
         
         //if we were doubling, the last doubling was too much
@@ -781,7 +782,7 @@ arma::vec init_epsilon(const arma::vec& theta0,
         delta_U = Rcpp::as<double>(nlp(theta,args,true)) - U;
         
         //check that it's finite
-        if(!arma::is_finite(delta_U)){
+        if(!std::isfinite(delta_U)){
           
           //make it inf
           delta_U = arma::datum::inf;
@@ -869,7 +870,7 @@ arma::vec init_epsilon(const arma::vec& theta0,
     arma::dot(arma::abs(m.subvec(d-k,d-1)),M_inv_disc);
   
   //let's make sure it's not NaN, in which case let's set it equal to -Inf
-  if(!arma::is_finite(H1)){
+  if(!std::isfinite(H1)){
     H1 = arma::datum::inf;
   }
   
@@ -897,7 +898,7 @@ arma::vec init_epsilon(const arma::vec& theta0,
     //calculation of the difference in potential energy
     delta_U = Rcpp::as<double>(nlp(theta,args,true)) - U;
     
-    if(!arma::is_finite(delta_U)){
+    if(!std::isfinite(delta_U)){
       delta_U = arma::datum::inf;
     }
     
@@ -960,7 +961,7 @@ arma::vec init_epsilon(const arma::vec& theta0,
         arma::dot(arma::abs(m.subvec(d-k,d-1)),M_inv_disc);
       
       //let's make sure it's not NaN, in which case let's set it equal to -Inf
-      if(!arma::is_finite(H1)){
+      if(!std::isfinite(H1)){
         H1 = arma::datum::inf;
         
         //if we were doubling, the last doubling was too much
@@ -1011,7 +1012,7 @@ arma::vec init_epsilon(const arma::vec& theta0,
         delta_U = Rcpp::as<double>(nlp(theta,args,true)) - U;
         
         //check that it's finite
-        if(!arma::is_finite(delta_U)){
+        if(!std::isfinite(delta_U)){
           
           //make it inf
           delta_U = arma::datum::inf;
@@ -1090,7 +1091,7 @@ arma::vec init_epsilon(const arma::vec& theta0,
     //calculation of the difference in potential energy
     delta_U = Rcpp::as<double>(nlp(theta,args,true)) - U;
     
-    if(!arma::is_finite(delta_U)){
+    if(!std::isfinite(delta_U)){
       delta_U = arma::datum::inf;
     }
     
@@ -1151,7 +1152,7 @@ arma::vec init_epsilon(const arma::vec& theta0,
         delta_U = Rcpp::as<double>(nlp(theta,args,true)) - U;
         
         //check that it's finite
-        if(!arma::is_finite(delta_U)){
+        if(!std::isfinite(delta_U)){
           
           //make it inf
           delta_U = arma::datum::inf;
@@ -1230,7 +1231,7 @@ arma::vec init_epsilon(const arma::vec& theta0,
     //calculation of the difference in potential energy
     delta_U = Rcpp::as<double>(nlp(theta,args,true)) - U;
     
-    if(!arma::is_finite(delta_U)){
+    if(!std::isfinite(delta_U)){
       delta_U = arma::datum::inf;
     }
     
@@ -1291,7 +1292,7 @@ arma::vec init_epsilon(const arma::vec& theta0,
         delta_U = Rcpp::as<double>(nlp(theta,args,true)) - U;
         
         //check that it's finite
-        if(!arma::is_finite(delta_U)){
+        if(!std::isfinite(delta_U)){
           
           //make it inf
           delta_U = arma::datum::inf;

@@ -113,7 +113,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       }
       
       //and update the logarithm of the weights for multinomial sampling from the trajectory
-      sub_tree(6*d) = arma::log_add_exp(sub_tree(6*d),sub_tree2(6*d));
+      sub_tree(6*d) = log_add_exp(sub_tree(6*d),sub_tree2(6*d));
       
       //and update the cumulative sum of the kinetic energy gradients
       sub_tree.subvec(5*d,6*d-1) += sub_tree2.subvec(5*d,6*d-1);
@@ -245,7 +245,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       }
       
       //and update the logarithm of the weights for multinomial sampling from the trajectory
-      sub_tree(6*d) = arma::log_add_exp(sub_tree(6*d),sub_tree2(6*d));
+      sub_tree(6*d) = log_add_exp(sub_tree(6*d),sub_tree2(6*d));
       
       //and update the cumulative sum of the kinetic energy gradients
       sub_tree.subvec(5*d,6*d-1) += sub_tree2.subvec(5*d,6*d-1);
@@ -377,7 +377,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       }
       
       //and update the logarithm of the weights for multinomial sampling from the trajectory
-      sub_tree(6*d) = arma::log_add_exp(sub_tree(6*d),sub_tree2(6*d));
+      sub_tree(6*d) = log_add_exp(sub_tree(6*d),sub_tree2(6*d));
       
       //and update the cumulative sum of the kinetic energy gradients
       sub_tree.subvec(5*d,6*d-1) += sub_tree2.subvec(5*d,6*d-1);
@@ -525,7 +525,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       }
       
       //cumulate the log multinomial weights
-      sub_tree((5+K)*d) = arma::log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
+      sub_tree((5+K)*d) = log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
       
       //recalculate alpha
       //alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
@@ -681,7 +681,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       //uniform for the others
       
       //cumulate the log multinomial weights
-      sub_tree((5+K)*d) = arma::log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
+      sub_tree((5+K)*d) = log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
       
       //recalculate alpha
       //alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
@@ -839,7 +839,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       }
       
       //cumulate the log multinomial weights
-      sub_tree((5+K)*d) = arma::log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
+      sub_tree((5+K)*d) = log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
       
       //recalculate alpha
       //alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
@@ -966,7 +966,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       }
       
       //and update the logarithm of the weights for multinomial sampling from the trajectory
-      sub_tree(6*d) = arma::log_add_exp(sub_tree(6*d),sub_tree2(6*d));
+      sub_tree(6*d) = log_add_exp(sub_tree(6*d),sub_tree2(6*d));
       
       //and update the cumulative sum of the kinetic energy gradients
       sub_tree.subvec(5*d,6*d-1) += sub_tree2.subvec(5*d,6*d-1);
@@ -1088,7 +1088,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       }
       
       //and update the logarithm of the weights for multinomial sampling from the trajectory
-      sub_tree(6*d) = arma::log_add_exp(sub_tree(6*d),sub_tree2(6*d));
+      sub_tree(6*d) = log_add_exp(sub_tree(6*d),sub_tree2(6*d));
       
       //and update the cumulative sum of the kinetic energy gradients
       sub_tree.subvec(5*d,6*d-1) += sub_tree2.subvec(5*d,6*d-1);
@@ -1206,7 +1206,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       }
       
       //and update the logarithm of the weights for multinomial sampling from the trajectory
-      sub_tree(6*d) = arma::log_add_exp(sub_tree(6*d),sub_tree2(6*d));
+      sub_tree(6*d) = log_add_exp(sub_tree(6*d),sub_tree2(6*d));
       
       //and update the cumulative sum of the kinetic energy gradients
       sub_tree.subvec(5*d,6*d-1) += sub_tree2.subvec(5*d,6*d-1);
@@ -1345,7 +1345,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       //uniform for the others
       
       //cumulate the log multinomial weights
-      sub_tree((5+K)*d) = arma::log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
+      sub_tree((5+K)*d) = log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
       
       //recalculate alpha
       //alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
@@ -1486,7 +1486,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       //uniform for the others
       
       //cumulate the log multinomial weights
-      sub_tree((5+K)*d) = arma::log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
+      sub_tree((5+K)*d) = log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
       
       //recalculate alpha
       //alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
@@ -1627,7 +1627,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       //uniform for the others
       
       //cumulate the log multinomial weights
-      sub_tree((5+K)*d) = arma::log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
+      sub_tree((5+K)*d) = log_add_exp(sub_tree((5+K)*d),sub_tree2((5+K)*d));
       
       //recalculate alpha
       //alpha = std::exp(sub_tree2((5+K)*d) - sub_tree((5+K)*d));
@@ -2281,7 +2281,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       //check the condition of the virial:
       
       //first, cumulate the log sum of the metropolis weights
-      sub_tree(5*d) = arma::log_add_exp(sub_tree(5*d),sub_tree2(5*d));
+      sub_tree(5*d) = log_add_exp(sub_tree(5*d),sub_tree2(5*d));
       
       //then, cumulates the virial
       add_sign_log_sum_exp(sub_tree( 5*d+k+4),
@@ -2418,7 +2418,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       //check the condition of the virial:
       
       //first, cumulate the log sum of the metropolis weights
-      sub_tree(5*d) = arma::log_add_exp(sub_tree(5*d),sub_tree2(5*d));
+      sub_tree(5*d) = log_add_exp(sub_tree(5*d),sub_tree2(5*d));
       
       //then, cumulates the virial
       add_sign_log_sum_exp(sub_tree( 5*d+k+4),
@@ -2556,7 +2556,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       //check the condition of the virial:
       
       //first, cumulate the log sum of the metropolis weights
-      sub_tree(5*d) = arma::log_add_exp(sub_tree(5*d),sub_tree2(5*d));
+      sub_tree(5*d) = log_add_exp(sub_tree(5*d),sub_tree2(5*d));
       
       //then, cumulates the virial
       add_sign_log_sum_exp(sub_tree( 5*d+k+4),
@@ -2708,7 +2708,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       //uniform sampling for the recycled values
       
       //cumulate the log multinomial weights
-      sub_tree((4+K)*d) = arma::log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
+      sub_tree((4+K)*d) = log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
       
       //update alpha
       //alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
@@ -2872,7 +2872,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       //uniform sampling for the recycled values
       
       //cumulate the log multinomial weights
-      sub_tree((4+K)*d) = arma::log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
+      sub_tree((4+K)*d) = log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
       
       //update alpha
       //alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
@@ -3037,7 +3037,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       //uniform sampling for the recycled values
       
       //cumulate the log multinomial weights
-      sub_tree((4+K)*d) = arma::log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
+      sub_tree((4+K)*d) = log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
       
       //update alpha
       //alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
@@ -3173,7 +3173,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       //check the condition of the virial:
       
       //first, cumulate the log sum of the metropolis weights
-      sub_tree(5*d) = arma::log_add_exp(sub_tree(5*d),sub_tree2(5*d));
+      sub_tree(5*d) = log_add_exp(sub_tree(5*d),sub_tree2(5*d));
       
       //then, cumulates the virial
       add_sign_log_sum_exp(sub_tree( 5*d+4),
@@ -3299,7 +3299,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       //check the condition of the virial:
       
       //first, cumulate the log sum of the metropolis weights
-      sub_tree(5*d) = arma::log_add_exp(sub_tree(5*d),sub_tree2(5*d));
+      sub_tree(5*d) = log_add_exp(sub_tree(5*d),sub_tree2(5*d));
       
       //then, cumulates the virial
       add_sign_log_sum_exp(sub_tree( 5*d+4),
@@ -3425,7 +3425,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       //check the condition of the virial:
       
       //first, cumulate the log sum of the metropolis weights
-      sub_tree(5*d) = arma::log_add_exp(sub_tree(5*d),sub_tree2(5*d));
+      sub_tree(5*d) = log_add_exp(sub_tree(5*d),sub_tree2(5*d));
       
       //then, cumulates the virial
       add_sign_log_sum_exp(sub_tree( 5*d+4),
@@ -3567,7 +3567,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       //uniform sampling for the recycled values
       
       //cumulate the log multinomial weights
-      sub_tree((4+K)*d) = arma::log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
+      sub_tree((4+K)*d) = log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
       
       //update alpha
       //alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
@@ -3714,7 +3714,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       //uniform sampling for the recycled values
       
       //cumulate the log multinomial weights
-      sub_tree((4+K)*d) = arma::log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
+      sub_tree((4+K)*d) = log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
       
       //update alpha
       //alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));
@@ -3863,7 +3863,7 @@ Rcpp::List nuts_singolo(const arma::vec& theta0,
       //uniform sampling for the recycled values
       
       //cumulate the log multinomial weights
-      sub_tree((4+K)*d) = arma::log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
+      sub_tree((4+K)*d) = log_add_exp(sub_tree((4+K)*d),sub_tree2((4+K)*d));
       
       //update alpha
       //alpha = std::exp(sub_tree2((4+K)*d) - sub_tree((4+K)*d));

@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <RcppArmadillo.h>
+#include "globals.h"
+#include "globals_interact.h"
 // [[Rcpp::depends(RcppArmadillo)]]
 
 using namespace std;

@@ -1,14 +1,13 @@
 #ifndef EPSILON_INIT_H
 #define EPSILON_INIT_H
 
-#include <iostream>
-#include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
 
 using namespace std;
 
 #include <iostream>
 #include <RcppArmadillo.h>
+#include <cmath>
 #include "globals.h"
 #include "globals_interact.h"
 #include "globals_functions.h"
