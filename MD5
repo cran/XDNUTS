@@ -1,16 +1,16 @@
-1fb1d19b4db26ad8e95b2797a97380ea *DESCRIPTION
+0e9947cea99f5b18cee2bf8a6adc4035 *DESCRIPTION
 8834b3b4f13ac200a29b2fdaad264add *LICENSE
 379abb6fca0fc93b710fe36ae7e45cb9 *NAMESPACE
 0d67b296df403385e4ec033bcbe25832 *R/RcppExports.R
 278a5a1b36ebb4800a76a9a9cf58094f *R/data.R
 69fcbc7391b829d4c359eb2fe8f1c322 *R/interface.R
-68e834d416d269c9b7867fd05c299416 *build/partial.rdb
+1d76387916f88016e7c06b0cd347f6c2 *build/partial.rdb
 f6e382572d4ccdfef9f82dfbb9e1b759 *build/vignette.rds
 0149c4a626ec11f87f7f21c3e9b45b9c *data/viscosity.rda
 4d4ace2614e043dacfcbe013d9b66032 *inst/REFERENCES.bib
-2f0021fcbac3cde6d595b72af6fc824e *inst/doc/Tutorial_for_main_functions.R
-c5ca07e75826b1d282e1984d73bae091 *inst/doc/Tutorial_for_main_functions.Rmd
-bd96e775bb1217ccd66d0e469fc9cfb0 *inst/doc/Tutorial_for_main_functions.html
+376d03634dce284eb37bbf5cd832391e *inst/doc/Tutorial_for_main_functions.R
+2f70ae84d5be2f50329ed89eb9dd196c *inst/doc/Tutorial_for_main_functions.Rmd
+a0d13b41f5e8b49fb3fd3c3ae8a726cc *inst/doc/Tutorial_for_main_functions.html
 447e615b67d034201c7978feca4d710b *man/XDNUTS-package.Rd
 5cbe9e8f3025563a1716c4bf5e54b33c *man/main_function.Rd
 3590a384db22fa6e12822ffd45fa1cb4 *man/plot.XDNUTS.Rd
@@ -48,4 +48,4 @@ cef0b42c7c39d126e90fd40606fab354 *src/single_hmc.h
 0d50cc55bcff574a4464fe9f974ce24a *src/single_nuts.cpp
 725c5170bfaaeee46a206f8de91521fe *src/single_nuts.h
 1e47add845fa4ee57222cee9eef39379 *vignettes/REFERENCES.bib
-c5ca07e75826b1d282e1984d73bae091 *vignettes/Tutorial_for_main_functions.Rmd
+2f70ae84d5be2f50329ed89eb9dd196c *vignettes/Tutorial_for_main_functions.Rmd

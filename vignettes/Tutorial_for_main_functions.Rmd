@@ -236,6 +236,7 @@ set.seed(123)
 
 ```{r setup, eval = TRUE, echo = FALSE}
 library(XDNUTS)
+library(MASS)
 ```
 
 Consider the following probabilistic model

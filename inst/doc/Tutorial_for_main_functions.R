@@ -12,6 +12,7 @@ knitr::opts_chunk$set(
 
 ## ----setup, eval = TRUE, echo = FALSE-----------------------------------------
 library(XDNUTS)
+library(MASS)
 
 ## ----eval = TRUE--------------------------------------------------------------
 #observed data
