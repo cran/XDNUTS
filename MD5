@@ -1,10 +1,10 @@
-0e9947cea99f5b18cee2bf8a6adc4035 *DESCRIPTION
+fdd9e7197797ee8594a8ca1a1a73fbbf *DESCRIPTION
 8834b3b4f13ac200a29b2fdaad264add *LICENSE
 379abb6fca0fc93b710fe36ae7e45cb9 *NAMESPACE
 0d67b296df403385e4ec033bcbe25832 *R/RcppExports.R
 278a5a1b36ebb4800a76a9a9cf58094f *R/data.R
 69fcbc7391b829d4c359eb2fe8f1c322 *R/interface.R
-1d76387916f88016e7c06b0cd347f6c2 *build/partial.rdb
+48d6f0ef3c48a93442f0950a505e6b64 *build/partial.rdb
 f6e382572d4ccdfef9f82dfbb9e1b759 *build/vignette.rds
 0149c4a626ec11f87f7f21c3e9b45b9c *data/viscosity.rda
 4d4ace2614e043dacfcbe013d9b66032 *inst/REFERENCES.bib
